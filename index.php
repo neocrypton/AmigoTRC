@@ -21,10 +21,9 @@ include_once('./support/con_db.php');
     $site['adduser']      = './cts/adduser.php';
     $site['login']        = './cts/login.php';
     $site['logout']       = './cts/logout.php';
-    
+    $site['userview']     = './cts/userview.php';
    
     // Inhalt Start
-
 
     if (!isset($_GET['site'], $site[$_GET['site']]))
     {
@@ -48,7 +47,6 @@ include_once('./support/con_db.php');
     
 ?>
 
-        <?php #include_once('footer.php'); ?>
         
     </body>
 </html>

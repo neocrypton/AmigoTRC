@@ -1,6 +1,6 @@
 
 
-<h1 class="text-light pl-4 pt-4"><?php echo str_head_showGames ?></h1>
+<h3 class="text-light pl-4 pt-4"><?php echo str_head_showGames ?></h3>
 
 <?php
 $sql = $db->query("SELECT * FROM collecting_games ORDER BY cg_category, cg_title ASC");

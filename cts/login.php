@@ -12,10 +12,7 @@
                 $_SESSION['userid'] = $user['id'];
                 echo '<meta http-equiv="refresh" content="3; URL=index.php?lang=de&site=dashboard">';
                 die('<div class="container-fluid"><div class="box bg-success text-light ml-3 mr-3 mt-4 pl-2 pt-3 pb-3 rounded-lg"><img src="./img/16/accept.png" class="d-inline-block align-middel m-0" alt=""> '.str_login_success.'</div></div>');
-
-                
-                echo 'Hallo ich bin drin';
-            
+                            
             } else {
                 $errorMessage = '<div class="container-fluid"><div class="box bg-warning ml-3 mr-3 mt-4 pl-2 pt-3 pb-3 rounded-lg"><img src="./img/16/exclamation.png" class="d-inline-block align-middel m-0" alt=""> '.str_login_error.'</div></div>';
         }
@@ -26,7 +23,7 @@
         echo $errorMessage;
     }
 ?>
-<h1 class="text-light pl-4 pt-4"><?php echo str_head_login ?></h1> <?php $_SERVER['PHP_SELF'] ?>
+<h3 class="text-light pl-4 pt-4"><?php echo str_head_login ?></h3>
 <div  class="container-fluid text-light">
     <div class="container-fluid">
         <form action="<?php $_SERVER['PHP_SELF'] ?>" method="post">

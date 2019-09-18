@@ -1,4 +1,4 @@
-<h1 class="text-light pl-4 pt-4"><?php echo str_head_searchGame ?></h1>
+<h3 class="text-light pl-4 pt-4"><?php echo str_head_searchGame ?></h3>
 <div  class="container-fluid text-light pb-3">
     <div class="container-fluid m-3">
         <form action="<?php $_SERVER['PHP_SELF'] ?>" class="form-inline" method="post">

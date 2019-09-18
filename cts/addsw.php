@@ -26,7 +26,7 @@ $sql = $db->query("SELECT * FROM categories ORDER BY cat_name ASC");
 $row = $sql->fetchAll();
 
 ?>
-<h1 class="text-light pl-4 pt-4"><?php echo str_head_entryGame ?></h1> 
+<h3 class="text-light pl-4 pt-4"><?php echo str_head_entryGame ?></h3> 
 <div  class="container-fluid text-light">
     <div class="container-fluid">
         

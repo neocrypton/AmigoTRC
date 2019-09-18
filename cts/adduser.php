@@ -51,7 +51,7 @@ if(isset($_POST['submit'])) {
     } 
 }
 ?>
-<h1 class="text-light pl-4 pt-4"><?php echo str_head_adduser ?></h1> 
+<h3 class="text-light pl-4 pt-4"><?php echo str_head_adduser ?></h3> 
 <div  class="container-fluid text-light">
     <div class="container-fluid">
 <?php
@@ -89,7 +89,7 @@ if($showFormular) {
         </div>
     </div>
     <div class="mt-4 text-center">
-            <button type="submit" class="btn btn-primary" name="submit"><?php echo str_submit_entry ?></button>
+            <button type="submit" class="btn btn-primary mb-3" name="submit"><?php echo str_submit_entry ?></button>
     </div>
     </div>
 </div>
