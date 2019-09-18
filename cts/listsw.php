@@ -1,15 +1,16 @@
-<?php
-$sql = 'SELECT * FROM collecting_games ORDER BY cg_category, cg_title ASC';
-$result = $link->query($sql);
 
-if (!$result) {
-    die ('Etwas stimmte mit dem Query nicht: '.$db->error);
-}
-echo 'Die Ergebnistabelle besitzt '.$result->num_rows." Datensätze<br />\n";
+
+<h1 class="text-light pl-4 pt-4"><?php echo str_head_showGames ?></h1>
+
+<?php
+$sql = $db->query("SELECT * FROM collecting_games ORDER BY cg_category, cg_title ASC");
+$row = $sql->fetchAll();
+$eintraege = $sql->rowCount();
+
 
 
 ?>
-
+<p class="subtitle-1 pl-4"><?php echo str_gameview_info1 ?> <b class="text-danger"><?php echo $eintraege; ?></b> <?php echo str_gameview_info2 ?><br /></p>
 <div  class="container-fluid text-light">
     <div class="container-fluid">
          <table class="table table-striped table-dark table-hover">
@@ -17,18 +18,20 @@ echo 'Die Ergebnistabelle besitzt '.$result->num_rows." Datensätze<br />\n";
                 <tr>
                   <th scope="col" width="15">#</th>
                   <th scope="col" class="text-center" width="18"><img src="./img/16/hw.png" class="d-inline-block align-middle m-0" alt=""></th>
-                  <th scope="col">Spieletitel</th>
+                  <th scope="col"><?php echo str_gametitle ?></th>
                   
                 </tr>
               </thead>
               <tbody>
 <?php
-while ($row = $result->fetch_assoc()) {
+$nummer =1;                
+foreach ($row as $row) {
     ?>
                 <tr>
-                  <th scope="row">1</th>
+                  <th scope="row"><?php echo $nummer; ?></th>
                     
-                    <td class="text-center">PS1</td>
+                    <td class="text-center">
+                    <?php echo $row['cg_category']; ?></td>
                     <td><?php echo $row['cg_title'].'<br />'; 
   
                         if($row['cg_region']=="PAL") { echo '<img src="./img/16/pal.png" class="d-inline-block align-middle m-0" alt=""> ';} else if($row['cg_region']=="NTSC") {echo '<img src="./img/16/us.png" class="d-inline-block align-middle m-0" alt=""> ';} else if($row['cg_region']=="JAP") {echo '<img src="./img/16/jap.png" class="d-inline-block align-middle m-0" alt=""> ';}
@@ -66,9 +69,12 @@ while ($row = $result->fetch_assoc()) {
                     </td>
                 </tr>
 <?php
+    $nummer++;
 }
 ?>
               </tbody>
-        </table>
+        </table><center>
+        <a id="back-to-top" href="#" class="btn btn-primary btn-lg back-to-top mt-3 mb-3 " role="button"><img src="./img/top.png" class="d-inline-block align-middle m-0" alt=""></a></center>
     </div>
 </div>
+
