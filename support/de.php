@@ -49,6 +49,11 @@ define("str_adduser_passwd2", "Passwort wiederholen:");
 define("str_login_user", "Benutzername:");
 define("str_login_passwd", "Passwort:");
 define("str_login_login", "Einloggen");
+define("str_userview_email", "E-Mail");
+define("str_userview_uname", "Benutzer");
+define("str_userview_vname", "Vorname");
+define("str_userview_lname", "Nachname");
+define("str_userview_functions", "Funktionen");
 
 #Warnings and Info
 define("str_form_warning", "Du musst alle Felder ausfüllen!");
@@ -80,6 +85,7 @@ define("str_head_entryGame", "Spiel eintragen");
 define("str_head_searchGame", "Spielesuche");
 define("str_head_showGames", "Spiele anzeigen");
 define("str_head_logout", "Logout");
-
+define("str_head_userView", "Benutzerverwaltung");
+                             
 
 ?>
