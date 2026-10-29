@@ -24,10 +24,10 @@ $icon = static fn (string $name): string => '<svg class="ico" aria-hidden="true"
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="preload" href="<?= e(asset('fonts/press-start-2p-latin.woff2')) ?>" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
-    <script src="<?= e(asset('js/app.js')) ?>" defer></script>
     <?php foreach ($scripts ?? [] as $s): ?>
     <script src="<?= e(asset($s)) ?>" defer></script>
     <?php endforeach; ?>
+    <script src="<?= e(asset('js/app.js')) ?>" defer></script>
 </head>
 <body>
 <a class="skip" href="#main">Zum Inhalt springen</a>

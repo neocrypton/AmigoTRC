@@ -1,0 +1,14 @@
+{
+  "name": "AMIGO! The Retro Collector",
+  "short_name": "AMIGO!",
+  "start_url": "index.php",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0e0b1e",
+  "theme_color": "#0e0b1e",
+  "lang": "de",
+  "icons": [
+    { "src": "assets/img/icon-200.png", "sizes": "200x200", "type": "image/png" },
+    { "src": "assets/img/icon-95.png", "sizes": "95x95", "type": "image/png" }
+  ]
+}

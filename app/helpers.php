@@ -19,7 +19,7 @@ function url(string $route = 'home', array $params = []): string
     if ($route === 'home' && !$params) {
         return 'index.php';
     }
-    return 'index.php?' . http_build_query(['r' => $route] + $params);
+    return 'index.php?' . str_replace('%2F', '/', http_build_query(['r' => $route] + $params));
 }
 
 function asset(string $path): string
@@ -207,4 +207,19 @@ function platform_icon(?string $icon): ?string
         return null;
     }
     return 'https://cdn.thegamesdb.net/images/original/consoles/png48/' . $icon;
+}
+
+/**
+ * Relativer URL-Pfad zur Probe-Datei, falls das Datenverzeichnis im Webroot liegt
+ * (dann muss es per Webserver-Regel gesperrt sein), sonst null.
+ */
+function probe_path(): ?string
+{
+    $root = realpath(AMIGO_ROOT) ?: AMIGO_ROOT;
+    $data = realpath(\Amigo\Core\App::dataDir()) ?: \Amigo\Core\App::dataDir();
+    if (!str_starts_with($data, $root . DIRECTORY_SEPARATOR)) {
+        return null;
+    }
+    $rel = str_replace(DIRECTORY_SEPARATOR, '/', substr($data, strlen($root) + 1));
+    return implode('/', array_map('rawurlencode', explode('/', $rel))) . '/probe.txt';
 }

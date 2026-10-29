@@ -102,8 +102,9 @@ final class AccountController
         $issuer = (string)App::config('site_name', 'AMIGO!');
         header('Cache-Control: no-store');
         View::render('account/twofactor', [
-            'title'  => '2FA einrichten',
-            'nav'    => 'account',
+            'title'   => '2FA einrichten',
+            'nav'     => 'account',
+            'scripts' => ['js/qrcode.min.js'],
             'secret' => $secret,
             'uri'    => Totp::uri($secret, $user['username'], $issuer),
             'error'  => $error,

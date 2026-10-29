@@ -134,7 +134,7 @@ final class AdminController
             'require2fa'   => Settings::bool($db, 'require_2fa'),
             'checks'       => $checks,
             'counts'       => $counts,
-            'dataInWeb'    => str_starts_with(realpath(App::dataDir()) ?: '', realpath(AMIGO_ROOT) ?: "\0"),
+            'probe'        => probe_path(),
         ]);
     }
 
