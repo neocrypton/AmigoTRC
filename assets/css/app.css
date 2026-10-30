@@ -520,6 +520,12 @@ meter::-moz-meter-bar { background: var(--accent); }
 .captcha { overflow: hidden; }
 @media (max-width: 360px) { .g-recaptcha { transform: scale(.88); transform-origin: 0 0; } }
 
+/* Freischaltung */
+.pendinglist { list-style: none; margin: 0; padding: 0; }
+.pendinglist li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px dashed var(--line); }
+.pending-who { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.subfield { margin-top: 12px; }
+
 /* Community */
 .players { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 @media (min-width: 700px) { .players { grid-template-columns: 1fr 1fr; } }

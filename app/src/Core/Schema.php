@@ -16,7 +16,7 @@ namespace Amigo\Core;
  */
 final class Schema
 {
-    public const VERSION = 2;
+    public const VERSION = 3;
 
     public static function migrate(Database $db): void
     {
@@ -24,7 +24,7 @@ final class Schema
         if ($current >= self::VERSION) {
             return;
         }
-        $steps = [1 => self::v1(), 2 => self::v2()];
+        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3()];
         foreach ($steps as $version => $statements) {
             if ($current < $version) {
                 foreach ($statements as $ddl) {
@@ -61,6 +61,17 @@ final class Schema
         // Index-Namen sind in SQLite datenbankweit eindeutig -> mit Präfix versehen.
         $ddl = preg_replace_callback('/\[([a-z_]+)\]/', fn ($m) => $db->quoteIdent($db->prefix() . $m[1]), $ddl);
         return $db->sql($ddl);
+    }
+
+    /** v3: Konto-Aktivierung (E-Mail-Bestätigung / Admin-Freischaltung). */
+    private static function v3(): array
+    {
+        return [
+            'ALTER TABLE {users} ADD COLUMN pending VARCHAR(10) NULL',
+            'ALTER TABLE {users} ADD COLUMN email_verified_at %DT% NULL',
+            'ALTER TABLE {users} ADD COLUMN verify_token VARCHAR(64) NULL',
+            'ALTER TABLE {users} ADD COLUMN verify_expires %BIG% NULL',
+        ];
     }
 
     /** v2: eigener TheGamesDB-Key pro Nutzer, öffentliche Sammlung/Durchgespielt-Liste. */

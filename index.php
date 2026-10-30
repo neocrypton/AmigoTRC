@@ -29,6 +29,8 @@ $routes = [
     'login'             => [C\AuthController::class, 'login', 'guest'],
     'login/2fa'         => [C\AuthController::class, 'twoFactor', 'public'],
     'logout'            => [C\AuthController::class, 'logout', 'public'],
+    'verify'            => [C\AuthController::class, 'verify', 'public'],
+    'verify/resend'     => [C\AuthController::class, 'resend', 'public'],
     'register'          => [C\AuthController::class, 'register', 'guest'],
 
     'collection'        => [C\CollectionController::class, 'index', 'auth'],
@@ -56,6 +58,7 @@ $routes = [
 
     'account'           => [C\AccountController::class, 'index', 'auth'],
     'account/profile'   => [C\AccountController::class, 'profile', 'auth'],
+    'account/verify'    => [C\AccountController::class, 'verifyMail', 'auth'],
     'account/privacy'   => [C\AccountController::class, 'privacy', 'auth'],
     'account/tgdb'      => [C\AccountController::class, 'tgdbKey', 'auth'],
     'account/password'  => [C\AccountController::class, 'password', 'auth'],
@@ -66,6 +69,7 @@ $routes = [
     'admin/users'          => [C\AdminController::class, 'users', 'admin'],
     'admin/user/action'    => [C\AdminController::class, 'userAction', 'admin'],
     'admin/settings'       => [C\AdminController::class, 'settings', 'admin'],
+    'admin/mail'           => [C\AdminController::class, 'mail', 'admin'],
     'admin/recaptcha'      => [C\AdminController::class, 'recaptcha', 'admin'],
     'admin/tgdb'           => [C\AdminController::class, 'tgdbKey', 'admin'],
     'admin/platforms'      => [C\AdminController::class, 'platformImport', 'admin'],

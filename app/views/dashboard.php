@@ -13,6 +13,10 @@ $u = Auth::user();
     </div>
 </section>
 
+<?php if (\Amigo\Core\Auth::isAdmin() && ($pc = \Amigo\Service\Accounts::pendingCount()) > 0): ?>
+<div class="flash flash-warn">⏳ <a href="<?= e(url('admin/users')) ?>#pending"><?= $pc ?> neue(s) Konto/Konten warten auf Freischaltung</a></div>
+<?php endif; ?>
+
 <?php if (!(int)$u['totp_enabled']): ?>
 <div class="flash flash-info">Tipp: Schütze dein Konto mit <a href="<?= e(url('account/2fa')) ?>">Zwei-Faktor-Anmeldung</a>.</div>
 <?php endif; ?>

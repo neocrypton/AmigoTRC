@@ -19,10 +19,70 @@
             <?= csrf_field() ?>
             <label class="check"><input type="checkbox" name="registration_open" value="1"<?= checked($registration) ?><?= $captchaOk ? '' : ' disabled' ?>> Öffentliche Registrierung erlauben</label>
             <?php if (!$captchaOk): ?><p class="hint">Erst möglich, wenn unten reCAPTCHA eingerichtet ist.</p><?php endif; ?>
+            <div class="field subfield">
+                <label for="activation_mode">Neue Konten aktivieren</label>
+                <select id="activation_mode" name="activation_mode">
+                    <?php foreach (\Amigo\Service\Accounts::MODES as $k => $label): ?>
+                    <option value="<?= e($k) ?>"<?= selected($k, $mode) ?><?= !$mailOk && str_contains($k, 'email') ? ' disabled' : '' ?>><?= e($label) ?><?= !$mailOk && str_contains($k, 'email') ? ' – E-Mail-Versand einrichten' : '' ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <?php if ($pendingCount > 0): ?><p class="hint">⏳ <a href="<?= e(url('admin/users')) ?>"><?= $pendingCount ?> Konto/Konten warten auf Freischaltung</a></p><?php endif; ?>
+            </div>
+            <label class="check subfield"><input type="checkbox" name="require_email" value="1"<?= checked($requireEmail || str_contains($mode, 'email')) ?><?= str_contains($mode, 'email') ? ' disabled' : '' ?>> E-Mail-Adresse ist bei der Registrierung Pflicht<?= str_contains($mode, 'email') ? ' (durch E-Mail-Bestätigung automatisch)' : '' ?></label>
             <label class="check"><input type="checkbox" name="require_2fa" value="1"<?= checked($require2fa) ?>> 2FA für alle Konten verpflichtend</label>
             <label class="check"><input type="checkbox" name="clear_cache" value="1"> TheGamesDB-Cache leeren (<?= (int)$counts['cache'] ?> Einträge)</label>
             <button class="btn btn-primary" type="submit">Speichern</button>
         </form>
+    </section>
+
+    <section class="panel" id="mail">
+        <h2 class="panel-title">E-Mail-Versand</h2>
+        <p>
+            <?php if ($mailOk): ?>
+                <span class="cond cond-5">AKTIV</span> Absender <code><?= e($mail['from']) ?></code> über <?= $mail['transport'] === 'smtp' ? 'SMTP (' . e($mail['host']) . ')' : 'PHP mail()' ?>.
+            <?php else: ?>
+                <span class="cond cond-1">AUS</span> Wird für E-Mail-Bestätigung und Benachrichtigungen gebraucht.
+            <?php endif; ?>
+        </p>
+        <form method="post" action="<?= e(url('admin/mail')) ?>" autocomplete="off">
+            <?= csrf_field() ?>
+            <div class="row2">
+                <div class="field"><label for="m-from">Absender-Adresse</label><input id="m-from" type="email" name="from" value="<?= e($mail['from']) ?>" maxlength="190" placeholder="noreply@deine-domain.de"></div>
+                <div class="field"><label for="m-name">Absender-Name</label><input id="m-name" name="from_name" value="<?= e($mail['from_name']) ?>" maxlength="80"></div>
+            </div>
+            <div class="field">
+                <label for="m-base">Adresse der Seite (für Links in Mails)</label>
+                <input id="m-base" name="base_url" value="<?= e($baseUrl) ?>" maxlength="255">
+            </div>
+            <div class="field">
+                <label for="m-transport">Versandart</label>
+                <select id="m-transport" name="transport" data-toggle-target="#smtp-fields" data-toggle-value="smtp">
+                    <?php foreach (\Amigo\Service\Mailer::TRANSPORTS as $k => $label): ?><option value="<?= e($k) ?>"<?= selected($k, $mail['transport']) ?>><?= e($label) ?></option><?php endforeach; ?>
+                </select>
+                <p class="hint">SMTP ist zuverlässiger (weniger Spam-Ordner). Zugangsdaten findest du bei deinem Hoster beim E-Mail-Postfach.</p>
+            </div>
+            <fieldset id="smtp-fields" class="dbfields">
+                <div class="row2">
+                    <div class="field"><label for="m-host">SMTP-Server</label><input id="m-host" name="host" value="<?= e($mail['host']) ?>" maxlength="253" placeholder="smtp.deine-domain.de"></div>
+                    <div class="field"><label for="m-port">Port</label><input id="m-port" name="port" inputmode="numeric" value="<?= (int)$mail['port'] ?>" maxlength="5"></div>
+                    <div class="field"><label for="m-secure">Verschlüsselung</label>
+                        <select id="m-secure" name="secure"><?php foreach (\Amigo\Service\Mailer::SECURE as $k => $label): ?><option value="<?= e($k) ?>"<?= selected($k, $mail['secure']) ?>><?= e($label) ?></option><?php endforeach; ?></select>
+                    </div>
+                    <div class="field"><label for="m-user">Benutzername</label><input id="m-user" name="user" value="<?= e($mail['user']) ?>" maxlength="190" autocomplete="off"></div>
+                    <div class="field"><label for="m-pass">Passwort</label><input id="m-pass" type="password" name="pass" maxlength="200" autocomplete="new-password" placeholder="<?= $mail['has_pass'] ? 'leer lassen = unverändert' : '' ?>"></div>
+                </div>
+                <?php if ($mail['has_pass']): ?><label class="check"><input type="checkbox" name="clear_pass" value="1"> gespeichertes Passwort löschen</label><?php endif; ?>
+            </fieldset>
+            <button class="btn btn-primary" type="submit" name="action" value="save">Speichern</button>
+        </form>
+        <?php if ($mailOk): ?>
+        <form method="post" action="<?= e(url('admin/mail')) ?>" class="subform">
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="test">
+            <div class="field"><label for="m-test">Testmail an</label><input id="m-test" type="email" name="test_to" value="<?= e(\Amigo\Core\Auth::user()['email'] ?? '') ?>" maxlength="190"></div>
+            <button class="btn btn-sm" type="submit">✉ Testmail senden</button>
+        </form>
+        <?php endif; ?>
     </section>
 
     <section class="panel" id="recaptcha">

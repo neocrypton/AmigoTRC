@@ -151,6 +151,25 @@ wenn **Google reCAPTCHA v2** („Ich bin kein Roboter“-Kästchen) eingerichtet
    eintragen und „Speichern & prüfen“ klicken.
 3. Danach „Öffentliche Registrierung erlauben“ anhaken.
 
+**Aktivierung neuer Konten** (Admin › System):
+
+| Modus | Ablauf |
+|---|---|
+| E-Mail + Admin | Nutzer bestätigt seine Adresse per Link, danach schaltet ein Admin frei |
+| Admin (Standard) | Admin schaltet unter *Benutzer* frei oder lehnt ab |
+| E-Mail | Konto ist nach Klick auf den Bestätigungslink aktiv |
+| Sofort | Konto ist sofort aktiv (nicht empfohlen) |
+
+Wartende Konten können sich nicht einloggen und erscheinen nicht in der
+Community. Admins mit E-Mail-Adresse werden über neue Anmeldungen informiert,
+Nutzer über ihre Freischaltung. Bestätigungslinks gelten 48 Stunden und nur
+einmal; nie bestätigte Konten werden nach 7 Tagen entfernt. Per Häkchen kann die
+E-Mail-Adresse zur Pflicht gemacht werden (bei E-Mail-Bestätigung automatisch).
+
+**E-Mail-Versand** (Admin › System): PHP `mail()` oder SMTP (STARTTLS/SSL,
+Passwort verschlüsselt gespeichert) mit Testmail-Button. Die „Adresse der Seite“
+wird für Links in Mails verwendet.
+
 Der Geheimschlüssel wird verschlüsselt gespeichert, die Prüfung erfolgt
 serverseitig bei Google. Das Google-Script wird **nur auf der
 Registrierungsseite** geladen. Wird reCAPTCHA entfernt, schließt sich die

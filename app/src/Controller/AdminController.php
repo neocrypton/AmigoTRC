@@ -6,9 +6,12 @@ namespace Amigo\Controller;
 use Amigo\Core\App;
 use Amigo\Core\Auth;
 use Amigo\Core\Database;
+use Amigo\Core\RateLimiter;
 use Amigo\Core\Settings;
 use Amigo\Core\View;
+use Amigo\Service\Accounts;
 use Amigo\Service\Catalog;
+use Amigo\Service\Mailer;
 use Amigo\Service\Recaptcha;
 use Amigo\Service\TheGamesDb;
 
@@ -36,10 +39,13 @@ final class AdminController
         }
         $users = App::db()->all(
             'SELECT u.id, u.username, u.email, u.role, u.is_active, u.totp_enabled, u.created_at, u.last_login_at,
+                    u.pending, u.email_verified_at,
                     (SELECT COUNT(*) FROM {items} i WHERE i.user_id = u.id) AS items
              FROM {users} u ORDER BY u.username'
         );
-        View::render('admin/users', ['title' => 'Benutzer', 'nav' => 'admin', 'users' => $users, 'errors' => $errors, 'data' => $data]);
+        $pending = array_values(array_filter($users, fn ($u) => $u['pending'] !== null));
+        $users = array_values(array_filter($users, fn ($u) => $u['pending'] === null));
+        View::render('admin/users', ['title' => 'Benutzer', 'nav' => 'admin', 'users' => $users, 'pending' => $pending, 'errors' => $errors, 'data' => $data]);
     }
 
     public function userAction(): void
@@ -62,6 +68,18 @@ final class AdminController
         }
 
         switch ($action) {
+            case 'approve':
+                if ($user['pending'] !== null) {
+                    Accounts::approve($user);
+                    flash('ok', '„' . $user['username'] . '“ freigeschaltet.' . (!empty($user['email']) && Mailer::configured() ? ' Eine Info-Mail wurde verschickt.' : ''));
+                }
+                break;
+            case 'reject':
+                if ($user['pending'] !== null) {
+                    $db->delete('users', ['id' => $user['id']]);
+                    flash('ok', 'Registrierung von „' . $user['username'] . '“ abgelehnt und entfernt.');
+                }
+                break;
             case 'toggle_active':
                 $db->update('users', ['is_active' => (int)$user['is_active'] ? 0 : 1], ['id' => $user['id']]);
                 flash('ok', (int)$user['is_active'] ? 'Konto gesperrt.' : 'Konto entsperrt.');
@@ -100,7 +118,14 @@ final class AdminController
                 $open = false;
                 flash('error', 'Die Registrierung kann erst geöffnet werden, wenn reCAPTCHA eingerichtet ist.');
             }
+            $mode = input_enum('activation_mode', Accounts::MODES) ?? Accounts::mode();
+            if (Accounts::needsEmail($mode) && !Mailer::configured()) {
+                flash('error', 'E-Mail-Bestätigung braucht einen eingerichteten E-Mail-Versand – Aktivierungsmodus nicht geändert.');
+                $mode = Accounts::mode();
+            }
             Settings::set($db, 'registration_open', $open ? '1' : '0');
+            Settings::set($db, 'activation_mode', $mode);
+            Settings::set($db, 'require_email', isset($_POST['require_email']) ? '1' : '0');
             Settings::set($db, 'require_2fa', isset($_POST['require_2fa']) ? '1' : '0');
             if (isset($_POST['clear_cache'])) {
                 $db->run('DELETE FROM {api_cache}');
@@ -146,9 +171,62 @@ final class AdminController
             'keyHint'      => Catalog::systemKey() !== '' ? '…' . substr(Catalog::systemKey(), -4) : null,
             'tgdbShared'   => Settings::bool($db, 'tgdb_shared'),
             'captchaSite'  => Recaptcha::siteKey(),
+            'mode'         => Accounts::mode(),
+            'requireEmail' => Settings::bool($db, 'require_email'),
+            'mail'         => Mailer::settings(),
+            'mailOk'       => Mailer::configured(),
+            'baseUrl'      => Accounts::baseUrl(),
+            'pendingCount' => Accounts::pendingCount(),
             'captchaOk'    => Recaptcha::configured(),
             'userKeys'     => (int)$db->value('SELECT COUNT(*) FROM {users} WHERE tgdb_api_key IS NOT NULL'),
         ]);
+    }
+
+    /** E-Mail-Versand speichern oder Testmail schicken. */
+    public function mail(): void
+    {
+        if (!is_post()) {
+            redirect('admin/settings');
+        }
+        $db = App::db();
+        if (input('action', 10) === 'save') {
+            $errors = Mailer::save([
+                'transport'  => input('transport', 10),
+                'from'       => input('from', 190),
+                'from_name'  => input('from_name', 80),
+                'host'       => input('host', 253),
+                'port'       => input('port', 5),
+                'secure'     => input('secure', 5),
+                'user'       => input('user', 190),
+                'pass'       => (string)($_POST['pass'] ?? ''),
+                'clear_pass' => isset($_POST['clear_pass']),
+            ]);
+            $base = input('base_url', 255);
+            if (!preg_match('#^https?://[A-Za-z0-9.-]+(:\d+)?(/[A-Za-z0-9._~%/-]*)?$#', $base)) {
+                $errors[] = 'Die Adresse der Seite ist ungültig (z. B. https://amigo.example.de/).';
+            } else {
+                Settings::set($db, 'base_url', rtrim($base, '/') . '/');
+            }
+            flash($errors ? 'error' : 'ok', $errors ? implode(' ', $errors) : 'E-Mail-Einstellungen gespeichert.');
+            redirect('admin/settings');
+        }
+        // Testmail
+        $to = input('test_to', 190) ?: (string)(Auth::user()['email'] ?? '');
+        if (RateLimiter::tooMany('mailtest:' . Auth::id(), 10, 3600)) {
+            flash('error', 'Zu viele Testmails – bitte später erneut.');
+        } elseif (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
+            flash('error', 'Bitte eine Empfängeradresse für die Testmail angeben.');
+        } else {
+            RateLimiter::hit('mailtest:' . Auth::id());
+            try {
+                Mailer::send($to, (string)App::config('site_name', 'AMIGO!') . ': Testmail', "Der E-Mail-Versand funktioniert. GAME ON!
+");
+                flash('ok', 'Testmail an ' . $to . ' verschickt – bitte Posteingang (und Spam-Ordner) prüfen.');
+            } catch (\Throwable $e) {
+                flash('error', 'Versand fehlgeschlagen: ' . $e->getMessage());
+            }
+        }
+        redirect('admin/settings');
     }
 
     /** reCAPTCHA-Schlüssel speichern, prüfen oder entfernen. */

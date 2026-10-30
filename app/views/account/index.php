@@ -26,11 +26,19 @@
         <form method="post" action="<?= e(url('account/profile')) ?>">
             <?= csrf_field() ?>
             <div class="field">
-                <label for="email">E-Mail <span class="muted">(optional)</span></label>
-                <input id="email" name="email" type="email" value="<?= e($user['email']) ?>" maxlength="190" autocomplete="email">
+                <label for="email">E-Mail <?= \Amigo\Service\Accounts::emailRequired() ? '<span class="req">*</span>' : '<span class="muted">(optional)</span>' ?>
+                    <?php if ($user['email']): ?><?= $user['email_verified_at'] ? '<span class="cond cond-5">bestätigt</span>' : '<span class="cond cond-2">unbestätigt</span>' ?><?php endif; ?>
+                </label>
+                <input id="email" name="email" type="email" value="<?= e($user['email']) ?>" maxlength="190" autocomplete="email"<?= \Amigo\Service\Accounts::emailRequired() && $user['role'] !== 'admin' ? ' required' : '' ?>>
             </div>
             <button class="btn" type="submit">Speichern</button>
         </form>
+        <?php if ($user['email'] && !$user['email_verified_at'] && \Amigo\Service\Mailer::configured()): ?>
+        <form method="post" action="<?= e(url('account/verify')) ?>" class="subform">
+            <?= csrf_field() ?>
+            <button class="btn btn-sm" type="submit">✉ Bestätigungs-Mail senden</button>
+        </form>
+        <?php endif; ?>
     </section>
 
     <section class="panel">

@@ -45,16 +45,34 @@ final class Auth
         return (self::user()['role'] ?? '') === 'admin';
     }
 
+    /**
+     * Grund des letzten fehlgeschlagenen attempt(): invalid | pending_email | pending_admin | blocked.
+     * Die Detail-Gründe gibt es nur bei korrektem Passwort (keine Kontoermittlung durch Fremde).
+     */
+    public static string $failure = 'invalid';
+    public static ?int $failedUserId = null;
+
     /** Prüft Benutzername + Passwort. Gibt den Benutzer zurück oder null. */
     public static function attempt(string $username, string $password): ?array
     {
+        self::$failure = 'invalid';
+        self::$failedUserId = null;
         $user = App::db()->one('SELECT * FROM {users} WHERE LOWER(username) = LOWER(?)', [$username]);
         if (!$user) {
             // Gleiche Rechenzeit wie bei existierenden Konten (kein User-Enumeration-Timing).
             password_verify($password, self::dummyHash());
             return null;
         }
-        if (!password_verify($password, $user['password_hash']) || (int)$user['is_active'] !== 1) {
+        if (!password_verify($password, $user['password_hash'])) {
+            return null;
+        }
+        if ((int)$user['is_active'] !== 1) {
+            self::$failure = match ($user['pending'] ?? null) {
+                'email' => 'pending_email',
+                'admin' => 'pending_admin',
+                default => 'blocked',
+            };
+            self::$failedUserId = (int)$user['id'];
             return null;
         }
         if (password_needs_rehash($user['password_hash'], self::algo(), self::options())) {

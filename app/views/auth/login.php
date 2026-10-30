@@ -2,6 +2,9 @@
     <?= csrf_field() ?>
     <h2 class="panel-title">PLAYER LOGIN</h2>
     <?php if ($error): ?><div class="flash flash-error" role="alert"><?= e($error) ?></div><?php endif; ?>
+    <?php if ($canResend): ?>
+    <p><button class="btn btn-sm" type="submit" form="resend-form">✉ Bestätigungs-Mail erneut senden</button></p>
+    <?php endif; ?>
     <div class="field">
         <label for="username">Benutzername</label>
         <input id="username" name="username" value="<?= e($username) ?>" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="40" required autofocus>
@@ -15,3 +18,6 @@
     <p class="center muted">Neu hier? <a href="<?= e(url('register')) ?>">Konto erstellen</a></p>
     <?php endif; ?>
 </form>
+<?php if ($canResend): ?>
+<form method="post" action="<?= e(url('verify/resend')) ?>" id="resend-form" hidden><?= csrf_field() ?></form>
+<?php endif; ?>

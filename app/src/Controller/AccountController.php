@@ -10,7 +10,9 @@ use Amigo\Core\Options;
 use Amigo\Core\RateLimiter;
 use Amigo\Core\Totp;
 use Amigo\Core\View;
+use Amigo\Service\Accounts;
 use Amigo\Service\Catalog;
+use Amigo\Service\Mailer;
 use Amigo\Service\TheGamesDb;
 
 final class AccountController
@@ -26,6 +28,27 @@ final class AccountController
             'keySource'     => Catalog::keySourceFor($user),
             'keyHint'       => ($k = Catalog::userKey($user)) !== '' ? '…' . substr($k, -4) : null,
         ]);
+    }
+
+    /** Bestätigungs-Mail für die eigene Adresse (erneut) senden. */
+    public function verifyMail(): void
+    {
+        $user = Auth::user();
+        if (is_post() && !empty($user['email']) && !$user['email_verified_at'] && Mailer::configured()) {
+            $bucket = 'resend:' . $user['id'];
+            if (RateLimiter::tooMany($bucket, 3, 3600)) {
+                flash('error', 'Bitte später erneut versuchen.');
+            } else {
+                RateLimiter::hit($bucket);
+                try {
+                    Accounts::sendVerification($user);
+                    flash('ok', 'Bestätigungs-Mail verschickt.');
+                } catch (\Throwable) {
+                    flash('error', 'Die E-Mail konnte nicht verschickt werden.');
+                }
+            }
+        }
+        redirect('account');
     }
 
     /** Sichtbarkeit der eigenen Sammlung / Durchgespielt-Liste für andere Nutzer. */
@@ -79,13 +102,28 @@ final class AccountController
     {
         if (is_post()) {
             $email = input('email', 190);
-            if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $user = Auth::user();
+            if ($email === '' && Accounts::emailRequired() && $user['role'] !== 'admin') {
+                flash('error', 'Eine E-Mail-Adresse ist Pflicht.');
+            } elseif ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 flash('error', 'Die E-Mail-Adresse ist ungültig.');
             } elseif ($email !== '' && (int)App::db()->value('SELECT COUNT(*) FROM {users} WHERE LOWER(email) = LOWER(?) AND id <> ?', [$email, Auth::id()]) > 0) {
                 flash('error', 'Diese E-Mail-Adresse wird bereits verwendet.');
+            } elseif (strcasecmp($email, (string)$user['email']) === 0) {
+                flash('info', 'Keine Änderung.');
             } else {
-                App::db()->update('users', ['email' => $email ?: null], ['id' => Auth::id()]);
-                flash('ok', 'Profil gespeichert.');
+                // Neue Adresse gilt als unbestätigt.
+                App::db()->update('users', ['email' => $email ?: null, 'email_verified_at' => null], ['id' => Auth::id()]);
+                $msg = 'Profil gespeichert.';
+                if ($email !== '' && Mailer::configured()) {
+                    try {
+                        Accounts::sendVerification(['email' => $email] + $user);
+                        $msg .= ' Bitte bestätige die neue Adresse über den Link in der E-Mail.';
+                    } catch (\Throwable) {
+                        $msg .= ' Die Bestätigungs-Mail konnte nicht verschickt werden.';
+                    }
+                }
+                flash('ok', $msg);
             }
         }
         redirect('account');

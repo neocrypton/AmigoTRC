@@ -308,6 +308,15 @@
     box.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
   });
 
+  /* ---------- Felder nur bei passender Auswahl zeigen (z. B. SMTP-Daten) ---------- */
+  $$('[data-toggle-target]').forEach(function (sel) {
+    var target = $(sel.getAttribute('data-toggle-target'));
+    if (!target) return;
+    var sync = function () { target.hidden = sel.value !== sel.getAttribute('data-toggle-value'); };
+    sel.addEventListener('change', sync);
+    sync();
+  });
+
   /* ---------- Installer: MySQL-Felder nur bei Bedarf ---------- */
   var dbFields = $('[data-db-fields]');
   if (dbFields) {

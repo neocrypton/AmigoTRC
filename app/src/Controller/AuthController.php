@@ -11,6 +11,8 @@ use Amigo\Core\RateLimiter;
 use Amigo\Core\Settings;
 use Amigo\Core\Totp;
 use Amigo\Core\View;
+use Amigo\Service\Accounts;
+use Amigo\Service\Mailer;
 use Amigo\Service\Recaptcha;
 
 final class AuthController
@@ -21,6 +23,7 @@ final class AuthController
     {
         $error = null;
         $username = '';
+        $canResend = false;
 
         if (is_post()) {
             $username = input('username', 40);
@@ -34,7 +37,19 @@ final class AuthController
                 $error = 'Bitte Benutzername und Passwort eingeben.';
             } else {
                 $user = Auth::attempt($username, $password);
-                if (!$user) {
+                if (!$user && Auth::$failure !== 'invalid') {
+                    // Passwort stimmte, Konto ist aber (noch) nicht aktiv.
+                    RateLimiter::clear($userBucket);
+                    $error = match (Auth::$failure) {
+                        'pending_email' => 'Bitte bestätige zuerst deine E-Mail-Adresse über den Link in unserer Mail.',
+                        'pending_admin' => 'Dein Konto wartet noch auf die Freischaltung durch einen Admin.',
+                        default         => 'Dieses Konto ist gesperrt.',
+                    };
+                    if (Auth::$failure === 'pending_email' && Mailer::configured()) {
+                        $_SESSION['resend_uid'] = ['uid' => Auth::$failedUserId, 'at' => time()];
+                        $canResend = true;
+                    }
+                } elseif (!$user) {
                     RateLimiter::hit($ipBucket);
                     RateLimiter::hit($userBucket);
                     $error = 'Benutzername oder Passwort falsch.';
@@ -56,7 +71,55 @@ final class AuthController
             'error'        => $error,
             'username'     => $username,
             'registration' => Settings::bool(App::db(), 'registration_open') && Recaptcha::configured(),
+            'canResend'    => $canResend,
         ], 'layout_plain');
+    }
+
+    /** Bestätigungslink aus der E-Mail. */
+    public function verify(): void
+    {
+        $bucket = 'verify:' . RateLimiter::ip();
+        if (RateLimiter::tooMany($bucket, 20, 3600)) {
+            flash('error', 'Zu viele Versuche. Bitte später erneut.');
+            redirect('login');
+        }
+        $user = Accounts::verify(query_int('u', 1) ?? 0, query('t', 64));
+        if (!$user) {
+            RateLimiter::hit($bucket);
+            flash('error', 'Der Bestätigungslink ist ungültig oder abgelaufen. Logge dich ein, um einen neuen anzufordern.');
+            redirect(Auth::user() ? 'account' : 'login');
+        }
+        if (Auth::user()) {
+            flash('ok', 'E-Mail-Adresse bestätigt.');
+            redirect('account');
+        }
+        flash('ok', $user['pending'] === 'admin'
+            ? 'E-Mail bestätigt! Dein Konto wird jetzt noch von einem Admin freigeschaltet – du bekommst Bescheid.'
+            : 'E-Mail bestätigt – du kannst dich jetzt einloggen.');
+        redirect('login');
+    }
+
+    /** Neue Bestätigungs-Mail (nur nach korrektem Passwort beim Login, siehe resend_uid). */
+    public function resend(): void
+    {
+        $r = $_SESSION['resend_uid'] ?? null;
+        unset($_SESSION['resend_uid']);
+        if (is_post() && is_array($r) && time() - (int)$r['at'] < 600) {
+            $user = App::db()->one("SELECT * FROM {users} WHERE id = ? AND pending = 'email'", [(int)$r['uid']]);
+            $bucket = 'resend:' . (int)$r['uid'];
+            if ($user && !RateLimiter::tooMany($bucket, 3, 3600)) {
+                RateLimiter::hit($bucket);
+                try {
+                    Accounts::sendVerification($user);
+                    flash('ok', 'Neue Bestätigungs-Mail verschickt.');
+                } catch (\Throwable) {
+                    flash('error', 'Die E-Mail konnte nicht verschickt werden. Bitte später erneut versuchen.');
+                }
+            } else {
+                flash('error', 'Bitte später erneut versuchen.');
+            }
+        }
+        redirect('login');
     }
 
     public function twoFactor(): void
@@ -125,6 +188,12 @@ final class AuthController
             redirect('login');
         }
         App::sendSecurityHeaders(Recaptcha::CSP);
+        $mode = Accounts::mode();
+        $emailRequired = Accounts::emailRequired();
+        if (Accounts::needsEmail($mode) && !Mailer::configured()) {
+            flash('info', 'Die Registrierung ist vorübergehend nicht möglich.');
+            redirect('login');
+        }
         $errors = [];
         $data = ['username' => '', 'email' => ''];
 
@@ -144,18 +213,36 @@ final class AuthController
             if (RateLimiter::tooMany($bucket . ':captcha', 20, 3600)) {
                 $errors = ['Zu viele fehlgeschlagene Versuche. Bitte später erneut versuchen.'];
             }
+            if ($emailRequired && $data['email'] === '') {
+                $errors[] = 'Bitte eine E-Mail-Adresse angeben.';
+            }
+            Accounts::purgeStale();
             $errors = array_merge($errors, self::validateNewUser($data['username'], $data['email'], $password, (string)($_POST['password2'] ?? '')));
 
             if (!$errors) {
                 RateLimiter::hit($bucket);
-                App::db()->insert('users', [
+                $id = App::db()->insert('users', [
                     'username'      => $data['username'],
                     'email'         => $data['email'] ?: null,
                     'password_hash' => Auth::hash($password),
                     'role'          => 'user',
                     'created_at'    => Database::now(),
-                ]);
-                flash('ok', 'Konto angelegt – PLAYER 2 HAS JOINED! Bitte einloggen.');
+                ] + Accounts::initialState());
+                $user = App::db()->one('SELECT * FROM {users} WHERE id = ?', [$id]);
+
+                if ($user['pending'] === 'email') {
+                    try {
+                        Accounts::sendVerification($user);
+                        flash('ok', 'Fast geschafft! Wir haben dir eine E-Mail geschickt – bitte bestätige deine Adresse über den Link.');
+                    } catch (\Throwable) {
+                        flash('warn', 'Konto angelegt, aber die Bestätigungs-Mail konnte nicht verschickt werden. Versuche später, dich einzuloggen, um sie erneut anzufordern.');
+                    }
+                } elseif ($user['pending'] === 'admin') {
+                    Accounts::notifyAdmins($user);
+                    flash('ok', 'Konto angelegt! Ein Admin schaltet es in Kürze frei.');
+                } else {
+                    flash('ok', 'Konto angelegt – PLAYER 2 HAS JOINED! Bitte einloggen.');
+                }
                 redirect('login');
             }
         }
@@ -165,6 +252,8 @@ final class AuthController
             'errors'  => $errors,
             'data'    => $data,
             'siteKey' => Recaptcha::siteKey(),
+            'emailRequired' => $emailRequired,
+            'mode'    => $mode,
             'theme'   => ($_COOKIE['amigo_theme'] ?? 'crt') === 'dmg' ? 'light' : 'dark',
         ], 'layout_plain');
     }

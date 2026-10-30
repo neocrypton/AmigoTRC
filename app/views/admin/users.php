@@ -4,6 +4,33 @@
     <a class="btn btn-ghost" href="<?= e(url('admin/settings')) ?>">⚙ System</a>
 </div>
 
+<?php if ($pending): ?>
+<section class="panel" id="pending">
+    <h2 class="panel-title">⏳ Warten auf Freischaltung <span class="count"><?= count($pending) ?></span></h2>
+    <ul class="pendinglist">
+        <?php foreach ($pending as $u): ?>
+        <li>
+            <span class="pending-who">
+                <strong><?= e($u['username']) ?></strong>
+                <small class="muted"><?= e($u['email'] ?? 'ohne E-Mail') ?> · registriert <?= e(fmt_date($u['created_at'])) ?></small>
+                <small><?= $u['pending'] === 'email' ? '<span class="cond cond-2">E-Mail noch nicht bestätigt</span>' : ($u['email_verified_at'] ? '<span class="cond cond-5">E-Mail bestätigt</span>' : '') ?></small>
+            </span>
+            <span class="btnrow">
+                <form method="post" action="<?= e(url('admin/user/action')) ?>" class="inline">
+                    <?= csrf_field() ?><input type="hidden" name="id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="action" value="approve">
+                    <button class="btn btn-primary btn-sm" type="submit">✓ Freischalten</button>
+                </form>
+                <form method="post" action="<?= e(url('admin/user/action')) ?>" class="inline" data-confirm="Registrierung von <?= e($u['username']) ?> ablehnen und löschen?">
+                    <?= csrf_field() ?><input type="hidden" name="id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="action" value="reject">
+                    <button class="btn btn-danger btn-sm" type="submit">✕ Ablehnen</button>
+                </form>
+            </span>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+</section>
+<?php endif; ?>
+
 <div class="tablewrap">
 <table class="tbl">
     <thead><tr><th>Benutzer</th><th>Rolle</th><th>2FA</th><th>Einträge</th><th>Letzter Login</th><th>Aktionen</th></tr></thead>
