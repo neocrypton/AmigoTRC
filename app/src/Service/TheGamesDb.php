@@ -25,6 +25,33 @@ final class TheGamesDb
         return $this->apiKey !== '';
     }
 
+    /**
+     * Prüft den Key mit einer kleinen, ungecachten Anfrage.
+     * @return array{ok: bool, message: string}
+     */
+    public function ping(): array
+    {
+        if (!$this->enabled()) {
+            return ['ok' => false, 'message' => 'Kein API-Key gesetzt.'];
+        }
+        try {
+            [$status, $body] = $this->httpGet(self::BASE . 'Genres?' . http_build_query(['apikey' => $this->apiKey]));
+        } catch (\Throwable $e) {
+            return ['ok' => false, 'message' => $e->getMessage()];
+        }
+        $data = json_decode($body, true);
+        if ($status === 200 && is_array($data) && isset($data['data'])) {
+            $left = isset($data['remaining_monthly_allowance'])
+                ? (int)$data['remaining_monthly_allowance'] + (int)($data['extra_allowance'] ?? 0) : null;
+            if ($left !== null) {
+                Settings::set($this->db, 'tgdb_allowance', (string)$left);
+            }
+            return ['ok' => true, 'message' => 'Verbindung OK' . ($left !== null ? ' – Restkontingent: ' . $left . ' Anfragen' : '') . '.'];
+        }
+        $msg = is_array($data) && isset($data['status']) ? (string)$data['status'] : 'HTTP ' . $status;
+        return ['ok' => false, 'message' => 'TheGamesDB lehnt ab: ' . mb_substr($msg, 0, 200)];
+    }
+
     /** @return array<int, array> normalisierte Treffer */
     public function searchGames(string $name, ?int $platformId = null, int $page = 1): array
     {

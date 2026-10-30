@@ -6,7 +6,7 @@
 <section class="panel">
     <h2 class="panel-title">Import aus TheGamesDB</h2>
     <?php if (!$enabled): ?>
-        <p>Kein API-Key konfiguriert. Trage in <code>config/config.php</code> unter <code>tgdb_api_key</code> deinen Key ein (kostenlos im <a href="https://forums.thegamesdb.net/" target="_blank" rel="noopener noreferrer">TheGamesDB-Forum</a> anfragen).</p>
+        <p>Kein API-Key konfiguriert. Hinterlege deinen Key unter <a href="<?= e(url('admin/settings')) ?>">Admin › System</a> (kostenlos im <a href="https://forums.thegamesdb.net/" target="_blank" rel="noopener noreferrer">TheGamesDB-Forum</a> anfragen).</p>
     <?php elseif ($error): ?>
         <div class="flash flash-error"><?= e($error) ?></div>
     <?php else: ?>

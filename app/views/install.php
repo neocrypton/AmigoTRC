@@ -76,7 +76,7 @@
         <div class="field"><label for="timezone">Zeitzone</label><input id="timezone" name="timezone" value="<?= e($form['timezone']) ?>"></div>
     </div>
     <div class="field">
-        <label for="tgdb_key">TheGamesDB API-Key (optional, später in config/config.php änderbar)</label>
+        <label for="tgdb_key">TheGamesDB API-Key (optional, später unter Admin › System änderbar)</label>
         <input id="tgdb_key" name="tgdb_key" value="<?= e($form['tgdb_key']) ?>" spellcheck="false">
         <p class="hint">Einen kostenlosen Key gibt es über das <a href="https://forums.thegamesdb.net/" target="_blank" rel="noopener noreferrer">TheGamesDB-Forum</a>. Ohne Key funktioniert alles – nur ohne Vorschläge und Plattform-Import.</p>
     </div>

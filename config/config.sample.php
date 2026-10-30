@@ -13,7 +13,7 @@ return [
     'upload_max_mb'    => 10,             // max. Größe je Foto (zusätzlich PHP-Limits beachten)
     'data_dir'         => '/pfad/ausserhalb/des/webroots/amigo-data',
     'app_key'          => 'BASE64_32_BYTES', // php -r 'echo base64_encode(random_bytes(32));'
-    'tgdb_api_key'     => '',             // TheGamesDB API-Key (optional)
+    'tgdb_api_key'     => '',             // optional; besser unter Admin › System setzen (hat Vorrang)
 
     // Variante A: SQLite
     'db' => [

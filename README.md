@@ -104,8 +104,10 @@ Datenbanken enthält.
 Ohne Key funktioniert alles, nur ohne Vorschläge und Plattform-Import.
 Einen kostenlosen Key bekommst du über das
 [TheGamesDB-Forum](https://forums.thegamesdb.net/). Eintragen im Installer oder
-später in `config/config.php` unter `tgdb_api_key`. Der Key bleibt auf dem
-Server; alle Antworten werden zwischengespeichert (Suche 1 Tag, Spiele und
+jederzeit unter **Admin › System** (dort auch „Verbindung testen“ und
+„Entfernen“). Der Key wird verschlüsselt in der Datenbank gespeichert und bleibt
+auf dem Server; alternativ kann er als Rückfallwert in `config/config.php` unter
+`tgdb_api_key` stehen (ein im Adminbereich gesetzter Key hat Vorrang). alle Antworten werden zwischengespeichert (Suche 1 Tag, Spiele und
 Plattformen 7 Tage, Listen 30 Tage), um das Monatskontingent zu schonen. Das
 Restkontingent steht unter **Admin › System**.
 

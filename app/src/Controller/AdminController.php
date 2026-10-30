@@ -135,7 +135,40 @@ final class AdminController
             'checks'       => $checks,
             'counts'       => $counts,
             'probe'        => probe_path(),
+            'keySource'    => Catalog::apiKeySource(),
+            'keyHint'      => Catalog::apiKey() !== '' ? '…' . substr(Catalog::apiKey(), -4) : null,
         ]);
+    }
+
+    /** TheGamesDB-API-Key speichern, entfernen oder testen. */
+    public function tgdbKey(): void
+    {
+        if (!is_post()) {
+            redirect('admin/settings');
+        }
+        $action = input('action', 10);
+        if ($action === 'remove') {
+            Catalog::saveApiKey(null);
+            flash('ok', Catalog::apiKeySource() === 'config'
+                ? 'Key aus dem Adminbereich entfernt – es gilt jetzt wieder der Key aus config/config.php.'
+                : 'API-Key entfernt. Die TheGamesDB-Funktionen sind deaktiviert.');
+            redirect('admin/settings');
+        }
+        if ($action === 'save') {
+            $key = preg_replace('/\s+/', '', input('tgdb_api_key', 200));
+            if (!Catalog::validApiKey($key)) {
+                flash('error', 'Der API-Key sieht ungültig aus (nur Buchstaben und Ziffern, 16–128 Zeichen).');
+                redirect('admin/settings');
+            }
+            Catalog::saveApiKey($key);
+        }
+        $result = Catalog::tgdb()->ping();
+        if ($action === 'save') {
+            flash($result['ok'] ? 'ok' : 'warn', 'API-Key gespeichert. ' . ($result['ok'] ? $result['message'] : 'Test fehlgeschlagen: ' . $result['message']));
+        } else {
+            flash($result['ok'] ? 'ok' : 'error', $result['message']);
+        }
+        redirect('admin/settings');
     }
 
     /** Plattformen aus TheGamesDB auswählen und importieren. */

@@ -97,6 +97,9 @@ if (is_post()) {
     if (!preg_match('/^[a-zA-Z0-9_]{0,20}$/', $form['db_prefix'])) {
         $errors[] = 'Tabellen-Präfix: nur Buchstaben, Ziffern und _ (max. 20).';
     }
+    if ($form['tgdb_key'] !== '' && !Amigo\Service\Catalog::validApiKey(preg_replace('/\s+/', '', $form['tgdb_key']))) {
+        $errors[] = 'Der TheGamesDB-API-Key sieht ungültig aus (nur Buchstaben und Ziffern) – oder leer lassen und später eintragen.';
+    }
     $errors = array_merge($errors, validateAdmin($form['username'], $form['email'], (string)($_POST['password'] ?? ''), (string)($_POST['password2'] ?? '')));
 
     $dataDir = rtrim($form['data_dir'], '/');
@@ -139,7 +142,6 @@ if (is_post()) {
             'upload_max_mb'    => 10,
             'data_dir'         => $dataDir,
             'app_key'          => Crypto::generateKey(),
-            'tgdb_api_key'     => $form['tgdb_key'],
             'db'               => $db,
         ];
 
@@ -159,6 +161,10 @@ if (is_post()) {
             ]);
             Settings::set($pdo, 'registration_open', '0');
             Settings::set($pdo, 'require_2fa', '0');
+            $tgdbKey = preg_replace('/\s+/', '', $form['tgdb_key']);
+            if ($tgdbKey !== '') {
+                Settings::set($pdo, 'tgdb_api_key', Crypto::encrypt($tgdbKey));
+            }
 
             $php = "<?php\n// AMIGO! Konfiguration – erzeugt am " . date('Y-m-d H:i') . " durch install.php.\n"
                 . "// Diese Datei enthält Zugangsdaten und den Verschlüsselungsschlüssel: nicht weitergeben!\n"

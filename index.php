@@ -57,6 +57,7 @@ $routes = [
     'admin/users'          => [C\AdminController::class, 'users', 'admin'],
     'admin/user/action'    => [C\AdminController::class, 'userAction', 'admin'],
     'admin/settings'       => [C\AdminController::class, 'settings', 'admin'],
+    'admin/tgdb'           => [C\AdminController::class, 'tgdbKey', 'admin'],
     'admin/platforms'      => [C\AdminController::class, 'platformImport', 'admin'],
     'admin/platform/edit'  => [C\AdminController::class, 'platformEdit', 'admin'],
     'admin/platform/delete' => [C\AdminController::class, 'platformDelete', 'admin'],

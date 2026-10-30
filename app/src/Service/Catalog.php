@@ -4,14 +4,45 @@ declare(strict_types=1);
 namespace Amigo\Service;
 
 use Amigo\Core\App;
+use Amigo\Core\Crypto;
 use Amigo\Core\Database;
+use Amigo\Core\Settings;
 
 /** Lokaler Katalog (Plattformen + Spiele), befüllt manuell oder aus TheGamesDB. */
 final class Catalog
 {
     public static function tgdb(): TheGamesDb
     {
-        return new TheGamesDb((string)App::config('tgdb_api_key', ''), App::db());
+        return new TheGamesDb(self::apiKey(), App::db());
+    }
+
+    /** API-Key aus dem Adminbereich (verschlüsselt gespeichert), sonst aus config/config.php. */
+    public static function apiKey(): string
+    {
+        $stored = Settings::get(App::db(), 'tgdb_api_key');
+        if ($stored !== null && $stored !== '') {
+            return (string)Crypto::decrypt($stored);
+        }
+        return (string)App::config('tgdb_api_key', '');
+    }
+
+    public static function apiKeySource(): string
+    {
+        $stored = Settings::get(App::db(), 'tgdb_api_key');
+        if ($stored !== null && $stored !== '') {
+            return 'admin';
+        }
+        return App::config('tgdb_api_key', '') !== '' ? 'config' : 'none';
+    }
+
+    public static function saveApiKey(?string $key): void
+    {
+        Settings::set(App::db(), 'tgdb_api_key', $key === null || $key === '' ? null : Crypto::encrypt($key));
+    }
+
+    public static function validApiKey(string $key): bool
+    {
+        return (bool)preg_match('/^[A-Za-z0-9]{16,128}$/', $key);
     }
 
     public static function platforms(): array
