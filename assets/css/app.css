@@ -516,6 +516,10 @@ meter::-moz-meter-bar { background: var(--accent); }
 @media (min-width: 700px) { .checklist { grid-template-columns: 1fr 1fr; } }
 .checklist .check { margin: 0; padding: 6px 0; }
 
+/* reCAPTCHA-Widget hat feste Breite (304px) – auf schmalen Displays skalieren */
+.captcha { overflow: hidden; }
+@media (max-width: 360px) { .g-recaptcha { transform: scale(.88); transform-origin: 0 0; } }
+
 /* Community */
 .players { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 @media (min-width: 700px) { .players { grid-template-columns: 1fr 1fr; } }

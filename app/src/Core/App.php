@@ -82,20 +82,27 @@ final class App
             && strtolower((string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
     }
 
-    public static function sendSecurityHeaders(): void
+    /** @param array<string, string[]> $extra zusätzliche Quellen je Direktive (z. B. für reCAPTCHA) */
+    public static function sendSecurityHeaders(array $extra = []): void
     {
-        $csp = implode('; ', [
-            "default-src 'self'",
-            "img-src 'self' data: blob:",
-            "script-src 'self'",
-            "style-src 'self'",
-            "font-src 'self'",
-            "connect-src 'self'",
-            "form-action 'self'",
-            "frame-ancestors 'none'",
-            "base-uri 'none'",
-            "object-src 'none'",
-        ]);
+        $policy = [
+            'default-src'     => ["'self'"],
+            'img-src'         => ["'self'", 'data:', 'blob:'],
+            'script-src'      => ["'self'"],
+            'style-src'       => ["'self'"],
+            'font-src'        => ["'self'"],
+            'connect-src'     => ["'self'"],
+            'frame-src'       => ["'none'"],
+            'form-action'     => ["'self'"],
+            'frame-ancestors' => ["'none'"],
+            'base-uri'        => ["'none'"],
+            'object-src'      => ["'none'"],
+        ];
+        foreach ($extra as $directive => $sources) {
+            $current = array_diff($policy[$directive] ?? [], ["'none'"]);
+            $policy[$directive] = array_values(array_unique([...$current, ...$sources]));
+        }
+        $csp = implode('; ', array_map(fn ($d, $s) => $d . ' ' . implode(' ', $s), array_keys($policy), $policy));
         header('Content-Security-Policy: ' . $csp);
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: DENY');

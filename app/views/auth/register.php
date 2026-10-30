@@ -17,6 +17,12 @@
         <label for="password2">Passwort wiederholen</label>
         <input id="password2" name="password2" type="password" autocomplete="new-password" minlength="10" required>
     </div>
+    <div class="field captcha">
+        <div class="g-recaptcha" data-sitekey="<?= e($siteKey) ?>" data-theme="<?= e($theme) ?>"></div>
+        <noscript><p class="flash flash-warn">Für die Registrierung wird JavaScript benötigt (Bot-Schutz).</p></noscript>
+        <p class="hint">Zum Schutz vor Bots wird auf dieser Seite Google reCAPTCHA geladen.</p>
+    </div>
     <button class="btn btn-primary btn-block" type="submit">▶ KONTO ERSTELLEN</button>
+    <script src="https://www.google.com/recaptcha/api.js?hl=de" async defer></script>
     <p class="center muted"><a href="<?= e(url('login')) ?>">Zurück zum Login</a></p>
 </form>

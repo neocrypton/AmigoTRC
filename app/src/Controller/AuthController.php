@@ -11,6 +11,7 @@ use Amigo\Core\RateLimiter;
 use Amigo\Core\Settings;
 use Amigo\Core\Totp;
 use Amigo\Core\View;
+use Amigo\Service\Recaptcha;
 
 final class AuthController
 {
@@ -54,7 +55,7 @@ final class AuthController
             'title'        => 'Login',
             'error'        => $error,
             'username'     => $username,
-            'registration' => Settings::bool(App::db(), 'registration_open'),
+            'registration' => Settings::bool(App::db(), 'registration_open') && Recaptcha::configured(),
         ], 'layout_plain');
     }
 
@@ -118,6 +119,12 @@ final class AuthController
             flash('info', 'Die Registrierung ist geschlossen.');
             redirect('login');
         }
+        // Öffentliche Registrierung nur mit Bot-Schutz.
+        if (!Recaptcha::configured()) {
+            flash('info', 'Die Registrierung ist vorübergehend nicht möglich.');
+            redirect('login');
+        }
+        App::sendSecurityHeaders(Recaptcha::CSP);
         $errors = [];
         $data = ['username' => '', 'email' => ''];
 
@@ -129,6 +136,13 @@ final class AuthController
 
             if (RateLimiter::tooMany($bucket, 5, 3600)) {
                 $errors[] = 'Zu viele Registrierungen von dieser Adresse. Bitte später erneut versuchen.';
+            } elseif (!Recaptcha::verify((string)($_POST['g-recaptcha-response'] ?? ''), RateLimiter::ip())) {
+                // Fehlversuche zählen mit, damit Bots nicht endlos probieren können.
+                RateLimiter::hit($bucket . ':captcha');
+                $errors[] = 'Bitte bestätige „Ich bin kein Roboter“.';
+            }
+            if (RateLimiter::tooMany($bucket . ':captcha', 20, 3600)) {
+                $errors = ['Zu viele fehlgeschlagene Versuche. Bitte später erneut versuchen.'];
             }
             $errors = array_merge($errors, self::validateNewUser($data['username'], $data['email'], $password, (string)($_POST['password2'] ?? '')));
 
@@ -146,7 +160,13 @@ final class AuthController
             }
         }
 
-        View::render('auth/register', ['title' => 'Registrieren', 'errors' => $errors, 'data' => $data], 'layout_plain');
+        View::render('auth/register', [
+            'title'   => 'Registrieren',
+            'errors'  => $errors,
+            'data'    => $data,
+            'siteKey' => Recaptcha::siteKey(),
+            'theme'   => ($_COOKIE['amigo_theme'] ?? 'crt') === 'dmg' ? 'light' : 'dark',
+        ], 'layout_plain');
     }
 
     /** @return string[] Fehlermeldungen */

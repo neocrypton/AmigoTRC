@@ -139,6 +139,24 @@ Alle Antworten werden für alle Nutzer gemeinsam zwischengespeichert (Suche
 schonen. Das Restkontingent des System-Keys steht unter **Admin › System**, das
 des eigenen Keys unter **Mein Konto**.
 
+### Öffentliche Registrierung & reCAPTCHA
+
+Die öffentliche Registrierung lässt sich unter **Admin › System** erst öffnen,
+wenn **Google reCAPTCHA v2** („Ich bin kein Roboter“-Kästchen) eingerichtet ist:
+
+1. Unter [google.com/recaptcha/admin](https://www.google.com/recaptcha/admin/create)
+   eine Website anlegen, Typ **reCAPTCHA v2 → Kästchen „Ich bin kein Roboter“**,
+   deine Domain eintragen.
+2. Website-Schlüssel und Geheimschlüssel unter **Admin › System › reCAPTCHA v2**
+   eintragen und „Speichern & prüfen“ klicken.
+3. Danach „Öffentliche Registrierung erlauben“ anhaken.
+
+Der Geheimschlüssel wird verschlüsselt gespeichert, die Prüfung erfolgt
+serverseitig bei Google. Das Google-Script wird **nur auf der
+Registrierungsseite** geladen. Wird reCAPTCHA entfernt, schließt sich die
+Registrierung automatisch. Hinweis: reCAPTCHA überträgt Daten an Google – bitte
+in der Datenschutzerklärung erwähnen.
+
 ### nginx
 
 `.htaccess` wird von nginx ignoriert. Sperre die internen Ordner selbst:
@@ -174,6 +192,8 @@ location ~ \.(md|sqlite|log|lock)$ { deny all; }
   fremde Sammlungen nur lesend und nur bei Freigabe, private Felder werden
   serverseitig entfernt (nicht nur ausgeblendet)
 - **Header:** HSTS, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy
+- **Registrierung:** nur mit reCAPTCHA v2 (serverseitig geprüft, inkl. Domain),
+  Rate-Limit je IP, auch für fehlgeschlagene Captcha-Versuche
 - **CSV-Export** mit Schutz gegen Formel-Injection
 - Fehlerdetails nur im Log (`data/logs`), nie im Browser
 

@@ -9,6 +9,7 @@ use Amigo\Core\Database;
 use Amigo\Core\Settings;
 use Amigo\Core\View;
 use Amigo\Service\Catalog;
+use Amigo\Service\Recaptcha;
 use Amigo\Service\TheGamesDb;
 
 final class AdminController
@@ -94,7 +95,12 @@ final class AdminController
     {
         $db = App::db();
         if (is_post()) {
-            Settings::set($db, 'registration_open', isset($_POST['registration_open']) ? '1' : '0');
+            $open = isset($_POST['registration_open']);
+            if ($open && !Recaptcha::configured()) {
+                $open = false;
+                flash('error', 'Die Registrierung kann erst geöffnet werden, wenn reCAPTCHA eingerichtet ist.');
+            }
+            Settings::set($db, 'registration_open', $open ? '1' : '0');
             Settings::set($db, 'require_2fa', isset($_POST['require_2fa']) ? '1' : '0');
             if (isset($_POST['clear_cache'])) {
                 $db->run('DELETE FROM {api_cache}');
@@ -139,8 +145,46 @@ final class AdminController
             'keySource'    => Catalog::systemKeySource(),
             'keyHint'      => Catalog::systemKey() !== '' ? '…' . substr(Catalog::systemKey(), -4) : null,
             'tgdbShared'   => Settings::bool($db, 'tgdb_shared'),
+            'captchaSite'  => Recaptcha::siteKey(),
+            'captchaOk'    => Recaptcha::configured(),
             'userKeys'     => (int)$db->value('SELECT COUNT(*) FROM {users} WHERE tgdb_api_key IS NOT NULL'),
         ]);
+    }
+
+    /** reCAPTCHA-Schlüssel speichern, prüfen oder entfernen. */
+    public function recaptcha(): void
+    {
+        if (!is_post()) {
+            redirect('admin/settings');
+        }
+        $db = App::db();
+        $action = input('action', 10);
+        if ($action === 'remove') {
+            Recaptcha::clear();
+            if (Settings::bool($db, 'registration_open')) {
+                Settings::set($db, 'registration_open', '0');
+                flash('warn', 'reCAPTCHA entfernt – die öffentliche Registrierung wurde deshalb geschlossen.');
+            } else {
+                flash('ok', 'reCAPTCHA entfernt.');
+            }
+            redirect('admin/settings');
+        }
+        if ($action === 'save') {
+            $site = trim(input('site_key', 120));
+            $secret = trim(input('secret_key', 120));
+            if ($secret === '' && Recaptcha::secret() !== '') {
+                $secret = Recaptcha::secret(); // nur Website-Schlüssel geändert
+            }
+            if (!Recaptcha::validKey($site) || !Recaptcha::validKey($secret)) {
+                flash('error', 'Website-Schlüssel und Geheimschlüssel sehen ungültig aus.');
+                redirect('admin/settings');
+            }
+            Recaptcha::save($site, $secret);
+        }
+        $result = Recaptcha::checkSecret();
+        $prefix = $action === 'save' ? 'reCAPTCHA gespeichert. ' : '';
+        flash($result['ok'] ? 'ok' : ($action === 'save' ? 'warn' : 'error'), $prefix . $result['message']);
+        redirect('admin/settings');
     }
 
     /** TheGamesDB-API-Key speichern, entfernen oder testen. */
