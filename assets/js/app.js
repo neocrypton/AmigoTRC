@@ -163,31 +163,82 @@
     $('[data-picker-clear]', root).addEventListener('click', function () { unlink(); input.focus(); });
   });
 
-  /* ---------- Foto-Auswahl mit Vorschau + Beschreibung ---------- */
+  /* ---------- Foto-Auswahl: Fotos sammeln, Vorschau + Beschreibung ----------
+     Browser ersetzen bei jeder neuen Auswahl den Inhalt eines Datei-Felds. Darum
+     merken wir uns alle gewählten/aufgenommenen Fotos selbst und übergeben sie
+     erst beim Speichern gesammelt an das Formular. */
+  var canDT = (function () { try { return !!new DataTransfer().items; } catch (e) { return false; } })();
+
   $$('[data-photo-input]').forEach(function (input) {
+    var form = input.form;
     var preview = $('[data-photo-preview]', input.parentNode);
     var zone = input.parentNode.querySelector('.dropzone');
-    function show() {
-      preview.textContent = '';
-      Array.prototype.forEach.call(input.files, function (file, i) {
-        var li = el('li');
-        var img = el('img');
-        img.alt = '';
-        if (window.URL && URL.createObjectURL) img.src = URL.createObjectURL(file);
-        li.appendChild(img);
-        var box = el('div', 'photo-edit-fields');
-        box.appendChild(el('small', 'muted', file.name + ' · ' + (file.size / 1048576).toFixed(1) + ' MB'));
-        var cap = el('input');
-        cap.name = 'new_captions[' + i + ']';
-        cap.maxLength = 500;
-        cap.placeholder = 'Beschreibung zum Foto';
-        cap.setAttribute('aria-label', 'Beschreibung für ' + file.name);
-        box.appendChild(cap);
-        li.appendChild(box);
-        preview.appendChild(li);
-      });
+    var zoneText = zone ? $('[data-dropzone-text]', zone) : null;
+    var maxFiles = parseInt(input.getAttribute('data-max-files'), 10) || 20;
+    var status = $('[data-upload-status]', form);
+    var pending = [];
+
+    function fileItem(file) {
+      var li = el('li');
+      var img = el('img');
+      img.alt = '';
+      if (window.URL && URL.createObjectURL) img.src = URL.createObjectURL(file);
+      li.appendChild(img);
+      var box = el('div', 'photo-edit-fields');
+      box.appendChild(el('small', 'muted', file.name + ' · ' + (file.size / 1048576).toFixed(1) + ' MB'));
+      var cap = el('input');
+      cap.name = 'new_captions[]';
+      cap.maxLength = 500;
+      cap.placeholder = 'Beschreibung zum Foto';
+      cap.setAttribute('aria-label', 'Beschreibung für ' + file.name);
+      box.appendChild(cap);
+      li.appendChild(box);
+      return li;
     }
-    input.addEventListener('change', show);
+
+    function updateUi() {
+      if (zoneText) zoneText.textContent = pending.length ? 'Weiteres Foto hinzufügen' : 'Fotos auswählen oder aufnehmen';
+      if (status) status.textContent = pending.length ? pending.length + ' neue(s) Foto(s) – wird beim Speichern hochgeladen' : '';
+    }
+
+    if (!canDT) {
+      // Sehr alte Browser: Auswahl ersetzt die vorherige (Standardverhalten).
+      input.addEventListener('change', function () {
+        preview.textContent = '';
+        Array.prototype.forEach.call(input.files, function (f) { preview.appendChild(fileItem(f)); });
+      });
+      return;
+    }
+
+    input.removeAttribute('name'); // Dateien werden beim Speichern gesammelt übergeben
+    input.setAttribute('data-photo-collector', '');
+
+    function add(files) {
+      Array.prototype.forEach.call(files, function (file) {
+        if (!/^image\//.test(file.type)) return;
+        if (pending.length >= maxFiles) {
+          if (status) status.textContent = 'Maximal ' + maxFiles + ' Fotos pro Speichern – bitte zuerst speichern.';
+          return;
+        }
+        var entry = { file: file, li: fileItem(file) };
+        var rm = el('button', 'btn btn-sm btn-ghost photo-remove', '✕');
+        rm.type = 'button';
+        rm.title = 'Foto entfernen';
+        rm.setAttribute('aria-label', 'Foto ' + file.name + ' entfernen');
+        rm.addEventListener('click', function () {
+          pending.splice(pending.indexOf(entry), 1);
+          preview.removeChild(entry.li);
+          updateUi();
+        });
+        entry.li.appendChild(rm);
+        pending.push(entry);
+        preview.appendChild(entry.li);
+      });
+      input.value = ''; // gleiche Datei/Kamera erneut auswählbar
+      updateUi();
+    }
+
+    input.addEventListener('change', function () { add(input.files); });
     if (zone) {
       ['dragenter', 'dragover'].forEach(function (ev) {
         zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.add('is-over'); });
@@ -197,12 +248,32 @@
       });
       zone.addEventListener('drop', function (e) {
         e.preventDefault();
-        if (e.dataTransfer && e.dataTransfer.files.length) { input.files = e.dataTransfer.files; show(); }
+        if (e.dataTransfer && e.dataTransfer.files.length) add(e.dataTransfer.files);
       });
     }
+
+    /* Beim Speichern: Fotos verkleinern (spart bei EDGE/3G Minuten) und gesammelt anhängen. */
+    var busy = false;
+    form.addEventListener('submit', function (e) {
+      if (e.defaultPrevented || busy || !pending.length) return;
+      e.preventDefault();
+      busy = true;
+      var btn = $('button[type=submit]', form);
+      if (btn) btn.disabled = true;
+      if (status) status.textContent = 'Fotos werden verkleinert…';
+      Promise.all(pending.map(function (p) { return shrink(p.file); })).then(function (files) {
+        var dt = new DataTransfer();
+        files.forEach(function (f) { dt.items.add(f); });
+        input.files = dt.files;
+        input.name = 'photos[]';
+        var total = files.reduce(function (sum, f) { return sum + f.size; }, 0);
+        if (status) status.textContent = 'Lade hoch (' + (total / 1048576).toFixed(1) + ' MB)…';
+        HTMLFormElement.prototype.submit.call(form);
+      });
+    });
   });
 
-  /* ---------- Fotos vor dem Upload verkleinern (spart bei EDGE/3G Minuten) ---------- */
+  /* ---------- Fotos vor dem Upload verkleinern ---------- */
   var MAX_EDGE = 2000, QUALITY = 0.85, MIN_BYTES = 900 * 1024;
 
   function shrink(file) {
@@ -227,31 +298,6 @@
       });
     }).catch(function () { return file; });
   }
-
-  $$('form[data-resize-images]').forEach(function (form) {
-    var busy = false;
-    form.addEventListener('submit', function (e) {
-      if (e.defaultPrevented || busy) return;
-      var input = $('[data-photo-input]', form);
-      var status = $('[data-upload-status]', form);
-      if (!input || !input.files.length || typeof DataTransfer === 'undefined') return;
-      e.preventDefault();
-      busy = true;
-      var btn = $('button[type=submit]', form);
-      if (btn) btn.disabled = true;
-      if (status) status.textContent = 'Fotos werden verkleinert…';
-      Promise.all(Array.prototype.map.call(input.files, shrink)).then(function (files) {
-        try {
-          var dt = new DataTransfer();
-          files.forEach(function (f) { dt.items.add(f); });
-          input.files = dt.files;
-        } catch (err) { /* Original-Dateien senden */ }
-        var total = files.reduce(function (s, f) { return s + f.size; }, 0);
-        if (status) status.textContent = 'Lade hoch (' + (total / 1048576).toFixed(1) + ' MB)…';
-        HTMLFormElement.prototype.submit.call(form);
-      });
-    });
-  });
 
   /* ---------- QR-Code für 2FA ---------- */
   $$('[data-qr]').forEach(function (box) {

@@ -17,7 +17,7 @@ $int = static fn (string $k) => isset($item[$k]) && $item[$k] !== null && $item[
     <?php if (!empty($item['id'])): ?><a class="btn btn-ghost" href="<?= e(url('item', ['id' => $item['id']])) ?>">Abbrechen</a><?php endif; ?>
 </div>
 
-<form method="post" action="<?= e(url('item/edit')) ?>" enctype="multipart/form-data" class="form" data-resize-images>
+<form method="post" action="<?= e(url('item/edit')) ?>" enctype="multipart/form-data" class="form">
     <?= csrf_field() ?>
     <?php if (!empty($item['id'])): ?><input type="hidden" name="id" value="<?= (int)$item['id'] ?>"><?php endif; ?>
 
@@ -90,10 +90,10 @@ $int = static fn (string $k) => isset($item[$k]) && $item[$k] !== null && $item[
         <div class="field">
             <label for="f-photos" class="dropzone">
                 <span class="dropzone-icon" aria-hidden="true">📷</span>
-                <span>Fotos auswählen oder aufnehmen</span>
-                <small class="muted">JPEG/PNG/WebP · max. <?= (int)$maxUpload['file'] ?> MB je Bild · bis <?= (int)$maxUpload['files'] ?> Bilder pro Speichern.<br>Große Fotos werden vor dem Hochladen automatisch verkleinert.</small>
+                <span data-dropzone-text>Fotos auswählen oder aufnehmen</span>
+                <small class="muted">JPEG/PNG/WebP · max. <?= (int)$maxUpload['file'] ?> MB je Bild · bis <?= (int)$maxUpload['files'] ?> Bilder pro Speichern.<br>Mehrere Fotos nacheinander aufnehmen, dann einmal speichern. Große Fotos werden vor dem Hochladen automatisch verkleinert.</small>
             </label>
-            <input id="f-photos" type="file" name="photos[]" accept="image/jpeg,image/png,image/webp,image/gif" multiple class="file-input" data-photo-input>
+            <input id="f-photos" type="file" name="photos[]" accept="image/jpeg,image/png,image/webp,image/gif" multiple class="file-input" data-photo-input data-max-files="<?= max(1, (int)$maxUpload['files']) ?>">
             <ul class="photo-new" data-photo-preview></ul>
             <noscript><p class="hint">Bildbeschreibungen können nach dem Speichern ergänzt werden.</p></noscript>
         </div>
