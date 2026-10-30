@@ -58,6 +58,7 @@ auf dem Tablet und auf dem Smartphone.
 - Fotos werden **im Browser vor dem Hochladen verkleinert** (aus 5 MB werden
   ~300 KB) und vom Server zusätzlich als progressive JPEGs mit Vorschaubildern
   gespeichert; Vollbilder laden erst beim Öffnen
+- Cover werden lokal zwischengespeichert und in passender Größe ausgeliefert
 - Listenansicht ganz ohne Bilder
 - Alles funktioniert auch ohne JavaScript (dann ohne Live-Suche)
 
@@ -125,6 +126,13 @@ testen“ und „Entfernen“). Alle Keys werden verschlüsselt in der Datenbank
 gespeichert und verlassen nie den Server. Der System-Key kann alternativ als
 Rückfallwert in `config/config.php` unter `tgdb_api_key` stehen (ein im
 Adminbereich gesetzter Key hat Vorrang).
+
+**Cover und Plattform-Icons** lädt der Server beim ersten Abruf einmal vom
+TheGamesDB-CDN, rechnet sie neu und speichert sie unter `data/covers/`. Danach
+liefert er sie selbst aus: Die Browser der Nutzer kontaktieren keinen fremden
+Server, und fehlt auf dem CDN eine kleine Bildvariante, wird automatisch eine
+größere verkleinert. Dafür muss dein Server `cdn.thegamesdb.net` erreichen
+können (bei normalem Webhosting der Fall).
 
 Alle Antworten werden für alle Nutzer gemeinsam zwischengespeichert (Suche
 1 Tag, Spiele und Plattformen 7 Tage, Listen 30 Tage), um die Kontingente zu

@@ -50,6 +50,7 @@ $routes = [
     'u/item'            => [C\CommunityController::class, 'item', 'auth'],
     'u/plays'           => [C\CommunityController::class, 'plays', 'auth'],
 
+    'cover'             => [C\CoverController::class, 'show', 'auth'],
     'api/games'         => [C\ApiController::class, 'games', 'auth'],
     'export'            => [C\AccountController::class, 'export', 'auth'],
 
@@ -117,7 +118,7 @@ if ($user && !(int)$user['totp_enabled'] && Settings::bool(App::db(), 'require_2
 }
 
 // HTML komprimiert ausliefern – spart bei langsamen Verbindungen (EDGE/3G) viel Zeit.
-if (!in_array($route, ['photo', 'export'], true) && extension_loaded('zlib') && !ini_get('zlib.output_compression')) {
+if (!in_array($route, ['photo', 'cover', 'export'], true) && extension_loaded('zlib') && !ini_get('zlib.output_compression')) {
     ob_start('ob_gzhandler');
 }
 

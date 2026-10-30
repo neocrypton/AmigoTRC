@@ -86,7 +86,7 @@ final class App
     {
         $csp = implode('; ', [
             "default-src 'self'",
-            "img-src 'self' data: blob: https://cdn.thegamesdb.net",
+            "img-src 'self' data: blob:",
             "script-src 'self'",
             "style-src 'self'",
             "font-src 'self'",

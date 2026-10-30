@@ -70,7 +70,7 @@ final class ApiController
                         'platform'    => $p['name'] ?? ('TGDB #' . $g['platform_tgdb_id']),
                         'platform_id' => $p ? (int)$p['id'] : null,
                         'year'        => $g['release_date'] ? substr($g['release_date'], 0, 4) : null,
-                        'thumb'       => $g['boxart_thumb'],
+                        'thumb'       => tgdb_image($g['boxart_thumb']),
                     ];
                     if (count($results) >= 30) {
                         break;

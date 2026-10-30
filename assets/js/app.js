@@ -37,6 +37,12 @@
     if (e.target.closest('[data-print]')) window.print();
   });
 
+  /* ---------- Fehlende Cover still ausblenden statt kaputtem Bild-Symbol ---------- */
+  document.addEventListener('error', function (e) {
+    var img = e.target;
+    if (img && img.tagName === 'IMG' && img.src.indexOf('r=cover') >= 0) img.classList.add('img-missing');
+  }, true);
+
   /* ---------- Sicherheitsabfragen ---------- */
   document.addEventListener('submit', function (e) {
     var form = e.target;
@@ -73,7 +79,7 @@
     var statusDefault = status ? status.textContent : '';
 
     function safeThumb(url) {
-      return typeof url === 'string' && url.indexOf('https://cdn.thegamesdb.net/') === 0 ? url : null;
+      return typeof url === 'string' && url.indexOf('index.php?r=cover&') === 0 ? url : null;
     }
     function close() { list.hidden = true; active = -1; input.setAttribute('aria-expanded', 'false'); }
     function unlink() {

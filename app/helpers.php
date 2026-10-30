@@ -193,12 +193,11 @@ function checked(bool $on): string
     return $on ? ' checked' : '';
 }
 
-function tgdb_image(?string $path): ?string
+/** Cover-URL von TheGamesDB → lokale, gecachte Auslieferung über den eigenen Server. */
+function tgdb_image(?string $url): ?string
 {
-    if (!$path) {
-        return null;
-    }
-    return str_starts_with($path, 'https://cdn.thegamesdb.net/') ? $path : null;
+    $path = \Amigo\Service\CoverCache::pathFromUrl($url);
+    return $path === null ? null : url('cover', ['p' => $path]);
 }
 
 function platform_icon(?string $icon): ?string
@@ -206,7 +205,7 @@ function platform_icon(?string $icon): ?string
     if (!$icon || !preg_match('/^[a-zA-Z0-9._-]+$/', $icon)) {
         return null;
     }
-    return 'https://cdn.thegamesdb.net/images/original/consoles/png48/' . $icon;
+    return url('cover', ['p' => 'original/consoles/png48/' . $icon]);
 }
 
 /**

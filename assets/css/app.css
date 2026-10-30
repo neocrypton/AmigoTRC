@@ -115,6 +115,7 @@ body::after {
 a { color: var(--neon); text-decoration-thickness: 2px; text-underline-offset: 3px; }
 a:hover { color: var(--accent); }
 img { max-width: 100%; height: auto; }
+img.img-missing { visibility: hidden; }
 code { font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace; }
 :focus-visible { outline: 3px dashed var(--accent); outline-offset: 2px; }
 [id] { scroll-margin-top: 84px; }
