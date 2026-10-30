@@ -4,6 +4,8 @@
 </div>
 
 <nav class="menu-grid" aria-label="Bereiche">
+    <a href="<?= e(url('community')) ?>">👾<span>Community</span></a>
+    <a href="<?= e(url('u', ['name' => $user['username']])) ?>">🪪<span>Mein Profil</span></a>
     <a href="<?= e(url('platforms')) ?>">🕹<span>Plattformen</span></a>
     <a href="<?= e(url('export', ['type' => 'collection'])) ?>">⤓<span>Sammlung als CSV</span></a>
     <a href="<?= e(url('export', ['type' => 'plays'])) ?>">⤓<span>Durchgespielt als CSV</span></a>
@@ -57,6 +59,48 @@
             <p><span class="cond cond-1">AUS</span> Mit 2FA brauchst du beim Login zusätzlich einen Code aus einer App wie Aegis, 2FAS, Bitwarden oder Google Authenticator.</p>
             <a class="btn btn-primary" href="<?= e(url('account/2fa')) ?>">🔐 2FA einrichten</a>
         <?php endif; ?>
+    </section>
+</div>
+
+<div class="cols">
+    <section class="panel" id="sichtbarkeit">
+        <h2 class="panel-title">Sichtbarkeit</h2>
+        <p>Andere angemeldete Nutzer sehen dich in der <a href="<?= e(url('community')) ?>">Community</a>. Was sie von dir ansehen dürfen, legst du hier fest:</p>
+        <form method="post" action="<?= e(url('account/privacy')) ?>">
+            <?= csrf_field() ?>
+            <label class="check"><input type="checkbox" name="collection_public" value="1"<?= checked((int)$user['collection_public'] === 1) ?>> Meine Sammlung ist öffentlich</label>
+            <label class="check"><input type="checkbox" name="plays_public" value="1"<?= checked((int)$user['plays_public'] === 1) ?>> Meine Durchgespielt-Liste ist öffentlich</label>
+            <p class="hint">Kaufpreis, Kaufdatum, Händler und Notizen bleiben immer privat. Nicht angemeldete Besucher sehen nichts.</p>
+            <button class="btn" type="submit">Speichern</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2 class="panel-title">TheGamesDB-API-Key</h2>
+        <p>
+            <?php if ($keySource === 'user'): ?>
+                <span class="cond cond-5">EIGENER KEY</span> <code><?= e($keyHint) ?></code><?= $user['tgdb_allowance'] !== null ? ' · Restkontingent: ' . (int)$user['tgdb_allowance'] : '' ?>
+            <?php elseif ($keySource === 'system'): ?>
+                <span class="cond cond-4">SYSTEM-KEY</span> Du nutzt den Key des Systems mit. Mit einem eigenen Key hast du dein eigenes Kontingent.
+            <?php else: ?>
+                <span class="cond cond-1">KEIN KEY</span> Ohne Key gibt es keine neuen Vorschläge aus TheGamesDB – bereits importierte Spiele und Plattformen kannst du trotzdem auswählen.
+            <?php endif; ?>
+        </p>
+        <form method="post" action="<?= e(url('account/tgdb')) ?>">
+            <?= csrf_field() ?>
+            <div class="field">
+                <label for="u-tgdb"><?= $keySource === 'user' ? 'Neuen Key setzen' : 'Eigener API-Key' ?></label>
+                <input id="u-tgdb" name="tgdb_api_key" type="password" autocomplete="off" spellcheck="false" maxlength="200" placeholder="Key einfügen">
+                <p class="hint">Kostenlos über das <a href="https://forums.thegamesdb.net/" target="_blank" rel="noopener noreferrer">TheGamesDB-Forum</a>. Wird verschlüsselt gespeichert und nur für deine eigenen Suchen genutzt.</p>
+            </div>
+            <div class="btnrow">
+                <button class="btn btn-primary" type="submit" name="action" value="save">Speichern &amp; testen</button>
+                <?php if ($keySource === 'user'): ?>
+                <button class="btn" type="submit" name="action" value="test">Testen</button>
+                <button class="btn btn-danger" type="submit" name="action" value="remove" data-confirm="Deinen API-Key entfernen?">Entfernen</button>
+                <?php endif; ?>
+            </div>
+        </form>
     </section>
 </div>
 

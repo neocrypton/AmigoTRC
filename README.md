@@ -31,8 +31,14 @@ auf dem Tablet und auf dem Smartphone.
 - Plattformen werden außerdem automatisch angelegt, wenn ein Spiel gewählt wird
 - Eigene Plattformen für Exoten, die TheGamesDB nicht kennt
 
-**Benutzer**
-- Mehrere Benutzer, jeder sieht nur seine eigene Sammlung
+**Benutzer & Community**
+- Mehrere Benutzer, jeder pflegt seine eigene Sammlung und Durchgespielt-Liste
+- Community-Seite mit allen registrierten Spielern und Profilseiten
+- Sammlung und Durchgespielt-Liste können getrennt als **öffentlich** markiert
+  werden (Standard: privat); dann dürfen andere angemeldete Nutzer sie ansehen –
+  nur lesend. Kaufpreis, Kaufdatum, Händler und Notizen bleiben immer privat,
+  nicht angemeldete Besucher sehen nichts
+- Eigener TheGamesDB-API-Key pro Nutzer (unter *Mein Konto*)
 - Zwei-Faktor-Anmeldung (TOTP, z. B. Aegis, 2FAS, Bitwarden, Google/Microsoft
   Authenticator) mit QR-Code und 10 Einmal-Recovery-Codes
 - Admin: Benutzer anlegen/sperren/löschen, 2FA zurücksetzen, Registrierung
@@ -101,15 +107,29 @@ Datenbanken enthält.
 
 ### TheGamesDB-API-Key
 
-Ohne Key funktioniert alles, nur ohne Vorschläge und Plattform-Import.
+Jeder Nutzer kann unter **Mein Konto** seinen eigenen Key hinterlegen; seine
+Suchen laufen dann über sein eigenes Kontingent. Plattformen und Spieldaten, die
+einmal importiert wurden, bilden einen **gemeinsamen Katalog**, den alle Nutzer
+auch ohne Key durchsuchen und verwenden können.
+
+Zusätzlich gibt es einen **System-Key** (Admin › System), den Admins und der
+Plattform-Import nutzen. Per Häkchen kann der Admin erlauben, dass Nutzer ohne
+eigenen Key den System-Key mitbenutzen (Standard: aus).
+
+Ohne jeden Key funktioniert alles, nur ohne neue Vorschläge und Plattform-Import.
+
 Einen kostenlosen Key bekommst du über das
-[TheGamesDB-Forum](https://forums.thegamesdb.net/). Eintragen im Installer oder
-jederzeit unter **Admin › System** (dort auch „Verbindung testen“ und
-„Entfernen“). Der Key wird verschlüsselt in der Datenbank gespeichert und bleibt
-auf dem Server; alternativ kann er als Rückfallwert in `config/config.php` unter
-`tgdb_api_key` stehen (ein im Adminbereich gesetzter Key hat Vorrang). alle Antworten werden zwischengespeichert (Suche 1 Tag, Spiele und
-Plattformen 7 Tage, Listen 30 Tage), um das Monatskontingent zu schonen. Das
-Restkontingent steht unter **Admin › System**.
+[TheGamesDB-Forum](https://forums.thegamesdb.net/). Den System-Key trägst du im
+Installer oder jederzeit unter **Admin › System** ein (dort auch „Verbindung
+testen“ und „Entfernen“). Alle Keys werden verschlüsselt in der Datenbank
+gespeichert und verlassen nie den Server. Der System-Key kann alternativ als
+Rückfallwert in `config/config.php` unter `tgdb_api_key` stehen (ein im
+Adminbereich gesetzter Key hat Vorrang).
+
+Alle Antworten werden für alle Nutzer gemeinsam zwischengespeichert (Suche
+1 Tag, Spiele und Plattformen 7 Tage, Listen 30 Tage), um die Kontingente zu
+schonen. Das Restkontingent des System-Keys steht unter **Admin › System**, das
+des eigenen Keys unter **Mein Konto**.
 
 ### nginx
 
@@ -142,7 +162,9 @@ location ~ \.(md|sqlite|log|lock)$ { deny all; }
   wird neu berechnet (entfernt EXIF/GPS-Standortdaten und eingeschmuggelten
   Code), zufällige Dateinamen, Ablage außerhalb des Webroots, Auslieferung nur
   an den Besitzer
-- **Zugriffsrechte:** jede Abfrage ist auf den angemeldeten Benutzer beschränkt
+- **Zugriffsrechte:** jede Abfrage ist auf den angemeldeten Benutzer beschränkt;
+  fremde Sammlungen nur lesend und nur bei Freigabe, private Felder werden
+  serverseitig entfernt (nicht nur ausgeblendet)
 - **Header:** HSTS, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy
 - **CSV-Export** mit Schutz gegen Formel-Injection
 - Fehlerdetails nur im Log (`data/logs`), nie im Browser

@@ -1,15 +1,26 @@
 <?php
 use Amigo\Core\Options;
 
-$params = array_filter(['q' => $filter['q'], 'platform' => $filter['platform'], 'kind' => $filter['kind'], 'sort' => $filter['sort'] !== 'title' ? $filter['sort'] : null, 'view' => $filter['view'] === 'list' ? 'list' : null]);
+$owner ??= null;
+$listRoute = $owner ? 'u/collection' : 'collection';
+$itemUrl = static fn (int $id) => $owner ? url('u/item', ['name' => $owner['username'], 'id' => $id]) : url('item', ['id' => $id]);
+$params = ($owner ? ['name' => $owner['username']] : []) + array_filter(['q' => $filter['q'], 'platform' => $filter['platform'], 'kind' => $filter['kind'], 'sort' => $filter['sort'] !== 'title' ? $filter['sort'] : null, 'view' => $filter['view'] === 'list' ? 'list' : null]);
 ?>
 <div class="pagehead">
+    <?php if ($owner): ?>
+    <div>
+        <p class="crumbs"><a href="<?= e(url('community')) ?>">Community</a> › <a href="<?= e(url('u', ['name' => $owner['username']])) ?>"><?= e($owner['username']) ?></a></p>
+        <h1 class="h1">Sammlung von <?= e($owner['username']) ?> <span class="count"><?= fmt_num($total) ?></span></h1>
+    </div>
+    <?php else: ?>
     <h1 class="h1">Sammlung <span class="count"><?= fmt_num($total) ?></span></h1>
     <a class="btn btn-primary" href="<?= e(url('item/edit', ['platform' => $filter['platform'], 'kind' => $filter['kind']])) ?>">+ Neuer Eintrag</a>
+    <?php endif; ?>
 </div>
 
 <form class="filters" method="get" action="index.php" role="search">
-    <input type="hidden" name="r" value="collection">
+    <input type="hidden" name="r" value="<?= e($listRoute) ?>">
+    <?php if ($owner): ?><input type="hidden" name="name" value="<?= e($owner['username']) ?>"><?php endif; ?>
     <input type="search" name="q" value="<?= e($filter['q']) ?>" placeholder="Suchen…" aria-label="Suchbegriff">
     <select name="platform" aria-label="Plattform">
         <option value="">Alle Plattformen</option>
@@ -38,8 +49,8 @@ $params = array_filter(['q' => $filter['q'], 'platform' => $filter['platform'], 
 <?php if (!$items): ?>
     <div class="panel empty-state">
         <p class="logo-type">NO DATA</p>
-        <p><?= $filter['q'] || $filter['platform'] || $filter['kind'] ? 'Keine Treffer für diesen Filter.' : 'Deine Sammlung ist noch leer.' ?></p>
-        <a class="btn btn-primary" href="<?= e(url('item/edit')) ?>">+ Ersten Eintrag anlegen</a>
+        <p><?= $filter['q'] || $filter['platform'] || $filter['kind'] ? 'Keine Treffer für diesen Filter.' : ($owner ? 'Diese Sammlung ist noch leer.' : 'Deine Sammlung ist noch leer.') ?></p>
+        <?php if (!$owner): ?><a class="btn btn-primary" href="<?= e(url('item/edit')) ?>">+ Ersten Eintrag anlegen</a><?php endif; ?>
     </div>
 <?php elseif ($filter['view'] === 'list'): ?>
     <div class="tablewrap">
@@ -48,7 +59,7 @@ $params = array_filter(['q' => $filter['q'], 'platform' => $filter['platform'], 
         <tbody>
         <?php foreach ($items as $it): ?>
             <tr>
-                <td data-label="Titel"><a href="<?= e(url('item', ['id' => $it['id']])) ?>"><?= e($it['title']) ?></a><?= $it['photo_count'] ? ' <small class="muted">📷' . (int)$it['photo_count'] . '</small>' : '' ?></td>
+                <td data-label="Titel"><a href="<?= e($itemUrl((int)$it['id'])) ?>"><?= e($it['title']) ?></a><?= $it['photo_count'] ? ' <small class="muted">📷' . (int)$it['photo_count'] . '</small>' : '' ?></td>
                 <td data-label="Plattform"><?= e($it['platform_name'] ?? '–') ?></td>
                 <td data-label="Region"><?= e($it['region'] ?? '') ?></td>
                 <td data-label="Zustand"><?= $it['cond_overall'] !== null ? cond_badge((int)$it['cond_overall']) : '' ?></td>
@@ -62,7 +73,7 @@ $params = array_filter(['q' => $filter['q'], 'platform' => $filter['platform'], 
     <ul class="carts">
         <?php foreach ($items as $it): ?>
         <li class="cart">
-            <a href="<?= e(url('item', ['id' => $it['id']])) ?>">
+            <a href="<?= e($itemUrl((int)$it['id'])) ?>">
                 <span class="cart-label">
                     <?php if ($it['photo_id']): ?>
                         <img src="<?= e(url('photo', ['id' => $it['photo_id'], 's' => 't'])) ?>" alt="" loading="lazy" decoding="async">
@@ -82,4 +93,4 @@ $params = array_filter(['q' => $filter['q'], 'platform' => $filter['platform'], 
     </ul>
 <?php endif; ?>
 
-<?php $route = 'collection'; require __DIR__ . '/../partials/pager.php'; ?>
+<?php $route = $listRoute; require __DIR__ . '/../partials/pager.php'; ?>

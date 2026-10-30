@@ -9,6 +9,7 @@ use Amigo\Core\Database;
 use Amigo\Core\Settings;
 use Amigo\Core\View;
 use Amigo\Service\Catalog;
+use Amigo\Service\TheGamesDb;
 
 final class AdminController
 {
@@ -112,7 +113,7 @@ final class AdminController
             'Upload-Limit'          => [ini_get('upload_max_filesize') . ' / POST ' . ini_get('post_max_size'), true],
             'WebP-Unterstützung'    => [function_exists('imagecreatefromwebp') ? 'ja' : 'nein', function_exists('imagecreatefromwebp')],
             'Verschlüsselung'       => [function_exists('sodium_crypto_secretbox') ? 'libsodium' : 'OpenSSL', true],
-            'TheGamesDB'            => [Catalog::tgdb()->enabled() ? 'API-Key gesetzt' : 'kein API-Key', Catalog::tgdb()->enabled()],
+            'TheGamesDB (System)'   => [Catalog::systemKey() !== '' ? 'API-Key gesetzt' : 'kein API-Key', true],
             'TGDB-Kontingent'       => [Settings::get($db, 'tgdb_allowance') ?? 'unbekannt', true],
             'Datenverzeichnis'      => [App::dataDir(), is_writable(App::dataDir())],
         ];
@@ -135,8 +136,10 @@ final class AdminController
             'checks'       => $checks,
             'counts'       => $counts,
             'probe'        => probe_path(),
-            'keySource'    => Catalog::apiKeySource(),
-            'keyHint'      => Catalog::apiKey() !== '' ? '…' . substr(Catalog::apiKey(), -4) : null,
+            'keySource'    => Catalog::systemKeySource(),
+            'keyHint'      => Catalog::systemKey() !== '' ? '…' . substr(Catalog::systemKey(), -4) : null,
+            'tgdbShared'   => Settings::bool($db, 'tgdb_shared'),
+            'userKeys'     => (int)$db->value('SELECT COUNT(*) FROM {users} WHERE tgdb_api_key IS NOT NULL'),
         ]);
     }
 
@@ -148,8 +151,8 @@ final class AdminController
         }
         $action = input('action', 10);
         if ($action === 'remove') {
-            Catalog::saveApiKey(null);
-            flash('ok', Catalog::apiKeySource() === 'config'
+            Catalog::saveSystemKey(null);
+            flash('ok', Catalog::systemKeySource() === 'config'
                 ? 'Key aus dem Adminbereich entfernt – es gilt jetzt wieder der Key aus config/config.php.'
                 : 'API-Key entfernt. Die TheGamesDB-Funktionen sind deaktiviert.');
             redirect('admin/settings');
@@ -160,9 +163,16 @@ final class AdminController
                 flash('error', 'Der API-Key sieht ungültig aus (nur Buchstaben und Ziffern, 16–128 Zeichen).');
                 redirect('admin/settings');
             }
-            Catalog::saveApiKey($key);
+            Catalog::saveSystemKey($key);
         }
-        $result = Catalog::tgdb()->ping();
+        if ($action === 'shared') {
+            Settings::set(App::db(), 'tgdb_shared', isset($_POST['tgdb_shared']) ? '1' : '0');
+            flash('ok', isset($_POST['tgdb_shared'])
+                ? 'Nutzer ohne eigenen Key dürfen jetzt den System-Key mitnutzen.'
+                : 'Nutzer brauchen jetzt einen eigenen API-Key für TheGamesDB.');
+            redirect('admin/settings');
+        }
+        $result = (new TheGamesDb(Catalog::systemKey(), App::db()))->ping();
         if ($action === 'save') {
             flash($result['ok'] ? 'ok' : 'warn', 'API-Key gespeichert. ' . ($result['ok'] ? $result['message'] : 'Test fehlgeschlagen: ' . $result['message']));
         } else {

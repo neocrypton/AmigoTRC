@@ -25,22 +25,37 @@ final class CollectionController
 
     public function index(): void
     {
+        self::renderList(Auth::user(), false);
+    }
+
+    /**
+     * Sammlungsliste eines Besitzers. Bei fremden (öffentlichen) Sammlungen wird
+     * nicht in privaten Feldern gesucht und nicht nach Preis sortiert.
+     */
+    public static function renderList(array $owner, bool $foreign): void
+    {
         $db = App::db();
+        $sorts = $foreign ? array_diff_key(self::SORTS, ['price' => 1]) : self::SORTS;
         $filter = [
             'q'        => query('q', 100),
             'platform' => query_int('platform', 1),
             'kind'     => input_enum('kind', Options::KINDS, $_GET),
-            'sort'     => input_enum('sort', self::SORTS, $_GET) ?? 'title',
+            'sort'     => input_enum('sort', $sorts, $_GET) ?? 'title',
             'view'     => query('view', 4) === 'list' ? 'list' : 'grid',
         ];
         $page = query_int('page', 1, 100000) ?? 1;
 
         $where = ['i.user_id = ?'];
-        $params = [Auth::id()];
+        $params = [(int)$owner['id']];
         if ($filter['q'] !== '') {
-            $where[] = "(i.title LIKE ? ESCAPE '!' OR i.notes LIKE ? ESCAPE '!' OR p.name LIKE ? ESCAPE '!')";
             $like = Database::like($filter['q']);
-            array_push($params, $like, $like, $like);
+            if ($foreign) {
+                $where[] = "(i.title LIKE ? ESCAPE '!' OR p.name LIKE ? ESCAPE '!')";
+                array_push($params, $like, $like);
+            } else {
+                $where[] = "(i.title LIKE ? ESCAPE '!' OR i.notes LIKE ? ESCAPE '!' OR p.name LIKE ? ESCAPE '!')";
+                array_push($params, $like, $like, $like);
+            }
         }
         if ($filter['platform']) {
             $where[] = 'i.platform_id = ?';
@@ -65,33 +80,47 @@ final class CollectionController
             [...$params, self::PER_PAGE, ($page - 1) * self::PER_PAGE]
         );
 
+        $sortLabels = ['title' => 'Titel A–Z', 'new' => 'Neueste zuerst', 'platform' => 'Plattform', 'price' => 'Kaufpreis'];
         View::render('collection/index', [
-            'title'     => 'Sammlung',
-            'nav'       => 'collection',
+            'title'     => $foreign ? 'Sammlung von ' . $owner['username'] : 'Sammlung',
+            'nav'       => $foreign ? 'community' : 'collection',
+            'owner'     => $foreign ? $owner : null,
             'items'     => $items,
             'filter'    => $filter,
             'page'      => $page,
             'pages'     => $pages,
             'total'     => $total,
             'platforms' => Catalog::platforms(),
-            'sorts'     => ['title' => 'Titel A–Z', 'new' => 'Neueste zuerst', 'platform' => 'Plattform', 'price' => 'Kaufpreis'],
+            'sorts'     => array_intersect_key($sortLabels, $sorts),
         ]);
     }
 
     public function show(): void
     {
-        $item = $this->findOwned(query_int('id', 1));
+        self::renderItem($this->findOwned(query_int('id', 1)), Auth::user(), false);
+    }
+
+    /** Detailseite; bei fremden Einträgen ohne private Felder und ohne Bearbeiten. */
+    public static function renderItem(array $item, array $owner, bool $foreign): void
+    {
         $db = App::db();
+        if ($foreign) {
+            foreach (['purchase_date', 'price_cents', 'purchase_place', 'notes'] as $private) {
+                $item[$private] = null;
+            }
+        }
         $photos = $db->all('SELECT * FROM {photos} WHERE item_id = ? ORDER BY sort, id', [$item['id']]);
         $game = $item['game_id'] ? $db->one('SELECT * FROM {games} WHERE id = ?', [$item['game_id']]) : null;
         $platform = $item['platform_id'] ? $db->one('SELECT * FROM {platforms} WHERE id = ?', [$item['platform_id']]) : null;
         $plays = $item['game_id']
-            ? $db->all('SELECT * FROM {plays} WHERE user_id = ? AND game_id = ? ORDER BY finished_on DESC', [Auth::id(), $item['game_id']])
+            && (!$foreign || (int)$owner['plays_public'] === 1)
+            ? $db->all('SELECT * FROM {plays} WHERE user_id = ? AND game_id = ? ORDER BY finished_on DESC', [(int)$owner['id'], $item['game_id']])
             : [];
 
         View::render('collection/show', [
             'title'    => $item['title'],
-            'nav'      => 'collection',
+            'nav'      => $foreign ? 'community' : 'collection',
+            'owner'    => $foreign ? $owner : null,
             'item'     => $item,
             'photos'   => $photos,
             'game'     => $game,
@@ -169,7 +198,11 @@ final class CollectionController
     public function photo(): void
     {
         $id = query_int('id', 1);
-        $photo = $id ? App::db()->one('SELECT * FROM {photos} WHERE id = ? AND user_id = ?', [$id, Auth::id()]) : null;
+        $photo = $id ? App::db()->one(
+            'SELECT ph.* FROM {photos} ph JOIN {users} u ON u.id = ph.user_id
+             WHERE ph.id = ? AND (ph.user_id = ? OR (u.collection_public = 1 AND u.is_active = 1))',
+            [$id, Auth::id()]
+        ) : null;
         $path = $photo ? ImageStore::path((int)$photo['user_id'], $photo['file'], query('s', 1) === 't') : null;
         if (!$path) {
             http_response_code(404);

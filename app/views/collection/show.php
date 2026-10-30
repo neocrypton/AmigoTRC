@@ -1,26 +1,33 @@
 <?php
 use Amigo\Core\Options;
 
+$owner ??= null;
 $cover = tgdb_image($game['boxart_large'] ?? null) ?? tgdb_image($game['boxart_thumb'] ?? null);
 ?>
 <div class="pagehead">
     <div>
+        <?php if ($owner): ?>
+        <p class="crumbs"><a href="<?= e(url('community')) ?>">Community</a> › <a href="<?= e(url('u', ['name' => $owner['username']])) ?>"><?= e($owner['username']) ?></a> › <a href="<?= e(url('u/collection', ['name' => $owner['username']])) ?>">Sammlung</a></p>
+        <?php else: ?>
         <p class="crumbs"><a href="<?= e(url('collection')) ?>">Sammlung</a><?php if ($platform): ?> › <a href="<?= e(url('collection', ['platform' => $platform['id']])) ?>"><?= e($platform['name']) ?></a><?php endif; ?></p>
+        <?php endif; ?>
         <h1 class="h1"><?= e($item['title']) ?></h1>
     </div>
+    <?php if (!$owner): ?>
     <div class="btnrow">
         <a class="btn btn-primary" href="<?= e(url('item/edit', ['id' => $item['id']])) ?>">✎ Bearbeiten</a>
         <?php if ($item['kind'] === 'game'): ?>
         <a class="btn" href="<?= e(url('play/edit', ['game' => $item['game_id'], 'platform' => $item['platform_id']])) ?>">🏆 Durchgespielt</a>
         <?php endif; ?>
     </div>
+    <?php endif; ?>
 </div>
 
 <div class="detail">
     <section class="panel">
         <h2 class="panel-title">Fotos <span class="count"><?= count($photos) ?></span></h2>
         <?php if (!$photos): ?>
-            <p class="empty">Keine Fotos. <a href="<?= e(url('item/edit', ['id' => $item['id']])) ?>#photos">Fotos hinzufügen</a></p>
+            <p class="empty">Keine Fotos.<?php if (!$owner): ?> <a href="<?= e(url('item/edit', ['id' => $item['id']])) ?>#photos">Fotos hinzufügen</a><?php endif; ?></p>
             <?php if ($cover): ?><img class="cover" src="<?= e($cover) ?>" alt="Cover von <?= e($item['title']) ?> (TheGamesDB)" loading="lazy"><?php endif; ?>
         <?php else: ?>
         <ul class="gallery">
@@ -102,14 +109,16 @@ $cover = tgdb_image($game['boxart_large'] ?? null) ?? tgdb_image($game['boxart_t
     <h2 class="panel-title">Durchgespielt</h2>
     <ul class="minilist">
         <?php foreach ($plays as $pl): ?>
-        <li><a href="<?= e(url('play/edit', ['id' => $pl['id']])) ?>"><span class="noimg">🏆</span><span><strong><?= e(fmt_date($pl['finished_on'])) ?: 'ohne Datum' ?></strong><small><?= e(fmt_playtime($pl['playtime_minutes'] !== null ? (int)$pl['playtime_minutes'] : null)) ?></small></span><?= stars($pl['rating'] !== null ? (int)$pl['rating'] : null, false) ?></a></li>
+        <li><a href="<?= e($owner ? url('u/plays', ['name' => $owner['username']]) : url('play/edit', ['id' => $pl['id']])) ?>"><span class="noimg">🏆</span><span><strong><?= e(fmt_date($pl['finished_on'])) ?: 'ohne Datum' ?></strong><small><?= e(fmt_playtime($pl['playtime_minutes'] !== null ? (int)$pl['playtime_minutes'] : null)) ?></small></span><?= stars($pl['rating'] !== null ? (int)$pl['rating'] : null, false) ?></a></li>
         <?php endforeach; ?>
     </ul>
 </section>
 <?php endif; ?>
 
+<?php if (!$owner): ?>
 <form method="post" action="<?= e(url('item/delete')) ?>" class="danger-zone" data-confirm="Diesen Eintrag inkl. aller Fotos wirklich löschen?">
     <?= csrf_field() ?>
     <input type="hidden" name="id" value="<?= (int)$item['id'] ?>">
     <button class="btn btn-danger btn-sm" type="submit">🗑 Eintrag löschen</button>
 </form>
+<?php endif; ?>

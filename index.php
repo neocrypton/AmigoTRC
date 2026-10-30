@@ -44,11 +44,19 @@ $routes = [
     'platforms'         => [C\PlatformController::class, 'index', 'auth'],
     'platform'          => [C\PlatformController::class, 'show', 'auth'],
 
+    'community'         => [C\CommunityController::class, 'index', 'auth'],
+    'u'                 => [C\CommunityController::class, 'profile', 'auth'],
+    'u/collection'      => [C\CommunityController::class, 'collection', 'auth'],
+    'u/item'            => [C\CommunityController::class, 'item', 'auth'],
+    'u/plays'           => [C\CommunityController::class, 'plays', 'auth'],
+
     'api/games'         => [C\ApiController::class, 'games', 'auth'],
     'export'            => [C\AccountController::class, 'export', 'auth'],
 
     'account'           => [C\AccountController::class, 'index', 'auth'],
     'account/profile'   => [C\AccountController::class, 'profile', 'auth'],
+    'account/privacy'   => [C\AccountController::class, 'privacy', 'auth'],
+    'account/tgdb'      => [C\AccountController::class, 'tgdbKey', 'auth'],
     'account/password'  => [C\AccountController::class, 'password', 'auth'],
     'account/2fa'       => [C\AccountController::class, 'twoFactorSetup', 'auth'],
     'account/2fa/off'   => [C\AccountController::class, 'twoFactorDisable', 'auth'],

@@ -17,7 +17,7 @@ $g = $record['_game'] ?? null;
         <input type="hidden" name="game_id" value="<?= e($record['game_id'] ?? '') ?>" data-picker-game>
         <input type="hidden" name="tgdb_game_id" value="" data-picker-tgdb>
         <div class="picker-list" data-picker-list hidden role="listbox"></div>
-        <p class="hint" data-picker-status><?= $tgdb ? 'Ab 2 Buchstaben wird gesucht. Auswahl übernimmt Plattform & Cover.' : 'Tipp: Mit einem TheGamesDB-API-Key gibt es Vorschläge.' ?></p>
+        <p class="hint" data-picker-status><?= $tgdb ? 'Ab 2 Buchstaben wird gesucht. Auswahl übernimmt Plattform & Cover.' : 'Vorschläge aus dem gemeinsamen Katalog. Für neue Spiele aus TheGamesDB unter „Mein Konto“ einen eigenen API-Key hinterlegen.' ?></p>
     </div>
     <div class="picker-linked<?= $g ? '' : ' is-empty' ?>" data-picker-linked>
         <?php $thumb = tgdb_image($g['boxart_thumb'] ?? null); ?>

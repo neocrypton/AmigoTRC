@@ -25,7 +25,8 @@
     </section>
 
     <section class="panel">
-        <h2 class="panel-title">TheGamesDB</h2>
+        <h2 class="panel-title">TheGamesDB · System-Key</h2>
+        <p class="hint">Jeder Nutzer kann unter <em>Mein Konto</em> seinen eigenen Key hinterlegen (aktuell: <?= (int)$userKeys ?>). Der System-Key wird für Admins und den Plattform-Import genutzt.</p>
         <p>
             <?php if ($keySource === 'admin'): ?>
                 <span class="cond cond-5">AKTIV</span> API-Key gesetzt (<code><?= e($keyHint) ?></code>), verschlüsselt gespeichert.
@@ -51,6 +52,13 @@
                 <button class="btn btn-danger" type="submit" name="action" value="remove" formnovalidate data-confirm="API-Key wirklich entfernen?">Entfernen</button>
                 <?php endif; ?>
             </div>
+        </form>
+        <form method="post" action="<?= e(url('admin/tgdb')) ?>" class="subform">
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="shared">
+            <label class="check"><input type="checkbox" name="tgdb_shared" value="1"<?= checked($tgdbShared) ?>> Nutzer ohne eigenen Key dürfen den System-Key mitnutzen</label>
+            <p class="hint">Aus = jeder Nutzer verbraucht nur sein eigenes Kontingent. Bereits importierte Plattformen und Spiele stehen allen trotzdem zur Verfügung.</p>
+            <button class="btn btn-sm" type="submit">Übernehmen</button>
         </form>
     </section>
 

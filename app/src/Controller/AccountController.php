@@ -10,6 +10,8 @@ use Amigo\Core\Options;
 use Amigo\Core\RateLimiter;
 use Amigo\Core\Totp;
 use Amigo\Core\View;
+use Amigo\Service\Catalog;
+use Amigo\Service\TheGamesDb;
 
 final class AccountController
 {
@@ -21,7 +23,56 @@ final class AccountController
             'nav'           => 'account',
             'user'          => $user,
             'recoveryLeft'  => count(json_decode((string)$user['recovery_codes'], true) ?: []),
+            'keySource'     => Catalog::keySourceFor($user),
+            'keyHint'       => ($k = Catalog::userKey($user)) !== '' ? '…' . substr($k, -4) : null,
         ]);
+    }
+
+    /** Sichtbarkeit der eigenen Sammlung / Durchgespielt-Liste für andere Nutzer. */
+    public function privacy(): void
+    {
+        if (is_post()) {
+            App::db()->update('users', [
+                'collection_public' => isset($_POST['collection_public']) ? 1 : 0,
+                'plays_public'      => isset($_POST['plays_public']) ? 1 : 0,
+            ], ['id' => Auth::id()]);
+            flash('ok', 'Sichtbarkeit gespeichert.');
+        }
+        redirect('account');
+    }
+
+    /** Eigenen TheGamesDB-API-Key speichern, testen oder entfernen. */
+    public function tgdbKey(): void
+    {
+        if (!is_post()) {
+            redirect('account');
+        }
+        $user = Auth::user();
+        $action = input('action', 10);
+        if ($action === 'remove') {
+            Catalog::saveUserKey((int)$user['id'], null);
+            flash('ok', 'Dein API-Key wurde entfernt.');
+            redirect('account');
+        }
+        if ($action === 'save') {
+            $key = preg_replace('/\s+/', '', input('tgdb_api_key', 200));
+            if (!Catalog::validApiKey($key)) {
+                flash('error', 'Der API-Key sieht ungültig aus (nur Buchstaben und Ziffern, 16–128 Zeichen).');
+                redirect('account');
+            }
+            Catalog::saveUserKey((int)$user['id'], $key);
+        } else {
+            $key = Catalog::userKey($user);
+        }
+        $uid = (int)$user['id'];
+        $db = App::db();
+        $result = (new TheGamesDb($key, $db, fn (int $left) => $db->update('users', ['tgdb_allowance' => $left], ['id' => $uid])))->ping();
+        if ($action === 'save') {
+            flash($result['ok'] ? 'ok' : 'warn', 'API-Key gespeichert. ' . ($result['ok'] ? $result['message'] : 'Test fehlgeschlagen: ' . $result['message']));
+        } else {
+            flash($result['ok'] ? 'ok' : 'error', $result['message']);
+        }
+        redirect('account');
     }
 
     public function profile(): void

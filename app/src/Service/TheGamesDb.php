@@ -16,8 +16,16 @@ final class TheGamesDb
 {
     private const BASE = 'https://api.thegamesdb.net/v1/';
 
-    public function __construct(private readonly string $apiKey, private readonly Database $db)
+    /** @var callable(int): void */
+    private $onAllowance;
+
+    /**
+     * @param callable(int): void|null $onAllowance erhält das Restkontingent des Keys
+     *        (Standard: Ablage in den Settings für den System-Key)
+     */
+    public function __construct(private readonly string $apiKey, private readonly Database $db, ?callable $onAllowance = null)
     {
+        $this->onAllowance = $onAllowance ?? fn (int $left) => Settings::set($db, 'tgdb_allowance', (string)$left);
     }
 
     public function enabled(): bool
@@ -44,7 +52,7 @@ final class TheGamesDb
             $left = isset($data['remaining_monthly_allowance'])
                 ? (int)$data['remaining_monthly_allowance'] + (int)($data['extra_allowance'] ?? 0) : null;
             if ($left !== null) {
-                Settings::set($this->db, 'tgdb_allowance', (string)$left);
+                ($this->onAllowance)($left);
             }
             return ['ok' => true, 'message' => 'Verbindung OK' . ($left !== null ? ' – Restkontingent: ' . $left . ' Anfragen' : '') . '.'];
         }
@@ -207,7 +215,7 @@ final class TheGamesDb
         }
 
         if (isset($data['remaining_monthly_allowance'])) {
-            Settings::set($this->db, 'tgdb_allowance', (string)((int)$data['remaining_monthly_allowance'] + (int)($data['extra_allowance'] ?? 0)));
+            ($this->onAllowance)((int)$data['remaining_monthly_allowance'] + (int)($data['extra_allowance'] ?? 0));
         }
 
         $payload = json_encode($data, JSON_UNESCAPED_UNICODE);

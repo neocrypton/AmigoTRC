@@ -24,6 +24,12 @@ final class PlayController
 
     public function index(): void
     {
+        self::renderList(Auth::user(), false);
+    }
+
+    /** Durchgespielt-Liste eines Besitzers (eigene oder öffentliche fremde). */
+    public static function renderList(array $owner, bool $foreign): void
+    {
         $db = App::db();
         $filter = [
             'q'        => query('q', 100),
@@ -35,7 +41,7 @@ final class PlayController
         $page = query_int('page', 1, 100000) ?? 1;
 
         $where = ['pl.user_id = ?'];
-        $params = [Auth::id()];
+        $params = [(int)$owner['id']];
         if ($filter['q'] !== '') {
             $where[] = "(pl.title LIKE ? ESCAPE '!' OR pl.review LIKE ? ESCAPE '!')";
             $like = Database::like($filter['q']);
@@ -68,12 +74,13 @@ final class PlayController
 
         $years = array_map('intval', array_filter(array_column($db->all(
             'SELECT DISTINCT SUBSTR(finished_on, 1, 4) AS y FROM {plays} WHERE user_id = ? AND finished_on IS NOT NULL ORDER BY y DESC',
-            [Auth::id()]
+            [(int)$owner['id']]
         ), 'y')));
 
         View::render('plays/index', [
-            'title'     => 'Durchgespielt',
-            'nav'       => 'plays',
+            'title'     => $foreign ? 'Durchgespielt von ' . $owner['username'] : 'Durchgespielt',
+            'nav'       => $foreign ? 'community' : 'plays',
+            'owner'     => $foreign ? $owner : null,
             'plays'     => $plays,
             'filter'    => $filter,
             'summary'   => $summary,

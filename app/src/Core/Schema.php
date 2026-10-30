@@ -16,7 +16,7 @@ namespace Amigo\Core;
  */
 final class Schema
 {
-    public const VERSION = 1;
+    public const VERSION = 2;
 
     public static function migrate(Database $db): void
     {
@@ -24,9 +24,13 @@ final class Schema
         if ($current >= self::VERSION) {
             return;
         }
-        if ($current < 1) {
-            foreach (self::v1() as $ddl) {
-                $db->pdo()->exec(self::translate($db, $ddl));
+        $steps = [1 => self::v1(), 2 => self::v2()];
+        foreach ($steps as $version => $statements) {
+            if ($current < $version) {
+                foreach ($statements as $ddl) {
+                    $db->pdo()->exec(self::translate($db, $ddl));
+                }
+                Settings::set($db, 'schema_version', (string)$version);
             }
         }
         Settings::set($db, 'schema_version', (string)self::VERSION);
@@ -57,6 +61,17 @@ final class Schema
         // Index-Namen sind in SQLite datenbankweit eindeutig -> mit Präfix versehen.
         $ddl = preg_replace_callback('/\[([a-z_]+)\]/', fn ($m) => $db->quoteIdent($db->prefix() . $m[1]), $ddl);
         return $db->sql($ddl);
+    }
+
+    /** v2: eigener TheGamesDB-Key pro Nutzer, öffentliche Sammlung/Durchgespielt-Liste. */
+    private static function v2(): array
+    {
+        return [
+            'ALTER TABLE {users} ADD COLUMN tgdb_api_key TEXT NULL',
+            'ALTER TABLE {users} ADD COLUMN tgdb_allowance %INT% NULL',
+            'ALTER TABLE {users} ADD COLUMN collection_public SMALLINT NOT NULL DEFAULT 0',
+            'ALTER TABLE {users} ADD COLUMN plays_public SMALLINT NOT NULL DEFAULT 0',
+        ];
     }
 
     /** @return string[] */

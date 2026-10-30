@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Amigo\Service;
 
 use Amigo\Core\App;
+use Amigo\Core\Auth;
 use Amigo\Core\Crypto;
 use Amigo\Core\Database;
 use Amigo\Core\Settings;
@@ -11,13 +12,53 @@ use Amigo\Core\Settings;
 /** Lokaler Katalog (Plattformen + Spiele), befüllt manuell oder aus TheGamesDB. */
 final class Catalog
 {
+    /**
+     * TheGamesDB-Client für den angemeldeten Nutzer:
+     *  1. eigener Key des Nutzers
+     *  2. System-Key – für Admins immer, für andere nur, wenn der Admin das freigegeben hat
+     *  3. sonst deaktiviert (der gemeinsame lokale Katalog bleibt nutzbar)
+     */
     public static function tgdb(): TheGamesDb
     {
-        return new TheGamesDb(self::apiKey(), App::db());
+        $db = App::db();
+        $user = Auth::user();
+        if ($user && ($own = self::userKey($user)) !== '') {
+            $uid = (int)$user['id'];
+            return new TheGamesDb($own, $db, fn (int $left) => $db->update('users', ['tgdb_allowance' => $left], ['id' => $uid]));
+        }
+        if (!$user || $user['role'] === 'admin' || Settings::bool($db, 'tgdb_shared')) {
+            return new TheGamesDb(self::systemKey(), $db);
+        }
+        return new TheGamesDb('', $db);
     }
 
-    /** API-Key aus dem Adminbereich (verschlüsselt gespeichert), sonst aus config/config.php. */
-    public static function apiKey(): string
+    /** Woher der Key des angemeldeten Nutzers kommt: user | system | none */
+    public static function keySourceFor(array $user): string
+    {
+        if (self::userKey($user) !== '') {
+            return 'user';
+        }
+        if (self::systemKey() !== '' && ($user['role'] === 'admin' || Settings::bool(App::db(), 'tgdb_shared'))) {
+            return 'system';
+        }
+        return 'none';
+    }
+
+    public static function userKey(array $user): string
+    {
+        return empty($user['tgdb_api_key']) ? '' : (string)Crypto::decrypt((string)$user['tgdb_api_key']);
+    }
+
+    public static function saveUserKey(int $userId, ?string $key): void
+    {
+        App::db()->update('users', [
+            'tgdb_api_key'   => $key === null || $key === '' ? null : Crypto::encrypt($key),
+            'tgdb_allowance' => null,
+        ], ['id' => $userId]);
+    }
+
+    /** System-Key aus dem Adminbereich (verschlüsselt gespeichert), sonst aus config/config.php. */
+    public static function systemKey(): string
     {
         $stored = Settings::get(App::db(), 'tgdb_api_key');
         if ($stored !== null && $stored !== '') {
@@ -26,7 +67,7 @@ final class Catalog
         return (string)App::config('tgdb_api_key', '');
     }
 
-    public static function apiKeySource(): string
+    public static function systemKeySource(): string
     {
         $stored = Settings::get(App::db(), 'tgdb_api_key');
         if ($stored !== null && $stored !== '') {
@@ -35,7 +76,7 @@ final class Catalog
         return App::config('tgdb_api_key', '') !== '' ? 'config' : 'none';
     }
 
-    public static function saveApiKey(?string $key): void
+    public static function saveSystemKey(?string $key): void
     {
         Settings::set(App::db(), 'tgdb_api_key', $key === null || $key === '' ? null : Crypto::encrypt($key));
     }

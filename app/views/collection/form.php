@@ -100,7 +100,7 @@ $int = static fn (string $k) => isset($item[$k]) && $item[$k] !== null && $item[
     </section>
 
     <section class="panel">
-        <h2 class="panel-title">4 · Kauf &amp; Notizen <small class="muted">optional</small></h2>
+        <h2 class="panel-title">4 · Kauf &amp; Notizen <small class="muted">optional · immer privat</small></h2>
         <div class="row3">
             <div class="field"><label for="f-purchase_date">Kaufdatum</label><input id="f-purchase_date" type="date" name="purchase_date" value="<?= e($v('purchase_date')) ?>"></div>
             <div class="field"><label for="f-price">Preis (€)</label><input id="f-price" name="price" inputmode="decimal" value="<?= e(isset($item['price_cents']) ? money_input($int('price_cents')) : '') ?>" placeholder="0,00" maxlength="20"></div>

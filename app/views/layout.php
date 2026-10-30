@@ -43,6 +43,7 @@ $icon = static fn (string $name): string => '<svg class="ico" aria-hidden="true"
             <a href="<?= e(url('collection')) ?>"<?= $nav === 'collection' ? ' aria-current="page"' : '' ?>>Sammlung</a>
             <a href="<?= e(url('plays')) ?>"<?= $nav === 'plays' ? ' aria-current="page"' : '' ?>>Durchgespielt</a>
             <a href="<?= e(url('platforms')) ?>"<?= $nav === 'platforms' ? ' aria-current="page"' : '' ?>>Plattformen</a>
+            <a href="<?= e(url('community')) ?>"<?= $nav === 'community' ? ' aria-current="page"' : '' ?>>Community</a>
             <?php if (Auth::isAdmin()): ?>
             <a href="<?= e(url('admin/settings')) ?>"<?= $nav === 'admin' ? ' aria-current="page"' : '' ?>>Admin</a>
             <?php endif; ?>
@@ -75,7 +76,7 @@ $icon = static fn (string $name): string => '<svg class="ico" aria-hidden="true"
     <a href="<?= e(url('collection')) ?>"<?= $nav === 'collection' ? ' aria-current="page"' : '' ?>><?= $icon('cart') ?><span>Sammlung</span></a>
     <a class="tab-add" href="<?= e(url('item/edit')) ?>"<?= $nav === 'add' ? ' aria-current="page"' : '' ?>><?= $icon('plus') ?><span>Neu</span></a>
     <a href="<?= e(url('plays')) ?>"<?= $nav === 'plays' ? ' aria-current="page"' : '' ?>><?= $icon('trophy') ?><span>Gespielt</span></a>
-    <a href="<?= e(url('account')) ?>"<?= in_array($nav, ['account', 'platforms', 'admin'], true) ? ' aria-current="page"' : '' ?>><?= $icon('menu') ?><span>Mehr</span></a>
+    <a href="<?= e(url('account')) ?>"<?= in_array($nav, ['account', 'platforms', 'admin', 'community'], true) ? ' aria-current="page"' : '' ?>><?= $icon('menu') ?><span>Mehr</span></a>
 </nav>
 <?php endif; ?>
 </body>
