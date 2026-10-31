@@ -46,7 +46,7 @@ auf dem Tablet und auf dem Smartphone.
   Pixel-Smilies (16×16, per Klick oder Kürzel wie `:)` `:D` `;)` `:cool:` `:1up:`);
   optional E-Mail bei neuen PNs (im Konto abschaltbar, eine Mail pro Unterhaltung bis zum
   Lesen, ohne Nachrichtentext, nur an bestätigte Adressen, Abmelde-Link in jeder Mail)
-- **Avatar:** 60 Pixel-Badges zur Auswahl oder ein eigenes Mini-Bild (max. 512 KB,
+- **Avatar:** 90 Pixel-Badges zur Auswahl oder ein eigenes Mini-Bild (max. 512 KB,
   wird quadratisch auf 128×128 px gebracht, Pixel-Art bleibt scharf). Neue Badges
   lassen sich in `tools/build-badges.py` zeichnen (`python3 tools/build-badges.py`),
   Smilies in `tools/build-smilies.py`

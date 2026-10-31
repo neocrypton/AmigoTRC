@@ -327,6 +327,33 @@
     });
   });
 
+  /* ---------- Lange Auswahl schrittweise einblenden (Badges: erst 15, dann je 10) ---------- */
+  $$('[data-reveal]').forEach(function (grid) {
+    var btn = $('[data-reveal-more]', grid.form || grid.parentNode);
+    var items = $$('.badge-pick', grid);
+    var shown = parseInt(grid.getAttribute('data-reveal'), 10) || 15;
+    var step = parseInt(grid.getAttribute('data-reveal-step'), 10) || 10;
+    if (!btn || items.length <= shown) return;
+    function update() {
+      var hidden = 0;
+      items.forEach(function (it, i) {
+        // Der gewählte Badge bleibt immer sichtbar, auch wenn er weiter hinten liegt.
+        var keep = i < shown || $('input', it).checked;
+        it.hidden = !keep;
+        if (!keep) hidden++;
+      });
+      btn.hidden = hidden === 0;
+      btn.textContent = 'Mehr… (' + hidden + ' weitere)';
+    }
+    btn.addEventListener('click', function () {
+      var first = items[shown];
+      shown += step;
+      update();
+      if (first) { var inp = $('input', first); if (inp) inp.focus({ preventScroll: true }); }
+    });
+    update();
+  });
+
   /* ---------- „Alle markieren“ ---------- */
   $$('[data-check-all]').forEach(function (box) {
     box.addEventListener('change', function () {

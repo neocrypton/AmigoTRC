@@ -633,6 +633,330 @@ AAAAAAAAAAA
 AAKAAAAAKAA
 AAAAAAAAAAA
 .SSSSSSSSS."""),
+    # --- Serie 3 ---
+    ('fox', 'Fuchs', '#38b764', '#f77622', """
+A..........A
+AA........AA
+AAA......AAA
+AWAAAAAAAAWA
+AAAAAAAAAAAA
+AAKAAAAAAKAA
+.AAAAAAAAAA.
+.WWAAKKAAWW.
+..WWWWWWWW..
+....WWWW...."""),
+    ('panda', 'Panda', '#a7f070', '#f4f4f4', """
+.KK......KK.
+KKKAAAAAAKKK
+.KAAAAAAAAK.
+.AKKAAAAKKA.
+AAKWKAAKWKAA
+AAKKAAAAKKAA
+AAAAAKKAAAAA
+.AAAAAAAAAA.
+..AAAAAAAA.."""),
+    ('turtle', 'Schildkröte', '#41a6f6', '#38b764', """
+...AAAAA......
+..ANAAANA.....
+.AAANNNAAA.EE.
+AANAAAAANAAEKE
+AAAANNNAAAAEEE
+.EEAAAAAAAEE..
+.EE......EE..."""),
+    ('whale', 'Wal', '#73eff7', '#3b5dc9', """
+....W.W.......
+.....W........
+..AAAAAAA.....
+.AAAAAAAAA..AA
+AAKAAAAAAAAAA.
+AAAAAAAAAAAA..
+AWWWWWWWAAAA..
+.AWWWWWWAAAAA.
+..AAAAAAA...AA"""),
+    ('chick', 'Küken', '#5d275d', '#feae34', """
+....AAAA....
+...AAAAAA...
+..AAKAAKAA..
+..AAAOOAAA..
+.AAAAOOAAAA.
+AAAAAAAAAAAA
+.AAAAAAAAAA.
+..AAAAAAAA..
+...O....O...
+..OO....OO.."""),
+    ('bear', 'Bär', '#73eff7', '#8b5a3c', """
+.AA......AA.
+AMMA....AMMA
+AAAAAAAAAAAA
+.AAKAAAAKAA.
+.AAAAMMAAAA.
+.AAAMKKMAAA.
+.AAAAMMAAAA.
+..AAAAAAAA.."""),
+    ('spider', 'Spinne', '#a7f070', '#1a1c2c', """
+.A........A.
+..A......A..
+A..A.AA.A..A
+.A..AAAA..A.
+..AAAAAAAA..
+AA.ARAARA.AA
+..AAAAAAAA..
+.A..AAAA..A.
+A..A....A..A"""),
+    ('butterfly', 'Schmetterling', '#73eff7', '#b55088', """
+.AA......AA.
+AAAA....AAAA
+AYYAA.KAAYYA
+AYYAAKKAAYYA
+.AAAAKKAAAA.
+..AAAKKAAA..
+.AAAAKKAAAA.
+AAYAA..AAYAA
+.AAA....AAA."""),
+    ('coffee', 'Kaffee', '#b13e53', '#f4f4f4', """
+...S..S....
+....S..S...
+...S..S....
+.AAAAAAAA..
+.ANNNNNNA..
+.AAAAAAAAAA
+.AAAAAAAA.A
+.AAAAAAAAAA
+.AAAAAAAA..
+..AAAAAA..."""),
+    ('donut', 'Donut', '#41a6f6', '#ff77a8', """
+...NNNNNN...
+..NAAAAAAN..
+.NAWAARAAAN.
+NAAAA..AYAAN
+NARA....AAAN
+NAAA....AWAN
+NAAYA..AAAAN
+.NNAAAAAANN.
+..NNNNNNNN..
+...NNNNNN..."""),
+    ('pizza', 'Pizza', '#38b764', '#feae34', """
+NNNNNNNNNNNN
+.AAAAAAAAAA.
+.AARRAAAAAA.
+..ARRAAARA..
+..AAAAAAAA..
+...AAARRA...
+...AAARRA...
+....AAAA....
+....AAAA....
+.....AA....."""),
+    ('melon', 'Melone', '#ffcd75', '#38b764', """
+RRRRRRRRRRRR
+RRKRRRRRKRRR
+.RRRRKRRRRR.
+.RRRRRRRRRR.
+..RKRRRRKR..
+..WWWWWWWW..
+...AAAAAA..."""),
+    ('candy', 'Bonbon', '#29366f', '#e43b44', """
+A..........A
+AA..AAAA..AA
+AAAAWAAWAAAA
+AAAAAWAAWAAA
+AA..AAAA..AA
+A..........A"""),
+    ('guitar', 'Gitarre', '#ffcd75', '#f77622', """
+..........KK
+.........KK.
+........NN..
+.......NN...
+..AAA.NN....
+.AAAAAN.....
+AAAKKAAA....
+AAAKKAAA....
+.AAAAAA.....
+..AAAA......"""),
+    ('headphones', 'Kopfhörer', '#ffcd75', '#566c86', """
+...AAAAAA...
+..A......A..
+.A........A.
+.A........A.
+RRA......ARR
+RRA......ARR
+RRA......ARR
+.R........R."""),
+    ('bulb', 'Glühbirne', '#1a1c2c', '#feae34', """
+....AAAA....
+..AAAAAAAA..
+.AAAWAAAAAA.
+.AAWAAAAAAA.
+.AAAAAAAAAA.
+..AAAAAAAA..
+...AAAAAA...
+....SSSS....
+....DDDD....
+....SSSS....
+.....DD....."""),
+    ('magnet', 'Magnet', '#41a6f6', '#e43b44', """
+..AAAAAAAA..
+.AAAAAAAAAA.
+AAAA....AAAA
+AAA......AAA
+AAA......AAA
+AAA......AAA
+WWW......WWW
+WWW......WWW"""),
+    ('hourglass', 'Sanduhr', '#3b5dc9', '#8b5a3c', """
+AAAAAAAAAA
+.A......A.
+.AYYYYYYA.
+..AYYYYA..
+...AYYA...
+....AA....
+...A..A...
+..A.YY.A..
+.A.YYYY.A.
+AAAAAAAAAA"""),
+    ('anchor', 'Anker', '#29366f', '#9badb7', """
+.....AA.....
+....A..A....
+.....AA.....
+..AAAAAAAA..
+.....AA.....
+.....AA.....
+A....AA....A
+AA...AA...AA
+.AA..AA..AA.
+..AAAAAAAA..
+....AAAA...."""),
+    ('umbrella', 'Schirm', '#73eff7', '#b55088', """
+.....AAAA.....
+...AAAAAAAA...
+..AAWAAAAAAA..
+.AAAAAAAAAAAA.
+AAAAAAAAAAAAAA
+A..A..KK..A..A
+......KK......
+......KK......
+......KK......
+....K.KK......
+....KKK......."""),
+    ('bell', 'Glocke', '#b13e53', '#feae34', """
+.....AA.....
+....AAAA....
+...AAAAAA...
+..AAWAAAAA..
+..AWAAAAAA..
+..AAAAAAAA..
+.AAAAAAAAAA.
+AAAAAAAAAAAA
+AAAAAAAAAAAA
+.....OO....."""),
+    ('note', 'Musik', '#feae34', '#1a1c2c', """
+....AAAAAAAA
+....AAAAAAAA
+....A......A
+....A......A
+....A......A
+....A......A
+..AAA....AAA
+.AAAA...AAAA
+.AAA....AAA."""),
+    ('clover', 'Kleeblatt', '#ffcd75', '#38b764', """
+...AA..AA...
+..AAAAAAAA..
+..AAAAAAAA..
+...AAAAAA...
+.AA.AAAA.AA.
+AAAAAAAAAAAA
+AAAAAAAAAAAA
+.AA.AAAA.AA.
+......NN....
+.......NN..."""),
+    ('sun', 'Sonne', '#41a6f6', '#feae34', """
+.....OO.....
+.O...OO...O.
+..O......O..
+....AAAA....
+...AAAAAA...
+OO.AAAAAA.OO
+OO.AAAAAA.OO
+...AAAAAA...
+....AAAA....
+..O......O..
+.O...OO...O.
+.....OO....."""),
+    ('cactus', 'Kaktus', '#ffcd75', '#38b764', """
+.....AA.....
+....AAAA....
+....AAAA..A.
+.A..AAAA.AA.
+.AA.AAAA.AA.
+.AA.AAAAAAA.
+.AAAAAAAAA..
+..AAAAAA....
+....AAAA....
+....AAAA....
+..NNNNNNNN..
+..NNNNNNNN..
+...NNNNNN..."""),
+    ('computer', 'Computer', '#3b5dc9', '#ffcd75', """
+.AAAAAAAAAA.
+.AKKKKKKKKA.
+.AKBBBBBBKA.
+.AKBGBBBBKA.
+.AKBBBBBBKA.
+.AKKKKKKKKA.
+.AAAAAAAAAA.
+...AAAAAA...
+AAAAAAAAAAAA
+AKAKAKAKAKAA
+AAAAAAAAAAAA"""),
+    ('cd', 'CD', '#5d275d', '#9badb7', """
+...AAAAAA...
+..AAWWAAAA..
+.AAWAAAAAAA.
+AAAAAKKAAAAA
+AAAAK..KAAAA
+AAAAK..KAAAA
+AAAAAKKAAAAA
+.AAAAAAACAA.
+..AAAAACAA..
+...AAAAAA..."""),
+    ('blocks', 'Blöcke', '#1a1c2c', '#b55088', """
+AAAAAAAAA...
+AWAAWAAWA...
+AAAAAAAAA...
+...AAA......
+...AWA...OOO
+...AAA...OWO
+YYYYYY...OOO
+YWYYWY...OOO
+YYYYYY...OWO
+YYYYYYOOOOOO
+YWYYWYOWOOWO
+YYYYYYOOOOOO"""),
+    ('spaceship', 'Raumschiff', '#1a1c2c', '#9badb7', """
+.....AA.....
+....AAAA....
+....ABBA....
+....ABBA....
+...AAAAAA...
+.R.AAAAAA.R.
+.RAAAAAAAAR.
+RRAAAAAAAARR
+RR.AA..AA.RR
+....O..O....
+....Y..Y...."""),
+    ('qblock', 'Fragezeichen-Block', '#41a6f6', '#feae34', """
+NNNNNNNNNNNN
+NAAAAAAAAAAN
+NAKAAAAAAKAN
+NAAAKKKKAAAN
+NAAKKAAKKAAN
+NAAAAAAKKAAN
+NAAAAAKKAAAN
+NAAAAKKAAAAN
+NAAAAAAAAAAN
+NAKAAKKAAKAN
+NAAAAAAAAAAN
+NNNNNNNNNNNN"""),
 ]
 
 
@@ -661,7 +985,7 @@ def symbol(bid, name, bg, main, art):
 
 
 if __name__ == '__main__':
-    assert len(BADGES) == 60 and len({b[0] for b in BADGES}) == 60
+    assert len(BADGES) == 90 and len({b[0] for b in BADGES}) == 90
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     svg = ('<svg xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">\n'
            + '\n'.join(symbol(*b) for b in BADGES) + '\n</svg>\n')

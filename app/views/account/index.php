@@ -28,7 +28,7 @@
     <form method="post" action="<?= e(url('account/avatar')) ?>">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="badge">
-        <fieldset class="badge-grid">
+        <fieldset class="badge-grid" data-reveal="15" data-reveal-step="10">
             <legend class="label">Pixel-Badge wählen</legend>
             <?php foreach (\Amigo\Core\Badges::ALL as $key => $label): ?>
             <label class="badge-pick" title="<?= e($label) ?>">
@@ -38,7 +38,10 @@
             </label>
             <?php endforeach; ?>
         </fieldset>
-        <button class="btn btn-primary" type="submit">Badge übernehmen</button>
+        <div class="btnrow">
+            <button class="btn btn-ghost" type="button" data-reveal-more hidden>Mehr…</button>
+            <button class="btn btn-primary" type="submit">Badge übernehmen</button>
+        </div>
     </form>
     <form method="post" action="<?= e(url('account/avatar')) ?>" enctype="multipart/form-data" class="subform">
         <?= csrf_field() ?>
