@@ -4,6 +4,7 @@
 </div>
 
 <nav class="menu-grid" aria-label="Bereiche">
+    <?php if (\Amigo\Service\Messages::enabled()): ?><a href="<?= e(url('messages')) ?>">✉<span>Nachrichten</span></a><?php endif; ?>
     <a href="<?= e(url('community')) ?>">👾<span>Community</span></a>
     <a href="<?= e(url('u', ['name' => $user['username']])) ?>">🪪<span>Mein Profil</span></a>
     <a href="<?= e(url('platforms')) ?>">🕹<span>Plattformen</span></a>

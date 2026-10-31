@@ -10,7 +10,8 @@ $playsPublic = (int)$owner['plays_public'] === 1;
         <h1 class="h1"><?= avatar($owner, 56, 'player-avatar player-avatar-lg') ?> <?= e($owner['username']) ?></h1>
         <p class="muted">dabei seit <?= e(fmt_date($owner['created_at'])) ?></p>
     </div>
-    <?php if ($self): ?><a class="btn btn-ghost" href="<?= e(url('account')) ?>#sichtbarkeit">Sichtbarkeit ändern</a><?php endif; ?>
+    <?php if ($self): ?><a class="btn btn-ghost" href="<?= e(url('account')) ?>#sichtbarkeit">Sichtbarkeit ändern</a>
+    <?php elseif (\Amigo\Service\Messages::enabled()): ?><a class="btn btn-primary" href="<?= e(url('message/new', ['to' => $owner['username']])) ?>">✉ Nachricht senden</a><?php endif; ?>
 </div>
 
 <?php if ($self): ?>

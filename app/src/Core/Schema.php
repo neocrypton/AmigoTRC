@@ -16,7 +16,7 @@ namespace Amigo\Core;
  */
 final class Schema
 {
-    public const VERSION = 5;
+    public const VERSION = 6;
 
     public static function migrate(Database $db): void
     {
@@ -24,7 +24,7 @@ final class Schema
         if ($current >= self::VERSION) {
             return;
         }
-        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5()];
+        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5(), 6 => self::v6()];
         foreach ($steps as $version => $statements) {
             if ($current < $version) {
                 foreach ($statements as $ddl) {
@@ -61,6 +61,43 @@ final class Schema
         // Index-Namen sind in SQLite datenbankweit eindeutig -> mit Präfix versehen.
         $ddl = preg_replace_callback('/\[([a-z_]+)\]/', fn ($m) => $db->quoteIdent($db->prefix() . $m[1]), $ddl);
         return $db->sql($ddl);
+    }
+
+    /** v6: Private Nachrichten (Unterhaltungen mit bis zu 10 Teilnehmern). */
+    private static function v6(): array
+    {
+        return [
+            "CREATE TABLE {conversations} (
+                id %ID%,
+                subject VARCHAR(150) NOT NULL,
+                creator_id %INT% NULL,
+                created_at %DT% NOT NULL,
+                last_message_at %DT% NOT NULL,
+                last_message_id %INT% NOT NULL DEFAULT 0,
+                FOREIGN KEY (creator_id) REFERENCES {users} (id) ON DELETE SET NULL
+            )%OPT%",
+            "CREATE TABLE {conversation_users} (
+                conversation_id %INT% NOT NULL,
+                user_id %INT% NOT NULL,
+                status VARCHAR(10) NOT NULL DEFAULT 'active',
+                last_read_id %INT% NOT NULL DEFAULT 0,
+                joined_at %DT% NOT NULL,
+                PRIMARY KEY (conversation_id, user_id),
+                FOREIGN KEY (conversation_id) REFERENCES {conversations} (id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES {users} (id) ON DELETE CASCADE
+            )%OPT%",
+            "CREATE INDEX [conv_users_user] ON {conversation_users} (user_id, status)",
+            "CREATE TABLE {messages} (
+                id %ID%,
+                conversation_id %INT% NOT NULL,
+                user_id %INT% NULL,
+                body %TEXT% NOT NULL,
+                created_at %DT% NOT NULL,
+                FOREIGN KEY (conversation_id) REFERENCES {conversations} (id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES {users} (id) ON DELETE SET NULL
+            )%OPT%",
+            "CREATE INDEX [messages_conv] ON {messages} (conversation_id, id)",
+        ];
     }
 
     /** v5: Status der automatischen TheGamesDB-Zuordnung ('review' = prüfen, 'none' = nichts gefunden). */

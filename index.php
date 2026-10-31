@@ -54,6 +54,12 @@ $routes = [
 
     'cover'             => [C\CoverController::class, 'show', 'auth'],
     'api/games'         => [C\ApiController::class, 'games', 'auth'],
+    'messages'          => [C\MessageController::class, 'index', 'auth'],
+    'message/new'       => [C\MessageController::class, 'compose', 'auth'],
+    'message'           => [C\MessageController::class, 'show', 'auth'],
+    'message/reply'     => [C\MessageController::class, 'reply', 'auth'],
+    'message/action'    => [C\MessageController::class, 'action', 'auth'],
+    'api/users'         => [C\MessageController::class, 'users', 'auth'],
     'scrape'            => [C\ScrapeController::class, 'index', 'auth'],
     'scrape/run'        => [C\ScrapeController::class, 'run', 'auth'],
     'scrape/reset'      => [C\ScrapeController::class, 'reset', 'auth'],

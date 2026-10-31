@@ -104,6 +104,7 @@ final class AdminController
                 }
                 @rmdir($dir);
                 $db->delete('users', ['id' => $user['id']]);
+                \Amigo\Service\Messages::cleanup(); // Unterhaltungen ohne verbliebene Teilnehmer
                 flash('ok', 'Benutzer und alle Daten gelöscht.');
                 break;
         }

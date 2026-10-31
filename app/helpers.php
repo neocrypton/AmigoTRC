@@ -236,3 +236,22 @@ function avatar(array $user, int $size = 44, string $class = ''): string
     return '<svg class="' . e($cls) . '" width="' . $size . '" height="' . $size . '" role="img" aria-label="' . e($alt) . '">'
         . '<use href="' . e(asset('img/badges.svg')) . '#' . e($a['value']) . '"></use></svg>';
 }
+
+/** UTC-Zeitstempel aus der Datenbank in Ortszeit („heute 14:05“, „gestern 09:12“, „03.11.2026 18:30“). */
+function fmt_datetime(?string $utc): string
+{
+    if (!$utc) {
+        return '';
+    }
+    try {
+        $d = (new DateTimeImmutable($utc, new DateTimeZone('UTC')))->setTimezone(new DateTimeZone(date_default_timezone_get()));
+    } catch (Exception) {
+        return '';
+    }
+    $today = new DateTimeImmutable('today');
+    return match ($d->format('Y-m-d')) {
+        $today->format('Y-m-d')                 => 'heute ' . $d->format('H:i'),
+        $today->modify('-1 day')->format('Y-m-d') => 'gestern ' . $d->format('H:i'),
+        default                                  => $d->format('d.m.Y H:i'),
+    };
+}

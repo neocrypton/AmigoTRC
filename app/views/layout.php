@@ -50,6 +50,9 @@ $icon = static fn (string $name): string => '<svg class="ico" aria-hidden="true"
         </nav>
         <div class="topbar-actions">
             <a class="btn btn-primary btn-sm hide-sm" href="<?= e(url('item/edit')) ?>"><?= $icon('plus') ?> Neu</a>
+            <?php if (\Amigo\Service\Messages::enabled()): $unread = \Amigo\Service\Messages::unreadCount((int)$user['id']); ?>
+            <a class="iconbtn iconbtn-badge" href="<?= e(url('messages')) ?>" title="Nachrichten<?= $unread ? ' (' . $unread . ' ungelesen)' : '' ?>"<?= $nav === 'messages' ? ' aria-current="page"' : '' ?>><?= $icon('mail') ?><?php if ($unread): ?><span class="badge"><?= $unread > 99 ? '99+' : $unread ?></span><?php endif; ?><span class="sr">Nachrichten</span></a>
+            <?php endif; ?>
             <a class="iconbtn" href="<?= e(url('account')) ?>" title="Mein Konto (<?= e($user['username']) ?>)"><?= avatar($user, 32, 'avatar-mini') ?><span class="sr">Konto</span></a>
             <button class="iconbtn" type="button" data-theme-toggle title="Farbschema wechseln"><?= $icon('palette') ?><span class="sr">Farbschema</span></button>
             <form method="post" action="<?= e(url('logout')) ?>" class="inline">
@@ -76,7 +79,7 @@ $icon = static fn (string $name): string => '<svg class="ico" aria-hidden="true"
     <a href="<?= e(url('collection')) ?>"<?= $nav === 'collection' ? ' aria-current="page"' : '' ?>><?= $icon('cart') ?><span>Sammlung</span></a>
     <a class="tab-add" href="<?= e(url('item/edit')) ?>"<?= $nav === 'add' ? ' aria-current="page"' : '' ?>><?= $icon('plus') ?><span>Neu</span></a>
     <a href="<?= e(url('plays')) ?>"<?= $nav === 'plays' ? ' aria-current="page"' : '' ?>><?= $icon('trophy') ?><span>Gespielt</span></a>
-    <a href="<?= e(url('account')) ?>"<?= in_array($nav, ['account', 'platforms', 'admin', 'community'], true) ? ' aria-current="page"' : '' ?>><?= $icon('menu') ?><span>Mehr</span></a>
+    <a href="<?= e(url('account')) ?>"<?= in_array($nav, ['account', 'platforms', 'admin', 'community', 'messages'], true) ? ' aria-current="page"' : '' ?>><?= $icon('menu') ?><span>Mehr</span></a>
 </nav>
 <?php endif; ?>
 </body>

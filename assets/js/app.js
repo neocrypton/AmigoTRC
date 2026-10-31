@@ -308,6 +308,68 @@
     box.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
   });
 
+  /* ---------- Smilies per Klick an der Cursorposition einfügen ---------- */
+  $$('[data-smiley-target]').forEach(function (bar) {
+    var ta = $(bar.getAttribute('data-smiley-target'));
+    if (!ta) return;
+    bar.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-code]');
+      if (!btn) return;
+      var code = btn.getAttribute('data-code');
+      var start = ta.selectionStart || 0, end = ta.selectionEnd || 0, v = ta.value;
+      var before = v.slice(0, start), after = v.slice(end);
+      var ins = (before && !/\s$/.test(before) ? ' ' : '') + code + (/^\s/.test(after) ? '' : ' ');
+      if (v.length + ins.length > (ta.maxLength > 0 ? ta.maxLength : 1e9)) return;
+      ta.value = before + ins + after;
+      var pos = before.length + ins.length;
+      ta.focus();
+      ta.setSelectionRange(pos, pos);
+    });
+  });
+
+  /* ---------- „Alle markieren“ ---------- */
+  $$('[data-check-all]').forEach(function (box) {
+    box.addEventListener('change', function () {
+      $$('input[type=checkbox][name="' + box.getAttribute('data-check-all') + '"]', box.form).forEach(function (c) { c.checked = box.checked; });
+    });
+  });
+
+  /* ---------- Benutzernamen vorschlagen (Empfängerfeld, kommagetrennt) ---------- */
+  $$('[data-user-picker]').forEach(function (root) {
+    var input = $('input', root), list = $('[data-user-list]', root), api = root.getAttribute('data-api'), timer = null;
+    function lastToken() { var parts = input.value.split(','); return parts[parts.length - 1].trim(); }
+    function close() { list.hidden = true; list.textContent = ''; }
+    function choose(name) {
+      var parts = input.value.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+      parts[Math.max(0, parts.length - (lastToken() ? 1 : 0))] = name;
+      input.value = parts.join(', ') + ', ';
+      close();
+      input.focus();
+    }
+    input.addEventListener('input', function () {
+      clearTimeout(timer);
+      var q = lastToken();
+      if (!q) { close(); return; }
+      timer = setTimeout(function () {
+        fetch(api + '&q=' + encodeURIComponent(q), { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+          .then(function (r) { return r.ok ? r.json() : { users: [] }; })
+          .then(function (d) {
+            list.textContent = '';
+            (d.users || []).forEach(function (name) {
+              var b = el('button', null, name);
+              b.type = 'button';
+              b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+              b.addEventListener('click', function () { choose(name); });
+              list.appendChild(b);
+            });
+            list.hidden = !(d.users || []).length;
+          })
+          .catch(close);
+      }, 250);
+    });
+    input.addEventListener('blur', function () { setTimeout(close, 150); });
+  });
+
   /* ---------- Cover ergänzen: Stapel nacheinander abarbeiten, mit Fortschritt ---------- */
   $$('form[data-scrape-run]').forEach(function (form) {
     var box = $('[data-scrape-progress]');

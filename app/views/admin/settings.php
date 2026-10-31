@@ -19,6 +19,7 @@
             <?= csrf_field() ?>
             <label class="check"><input type="checkbox" name="registration_open" value="1"<?= checked($registration) ?><?= $captchaOk ? '' : ' disabled' ?>> Öffentliche Registrierung erlauben</label>
             <?php if (!$captchaOk): ?><p class="hint">Erst möglich, wenn unten reCAPTCHA eingerichtet ist.</p><?php endif; ?>
+            <p class="hint">Solange die Registrierung offen ist, sind auch private Nachrichten (PN) aktiv.</p>
             <div class="field subfield">
                 <label for="activation_mode">Neue Konten aktivieren</label>
                 <select id="activation_mode" name="activation_mode">

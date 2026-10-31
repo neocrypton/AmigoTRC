@@ -39,9 +39,15 @@ auf dem Tablet und auf dem Smartphone.
   nur lesend. Kaufpreis, Kaufdatum, Händler und Notizen bleiben immer privat,
   nicht angemeldete Besucher sehen nichts
 - Eigener TheGamesDB-API-Key pro Nutzer (unter *Mein Konto*)
+- **Private Nachrichten** (nur aktiv, solange die öffentliche Registrierung offen ist):
+  Unterhaltungen mit Betreff und bis zu 10 Teilnehmern, die drin bleiben, bis der
+  Ersteller sie entfernt oder sie austreten; Ungelesen-Zähler, mehrere
+  Unterhaltungen bzw. eigene Nachrichten auf einmal löschen, reiner Text mit 16
+  Pixel-Smilies (16×16, per Klick oder Kürzel wie `:)` `:D` `;)` `:cool:` `:1up:`)
 - **Avatar:** 60 Pixel-Badges zur Auswahl oder ein eigenes Mini-Bild (max. 512 KB,
   wird quadratisch auf 128×128 px gebracht, Pixel-Art bleibt scharf). Neue Badges
-  lassen sich in `tools/build-badges.py` zeichnen (`python3 tools/build-badges.py`)
+  lassen sich in `tools/build-badges.py` zeichnen (`python3 tools/build-badges.py`),
+  Smilies in `tools/build-smilies.py`
 - Zwei-Faktor-Anmeldung (TOTP, z. B. Aegis, 2FAS, Bitwarden, Google/Microsoft
   Authenticator) mit QR-Code und 10 Einmal-Recovery-Codes
 - Admin: Benutzer anlegen/sperren/löschen, 2FA zurücksetzen, Registrierung
