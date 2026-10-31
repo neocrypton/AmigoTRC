@@ -54,6 +54,10 @@ $routes = [
 
     'cover'             => [C\CoverController::class, 'show', 'auth'],
     'api/games'         => [C\ApiController::class, 'games', 'auth'],
+    'scrape'            => [C\ScrapeController::class, 'index', 'auth'],
+    'scrape/run'        => [C\ScrapeController::class, 'run', 'auth'],
+    'scrape/reset'      => [C\ScrapeController::class, 'reset', 'auth'],
+    'scrape/item'       => [C\ScrapeController::class, 'item', 'auth'],
     'import'            => [C\ImportController::class, 'upload', 'auth'],
     'import/map'        => [C\ImportController::class, 'map', 'auth'],
     'import/preview'    => [C\ImportController::class, 'preview', 'auth'],

@@ -10,6 +10,7 @@
     <?php endif; ?>
     <div class="btnrow center-row">
         <a class="btn btn-primary" href="<?= e(url($target === 'collection' ? 'collection' : 'plays', $target === 'collection' ? ['sort' => 'new'] : [])) ?>">▶ Zur <?= $target === 'collection' ? 'Sammlung' : 'Durchgespielt-Liste' ?></a>
+        <a class="btn" href="<?= e(url('scrape', ['target' => $target])) ?>">🔍 Cover &amp; Daten von TheGamesDB ergänzen</a>
         <a class="btn" href="<?= e(url('import')) ?>">Weitere Datei importieren</a>
     </div>
 </section>

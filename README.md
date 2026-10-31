@@ -74,6 +74,19 @@ Preise („24,90 €“, „$12.50“, „1.234,56“), Datum („01.05.2024“,
 „05/01/2024“ = 5. Januar, nur Jahr), Spielzeit („12:30“, „12,5 h“, „45 min“) und
 Wertung („4/5“, „8/10“, „★★★★“). Fotos lassen sich per CSV nicht übertragen.
 
+## Cover & Daten nachträglich ergänzen
+
+Einträge ohne Verknüpfung (z. B. nach einem CSV-Import oder frei eingetippt) lassen
+sich nachträglich mit TheGamesDB verbinden – dann kommen Cover, Entwickler,
+Publisher, Genre, Erscheinungsdatum und Beschreibung dazu:
+
+- **Einzeln:** Detailseite › „🔍 Bei TheGamesDB suchen“ → Treffer antippen
+  (Suchbegriff und Plattform anpassbar, optional Titel übernehmen).
+- **Alle:** Sammlung bzw. Durchgespielt › „🔍 Cover ergänzen (Anzahl)“. Eindeutige
+  Treffer (gleicher Titel auf gleicher Plattform) werden automatisch verknüpft,
+  unklare Fälle zum Bestätigen gesammelt. Läuft in kleinen Stapeln mit
+  Fortschrittsanzeige und stoppt, bevor das TheGamesDB-Kontingent aufgebraucht ist.
+
 ## Schlank für langsame Verbindungen (EDGE/3G)
 
 - Kein Framework, kein jQuery/Bootstrap: eine CSS-Datei (~7 KB gzip),

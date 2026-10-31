@@ -104,7 +104,7 @@ final class PlayController
             if (!$errors) {
                 $now = Database::now();
                 if ($play) {
-                    $db->update('plays', $data + ['updated_at' => $now], ['id' => $play['id'], 'user_id' => Auth::id()]);
+                    $db->update('plays', $data + ['updated_at' => $now, 'scrape_status' => null], ['id' => $play['id'], 'user_id' => Auth::id()]);
                 } else {
                     $db->insert('plays', $data + ['user_id' => Auth::id(), 'created_at' => $now, 'updated_at' => $now]);
                 }

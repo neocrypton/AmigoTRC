@@ -16,7 +16,7 @@ namespace Amigo\Core;
  */
 final class Schema
 {
-    public const VERSION = 4;
+    public const VERSION = 5;
 
     public static function migrate(Database $db): void
     {
@@ -24,7 +24,7 @@ final class Schema
         if ($current >= self::VERSION) {
             return;
         }
-        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4()];
+        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5()];
         foreach ($steps as $version => $statements) {
             if ($current < $version) {
                 foreach ($statements as $ddl) {
@@ -61,6 +61,15 @@ final class Schema
         // Index-Namen sind in SQLite datenbankweit eindeutig -> mit Präfix versehen.
         $ddl = preg_replace_callback('/\[([a-z_]+)\]/', fn ($m) => $db->quoteIdent($db->prefix() . $m[1]), $ddl);
         return $db->sql($ddl);
+    }
+
+    /** v5: Status der automatischen TheGamesDB-Zuordnung ('review' = prüfen, 'none' = nichts gefunden). */
+    private static function v5(): array
+    {
+        return [
+            'ALTER TABLE {items} ADD COLUMN scrape_status VARCHAR(10) NULL',
+            'ALTER TABLE {plays} ADD COLUMN scrape_status VARCHAR(10) NULL',
+        ];
     }
 
     /** v4: Avatar (Pixel-Badge oder eigenes Bild). */

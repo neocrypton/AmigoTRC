@@ -15,6 +15,9 @@ $params = ($owner ? ['name' => $owner['username']] : []) + array_filter(['q' => 
     <?php else: ?>
     <h1 class="h1">Sammlung <span class="count"><?= fmt_num($total) ?></span></h1>
     <div class="btnrow">
+        <?php if ($missing = \Amigo\Service\Scraper::openCount(\Amigo\Core\Auth::id(), 'collection')): ?>
+        <a class="btn btn-ghost" href="<?= e(url('scrape', ['target' => 'collection'])) ?>" title="Spiele ohne Cover/Spieldaten">🔍 Cover ergänzen (<?= $missing ?>)</a>
+        <?php endif; ?>
         <a class="btn btn-ghost" href="<?= e(url('import', ['target' => 'collection'])) ?>">⤒ CSV-Import</a>
         <a class="btn btn-primary" href="<?= e(url('item/edit', ['platform' => $filter['platform'], 'kind' => $filter['kind']])) ?>">+ Neuer Eintrag</a>
     </div>

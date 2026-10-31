@@ -13,6 +13,9 @@ $rating = isset($play['rating']) && $play['rating'] !== null ? (int)$play['ratin
 
     <section class="panel">
         <h2 class="panel-title">Spiel</h2>
+        <?php if (!empty($play['id']) && empty($play['game_id'])): ?>
+        <p class="scrape-inline">Kein Cover verknüpft · <a href="<?= e(url('scrape/item', ['target' => 'plays', 'id' => $play['id']])) ?>">🔍 Bei TheGamesDB suchen</a></p>
+        <?php endif; ?>
         <?php $record = $play; require __DIR__ . '/../partials/game_picker.php'; ?>
     </section>
 

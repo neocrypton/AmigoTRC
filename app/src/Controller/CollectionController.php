@@ -141,7 +141,7 @@ final class CollectionController
             if (!$errors) {
                 $now = Database::now();
                 if ($item) {
-                    $db->update('items', $data + ['updated_at' => $now], ['id' => $item['id'], 'user_id' => Auth::id()]);
+                    $db->update('items', $data + ['updated_at' => $now, 'scrape_status' => null], ['id' => $item['id'], 'user_id' => Auth::id()]);
                     $itemId = (int)$item['id'];
                 } else {
                     $itemId = $db->insert('items', $data + ['user_id' => Auth::id(), 'created_at' => $now, 'updated_at' => $now]);

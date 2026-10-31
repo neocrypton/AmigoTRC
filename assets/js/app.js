@@ -308,6 +308,34 @@
     box.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
   });
 
+  /* ---------- Cover ergänzen: Stapel nacheinander abarbeiten, mit Fortschritt ---------- */
+  $$('form[data-scrape-run]').forEach(function (form) {
+    var box = $('[data-scrape-progress]');
+    var bar = box ? $('progress', box) : null;
+    var status = box ? $('[data-scrape-status]', box) : null;
+    var total = { processed: 0, linked: 0, review: 0, none: 0 };
+    form.addEventListener('submit', function (e) {
+      if (!window.fetch || !box) return;
+      e.preventDefault();
+      form.hidden = true;
+      box.hidden = false;
+      var step = function () {
+        fetch(form.action, { method: 'POST', body: new FormData(form), credentials: 'same-origin', headers: { Accept: 'application/json' } })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d.error) { status.textContent = d.error; return; }
+            ['processed', 'linked', 'review', 'none'].forEach(function (k) { total[k] += d[k]; });
+            bar.value = total.processed;
+            status.textContent = total.processed + ' geprüft · ' + total.linked + ' verknüpft · ' + total.review + ' zum Prüfen · ' + total.none + ' ohne Treffer';
+            if (d.stopped) { status.textContent += ' – ' + d.stopped; setTimeout(function () { location.reload(); }, 4000); return; }
+            if (d.remaining > 0 && d.processed > 0) { step(); } else { status.textContent += ' – fertig!'; setTimeout(function () { location.reload(); }, 1500); }
+          })
+          .catch(function () { status.textContent = 'Verbindung unterbrochen – Seite neu laden, um fortzusetzen.'; });
+      };
+      step();
+    });
+  });
+
   /* ---------- CSV-Import: jedes Feld nur einer Spalte zuordnen ---------- */
   var mapSelects = $$('[data-map-select]');
   mapSelects.forEach(function (sel) {

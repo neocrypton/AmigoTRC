@@ -84,6 +84,13 @@ $cover = tgdb_image($game['boxart_large'] ?? null) ?? tgdb_image($game['boxart_t
     </section>
 </div>
 
+<?php if (!$game && !$owner && $item['kind'] === 'game'): ?>
+<section class="panel scrape-hint">
+    <p>Kein Cover und keine Spieldaten verknüpft.</p>
+    <a class="btn btn-primary" href="<?= e(url('scrape/item', ['target' => 'collection', 'id' => $item['id']])) ?>">🔍 Bei TheGamesDB suchen</a>
+</section>
+<?php endif; ?>
+
 <?php if ($game): ?>
 <section class="panel gameinfo">
     <h2 class="panel-title">Spielinfo <small class="muted">TheGamesDB</small></h2>
@@ -99,6 +106,7 @@ $cover = tgdb_image($game['boxart_large'] ?? null) ?? tgdb_image($game['boxart_t
             </dl>
             <?php if ($game['overview']): ?><details><summary>Beschreibung</summary><div class="text"><?= nl2br(e($game['overview'])) ?></div></details><?php endif; ?>
             <?php if ($game['tgdb_id']): ?><p><a href="https://thegamesdb.net/game.php?id=<?= (int)$game['tgdb_id'] ?>" target="_blank" rel="noopener noreferrer">Auf TheGamesDB ansehen ↗</a></p><?php endif; ?>
+            <?php if (!$owner): ?><p><a class="muted" href="<?= e(url('scrape/item', ['target' => 'collection', 'id' => $item['id']])) ?>">Falsches Spiel? Andere Zuordnung wählen</a></p><?php endif; ?>
         </div>
     </div>
 </section>
