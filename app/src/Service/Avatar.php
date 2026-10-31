@@ -24,10 +24,13 @@ final class Avatar
         return App::dataDir() . '/avatars';
     }
 
+    /** Neue Badges verändern die automatische Zuordnung nicht: sie nutzt nur die ersten 30. */
+    private const DEFAULT_POOL = 30;
+
     /** Fester Standard-Badge pro Nutzer, falls nichts gewählt wurde. */
     public static function defaultBadge(int $userId): string
     {
-        $keys = array_keys(Badges::ALL);
+        $keys = array_slice(array_keys(Badges::ALL), 0, self::DEFAULT_POOL);
         return $keys[($userId - 1) % count($keys)];
     }
 

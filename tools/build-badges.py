@@ -10,7 +10,7 @@ import os
 PALETTE = {
     'K': '#1b1b2f', 'W': '#f4f4f4', 'R': '#e43b44', 'O': '#f77622', 'Y': '#feae34',
     'G': '#63c74d', 'B': '#0099db', 'C': '#2ce8f5', 'P': '#b55088', 'S': '#9badb7',
-    'D': '#5a6988', 'N': '#8b5a3c',
+    'D': '#5a6988', 'N': '#8b5a3c', 'E': '#a7f070', 'M': '#ffcd75', 'Q': '#ff77a8',
 }
 
 # (id, Name, Hintergrund, Hauptfarbe A, Raster)
@@ -314,6 +314,325 @@ AAAAARARAAAAA
 ...AAAAA....
 ..AAAAAA....
 .AAAAAAAA..."""),
+    # --- Serie 2 ---
+    ('snake', 'Schlange', '#ffcd75', '#38b764', """
+..AAAA......
+.AKAAKA.....
+.AAAAAA.....
+..AARA......
+....RR..AA..
+...AAAAAAAA.
+..AA.....AA.
+..AAAAAAAAA.
+.........AA.
+.AAAAAAAAAA."""),
+    ('penguin', 'Pinguin', '#73eff7', '#1a1c2c', """
+....AAAA....
+...AAAAAA...
+..AAWAAWAA..
+..AAAOOAAA..
+.AAWWWWWWAA.
+.AWWWWWWWWA.
+AAWWWWWWWWAA
+.AWWWWWWWWA.
+.AAWWWWWWAA.
+..OO....OO.."""),
+    ('owl', 'Eule', '#29366f', '#8b5a3c', """
+.A........A.
+.AA......AA.
+.AAAAAAAAAA.
+AWWWAAAAWWWA
+AWKWAAAAWKWA
+AWWWAOOAWWWA
+AAAAAAOAAAAA
+AAMMMMMMMMAA
+.AMMMMMMMMA.
+..AAMMMMAA..
+...O....O..."""),
+    ('fish', 'Fisch', '#3b5dc9', '#f77622', """
+.....AAA......
+...AAAAAA...A.
+..AWKAAAAA.AA.
+.AAAAAAAAAAA..
+.AAAAAAAAAAA..
+..AAAAAAAA.AA.
+...AAAAAA...A."""),
+    ('octopus', 'Krake', '#1a1c2c', '#b55088', """
+....AAAA....
+..AAAAAAAA..
+.AAAAAAAAAA.
+.AWWAAAAWWA.
+.AWKAAAAWKA.
+.AAAAAAAAAA.
+..AAAAAAAA..
+.A.A.AA.A.A.
+A..A.A..A..A"""),
+    ('mouse', 'Maus', '#38b764', '#9badb7', """
+.AA......AA.
+AQQA....AQQA
+AQQAAAAAAQQA
+.AAAAAAAAAA.
+..AKAAAAKA..
+..AAAAAAAA..
+...AAKKAA...
+....AAAA...."""),
+    ('bunny', 'Hase', '#b55088', '#f4f4f4', """
+..AA..AA..
+..AQ..QA..
+..AQ..QA..
+..AA..AA..
+.AAAAAAAA.
+.AKAAAAKA.
+.AAAQQAAA.
+..AAAAAA..
+.AAAAAAAA.
+.AAAAAAAA."""),
+    ('pig', 'Schwein', '#a7f070', '#ff77a8', """
+.A........A.
+.AA......AA.
+.AAAAAAAAAA.
+.AKAAAAAAKA.
+.AAAPPPPAAA.
+.AAAPKKPAAA.
+.AAAPPPPAAA.
+..AAAAAAAA.."""),
+    ('duck', 'Ente', '#41a6f6', '#feae34', """
+....AAA.....
+...AAAAA....
+...AKAAAOO..
+...AAAAOOO..
+....AAA.....
+.AAAAAAAA...
+AAAAAAAAAA..
+AAAWWAAAAA..
+.AAAAAAAA..."""),
+    ('bee', 'Biene', '#63c74d', '#feae34', """
+...WW...WW..
+..WWWW.WWWW.
+...WW...WW..
+..AAKKAAKK..
+.AKAKKAAKKA.
+AAAAKKAAKKAK
+.AAAKKAAKKA.
+..AAKKAAKK.."""),
+    ('crab', 'Krabbe', '#ffcd75', '#e43b44', """
+AA........AA
+A.A......A.A
+AA..W..W..AA
+.A..K..K..A.
+.AAAAAAAAAA.
+..AAAAAAAA..
+.A.A.AA.A.A.
+A..A....A..A"""),
+    ('snail', 'Schnecke', '#29366f', '#8b5a3c', """
+.........E.E
+.........E.E
+...AAAA..EEE
+..AOOOOA.EKE
+.AOAAAOA.EEE
+.AOAOOAA.EE.
+.AOAAAAA.EE.
+.AAAAAAA.EE.
+EEEEEEEEEEE."""),
+    ('trophy', 'Pokal', '#5d275d', '#feae34', """
+AAAAAAAAAAAA
+A.AAAAAAAA.A
+A.AAAWAAAA.A
+.AAAAWAAAAA.
+..AAAAAAAA..
+....AAAA....
+.....AA.....
+.....AA.....
+....AAAA....
+...NNNNNN...
+...NNNNNN..."""),
+    ('gem', 'Juwel', '#1a1c2c', '#2ce8f5', """
+...AAAAAA...
+..AWWAAAAA..
+.AWAAAAAAAA.
+AAAAAAAAAAAA
+.AAABBBBAAA.
+..AABBBBAA..
+...AABBAA...
+....AABA....
+.....AA....."""),
+    ('shield', 'Schild', '#566c86', '#3b5dc9', """
+AAAAAAAAAA
+AWWWWYYYYA
+AWWWWYYYYA
+AWWWWYYYYA
+AYYYYWWWWA
+AYYYYWWWWA
+.AYYYWWWA.
+..AYYWWA..
+...AAAA..."""),
+    ('axe', 'Axt', '#a7f070', '#9badb7', """
+..AA......
+.AAAN.....
+AAAAAN....
+AAAA.NN...
+.AA...NN..
+.......NN.
+........NN"""),
+    ('chest', 'Schatztruhe', '#3b5dc9', '#8b5a3c', """
+..AAAAAAAA..
+.AAAAAAAAAA.
+.AYYYYYYYYA.
+.AAAAYYAAAA.
+.AAAAKKAAAA.
+.AAAAYYAAAA.
+.AAAAAAAAAA.
+.AYYYYYYYYA."""),
+    ('lightning', 'Blitz', '#29366f', '#feae34', """
+.....AAAA
+....AAAA.
+...AAAA..
+..AAAAAAA
+.....AAA.
+....AAA..
+...AAA...
+..AAA....
+..AA.....
+..A......"""),
+    ('flame', 'Flamme', '#1a1c2c', '#e43b44', """
+.....A.....
+....AA.....
+...AAA..A..
+..AAAAA.AA.
+..AAOAAAAA.
+.AAAOOAAAA.
+.AAOOYOAAA.
+.AAOYYYOAA.
+.AAOYWYOAA.
+..AAOYOAA..
+...AAAAA..."""),
+    ('moon', 'Mond', '#1a1c2c', '#ffcd75', """
+....AAAA...W
+..AAAA......
+.AAAA....W..
+.AAA........
+AAAA........
+AAAA.....W..
+AAAA........
+.AAAA....A..
+.AAAAA..AA..
+..AAAAAAA...
+....AAA....."""),
+    ('tree', 'Baum', '#73eff7', '#38b764', """
+.....AA.....
+....AAAA....
+...AAEAAA...
+..AAAAAEAA..
+...AAAAAA...
+..AEAAAAAA..
+.AAAAAAEAAA.
+AAAAAAAAAAAA
+.....NN.....
+.....NN....."""),
+    ('planet', 'Planet', '#1a1c2c', '#f77622', """
+..........MM
+....AAAA.MM.
+..AAAAAAMM..
+.AAAAAAMMA..
+.AAAAAMMAA..
+.AAAMMAAAA..
+.AAMMAAAAA..
+..MMAAAAA...
+.MM.AAAA....
+MM.........."""),
+    ('pumpkin', 'Kürbis', '#5d275d', '#f77622', """
+.....GG.....
+....GG......
+..AAAAAAAA..
+.AAAAAAAAAA.
+AAKKAAAAKKAA
+AAKKAAAAKKAA
+AAAAAKKAAAAA
+AAKAAAAAAKAA
+.AAKKKKKKAA.
+..AAAAAAAA.."""),
+    ('snowman', 'Schneemann', '#41a6f6', '#f4f4f4', """
+....KKKK....
+....KKKK....
+...KKKKKK...
+....AAAA....
+...AKAAKA...
+...AAOOAA...
+....AAAA....
+..AAAKAAAA..
+.AAAAAAAAAA.
+.AAAAKAAAAA.
+.AAAAAAAAAA.
+..AAAAAAAA.."""),
+    ('burger', 'Burger', '#b13e53', '#feae34', """
+...AAAAAA...
+..AAWAAWAA..
+.AAAAAAAAAA.
+.GGGGGGGGGG.
+.RRRRRRRRRR.
+.NNNNNNNNNN.
+.MMMMMMMMMM.
+..AAAAAAAA.."""),
+    ('icecream', 'Eis', '#73eff7', '#ff77a8', """
+....AAA.....
+...AAAAA....
+..AAWAAAA...
+..AAAAAAA...
+..CCCCCCC...
+..CCCCCCC...
+...YYYYY....
+...YNYNY....
+....YYY.....
+....YNY.....
+.....Y......"""),
+    ('arcade', 'Spielautomat', '#1a1c2c', '#b55088', """
+..AAAAAAAA..
+..AYYYYYYA..
+..AAAAAAAA..
+..AKKKKKKA..
+..AKCCCCKA..
+..AKCKKCKA..
+..AKKKKKKA..
+..AAAAAAAA..
+.AAARAAWAAA.
+.AAAAAAAAAA.
+..AAAAAAAA..
+..AAAAAAAA.."""),
+    ('handheld', 'Handheld', '#e43b44', '#9badb7', """
+.AAAAAAAAA.
+.AKKKKKKKA.
+.AKEEEEEKA.
+.AKEEEEEKA.
+.AKEEEEEKA.
+.AKKKKKKKA.
+.AAAAAAAAA.
+.AKAAAAARA.
+.KKKAAARAA.
+.AKAAAAAAA.
+.AAAADDAAA.
+..AAAAAAA.."""),
+    ('crt', 'Röhren-TV', '#ffcd75', '#8b5a3c', """
+...K....K...
+....K..K....
+.....KK.....
+.AAAAAAAAAA.
+.AKKKKKKKSA.
+.AKBBBBBKAA.
+.AKBCBBBKSA.
+.AKBBBBBKAA.
+.AKKKKKKKSA.
+.AAAAAAAAAA.
+..A......A.."""),
+    ('dice', 'Würfel', '#38b764', '#f4f4f4', """
+.AAAAAAAAA.
+AAAAAAAAAAA
+AAKAAAAAKAA
+AAAAAAAAAAA
+AAAAAKAAAAA
+AAAAAAAAAAA
+AAKAAAAAKAA
+AAAAAAAAAAA
+.SSSSSSSSS."""),
 ]
 
 
@@ -342,7 +661,7 @@ def symbol(bid, name, bg, main, art):
 
 
 if __name__ == '__main__':
-    assert len(BADGES) == 30 and len({b[0] for b in BADGES}) == 30
+    assert len(BADGES) == 60 and len({b[0] for b in BADGES}) == 60
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     svg = ('<svg xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">\n'
            + '\n'.join(symbol(*b) for b in BADGES) + '\n</svg>\n')

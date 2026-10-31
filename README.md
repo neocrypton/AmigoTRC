@@ -39,7 +39,7 @@ auf dem Tablet und auf dem Smartphone.
   nur lesend. Kaufpreis, Kaufdatum, Händler und Notizen bleiben immer privat,
   nicht angemeldete Besucher sehen nichts
 - Eigener TheGamesDB-API-Key pro Nutzer (unter *Mein Konto*)
-- **Avatar:** 30 Pixel-Badges zur Auswahl oder ein eigenes Mini-Bild (max. 512 KB,
+- **Avatar:** 60 Pixel-Badges zur Auswahl oder ein eigenes Mini-Bild (max. 512 KB,
   wird quadratisch auf 128×128 px gebracht, Pixel-Art bleibt scharf). Neue Badges
   lassen sich in `tools/build-badges.py` zeichnen (`python3 tools/build-badges.py`)
 - Zwei-Faktor-Anmeldung (TOTP, z. B. Aegis, 2FAS, Bitwarden, Google/Microsoft
