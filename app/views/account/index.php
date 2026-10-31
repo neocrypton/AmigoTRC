@@ -7,6 +7,7 @@
     <a href="<?= e(url('community')) ?>">👾<span>Community</span></a>
     <a href="<?= e(url('u', ['name' => $user['username']])) ?>">🪪<span>Mein Profil</span></a>
     <a href="<?= e(url('platforms')) ?>">🕹<span>Plattformen</span></a>
+    <a href="<?= e(url('import')) ?>">⤒<span>CSV-Import</span></a>
     <a href="<?= e(url('export', ['type' => 'collection'])) ?>">⤓<span>Sammlung als CSV</span></a>
     <a href="<?= e(url('export', ['type' => 'plays'])) ?>">⤓<span>Durchgespielt als CSV</span></a>
     <?php if (Auth::isAdmin()): ?>

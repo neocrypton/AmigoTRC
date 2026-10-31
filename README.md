@@ -18,7 +18,7 @@ auf dem Tablet und auf dem Smartphone.
   und Reihenfolge; Galerie mit Vollbildansicht
 - Kaufdatum, Preis, Händler, Notizen
 - Filter, Suche, Sortierung, Kachel- oder datensparende Listenansicht
-- CSV-Export (Excel-kompatibel)
+- CSV-Export (Excel-kompatibel) und **CSV-Import** für Umsteiger (siehe unten)
 
 **Durchgespielt**
 - Spiel (aus TheGamesDB oder frei), Plattform, Datum, Spielzeit,
@@ -52,6 +52,27 @@ auf dem Tablet und auf dem Smartphone.
 - Drei Farbschemata: *CRT Neon*, *Game Boy* (DMG-Grün) und *C64*
 - Mobil: App-artige Navigationsleiste unten, große Touch-Ziele,
   „Zum Startbildschirm hinzufügen“ (Web-App-Manifest)
+
+## CSV-Import
+
+Unter **Mein Konto › CSV-Import** (oder in Sammlung / Durchgespielt) lassen sich
+Listen aus Excel, LibreOffice, Google Sheets oder anderen Sammler-Apps übernehmen:
+
+1. **Hochladen:** Ziel wählen (Sammlung oder Durchgespielt), CSV-Datei hochladen
+   (max. 5 MB / 5.000 Zeilen). Trennzeichen und Zeichensatz (UTF-8, Excel/Windows,
+   UTF-16) werden erkannt.
+2. **Spalten zuordnen:** Für jede Spalte (mit Beispielwerten) das AMIGO-Feld wählen.
+   Bekannte Spaltennamen (deutsch/englisch, auch der AMIGO-Export) werden vorgeschlagen.
+3. **Vorschau & Plattformen:** Plattformen werden automatisch erkannt (auch Kürzel
+   wie SNES, PS1, N64, Mega Drive); unbekannte werden von Hand zugeordnet. Die
+   Vorschau zeigt, wie die Zeilen ankommen, und markiert unlesbare Werte.
+4. **Import:** optional ohne Duplikate (gleicher Titel + Plattform).
+
+Werte werden übersetzt: Zustand („sehr gut“, „Mint“, „8/10“), Region („PAL“, „US“,
+„JP“), Vollständigkeit („CIB“, „OVP“, „lose“ oder Spalten Verpackung/Anleitung ja/nein),
+Preise („24,90 €“, „$12.50“, „1.234,56“), Datum („01.05.2024“, „2024-05-01“,
+„05/01/2024“ = 5. Januar, nur Jahr), Spielzeit („12:30“, „12,5 h“, „45 min“) und
+Wertung („4/5“, „8/10“, „★★★★“). Fotos lassen sich per CSV nicht übertragen.
 
 ## Schlank für langsame Verbindungen (EDGE/3G)
 

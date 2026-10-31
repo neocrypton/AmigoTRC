@@ -520,6 +520,27 @@ meter::-moz-meter-bar { background: var(--accent); }
 .captcha { overflow: hidden; }
 @media (max-width: 360px) { .g-recaptcha { transform: scale(.88); transform-origin: 0 0; } }
 
+/* CSV-Import */
+.steps { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; padding: 0; }
+.steps li { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: 2px solid var(--line); color: var(--muted); font-size: 14px; }
+.steps li a { color: inherit; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+.steps span { font-family: "Press Start 2P", monospace; font-size: 10px; }
+.steps li[aria-current] { border-color: var(--accent); color: var(--accent); }
+.mapgrid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); margin-bottom: 16px; }
+.mapcol { display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--bg); border: 2px dashed var(--line); min-width: 0; }
+.mapcol.is-mapped { border-style: solid; border-color: var(--ok); }
+.mapcol-head { font-weight: 700; overflow-wrap: anywhere; margin: 0; }
+.mapcol-samples { list-style: none; margin: 0; padding: 0; font-size: 13px; color: var(--muted); }
+.mapcol-samples li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-bottom: 1px dotted var(--line); padding: 2px 0; }
+.pmap { display: grid; gap: 10px; margin-bottom: 16px; }
+.pmap-row { display: grid; gap: 6px; align-items: center; }
+@media (min-width: 700px) { .pmap-row { grid-template-columns: 1fr 1fr; } }
+.pmap-row label { margin: 0; overflow-wrap: anywhere; }
+.warnline { display: block; color: var(--warn); }
+.tips { padding-left: 20px; }
+.tips li { margin-bottom: 8px; }
+.center-row { justify-content: center; margin-top: 18px; }
+
 /* Avatare */
 .avatar { display: inline-block; vertical-align: middle; flex: 0 0 auto; image-rendering: pixelated; border: 2px solid var(--line); background: var(--bg); object-fit: cover; }
 .avatar-mini { border-width: 0; width: 28px; height: 28px; }

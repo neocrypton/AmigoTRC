@@ -11,7 +11,10 @@ $params = ($owner ? ['name' => $owner['username']] : []) + array_filter(['q' => 
     </div>
     <?php else: ?>
     <h1 class="h1">Durchgespielt <span class="count"><?= fmt_num((int)$summary['cnt']) ?></span></h1>
-    <a class="btn btn-primary" href="<?= e(url('play/edit')) ?>">+ Eintragen</a>
+    <div class="btnrow">
+        <a class="btn btn-ghost" href="<?= e(url('import', ['target' => 'plays'])) ?>">⤒ CSV-Import</a>
+        <a class="btn btn-primary" href="<?= e(url('play/edit')) ?>">+ Eintragen</a>
+    </div>
     <?php endif; ?>
 </div>
 

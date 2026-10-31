@@ -54,6 +54,10 @@ $routes = [
 
     'cover'             => [C\CoverController::class, 'show', 'auth'],
     'api/games'         => [C\ApiController::class, 'games', 'auth'],
+    'import'            => [C\ImportController::class, 'upload', 'auth'],
+    'import/map'        => [C\ImportController::class, 'map', 'auth'],
+    'import/preview'    => [C\ImportController::class, 'preview', 'auth'],
+    'import/cancel'     => [C\ImportController::class, 'cancel', 'auth'],
     'export'            => [C\AccountController::class, 'export', 'auth'],
 
     'account'           => [C\AccountController::class, 'index', 'auth'],

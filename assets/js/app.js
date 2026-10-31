@@ -308,6 +308,22 @@
     box.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
   });
 
+  /* ---------- CSV-Import: jedes Feld nur einer Spalte zuordnen ---------- */
+  var mapSelects = $$('[data-map-select]');
+  mapSelects.forEach(function (sel) {
+    sel.addEventListener('change', function () {
+      if (sel.value) {
+        mapSelects.forEach(function (other) {
+          if (other !== sel && other.value === sel.value) {
+            other.value = '';
+            other.closest('.mapcol').classList.remove('is-mapped');
+          }
+        });
+      }
+      sel.closest('.mapcol').classList.toggle('is-mapped', !!sel.value);
+    });
+  });
+
   /* ---------- Felder nur bei passender Auswahl zeigen (z. B. SMTP-Daten) ---------- */
   $$('[data-toggle-target]').forEach(function (sel) {
     var target = $(sel.getAttribute('data-toggle-target'));
