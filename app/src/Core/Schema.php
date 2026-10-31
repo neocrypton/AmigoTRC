@@ -16,7 +16,7 @@ namespace Amigo\Core;
  */
 final class Schema
 {
-    public const VERSION = 6;
+    public const VERSION = 7;
 
     public static function migrate(Database $db): void
     {
@@ -24,7 +24,7 @@ final class Schema
         if ($current >= self::VERSION) {
             return;
         }
-        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5(), 6 => self::v6()];
+        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5(), 6 => self::v6(), 7 => self::v7()];
         foreach ($steps as $version => $statements) {
             if ($current < $version) {
                 foreach ($statements as $ddl) {
@@ -61,6 +61,15 @@ final class Schema
         // Index-Namen sind in SQLite datenbankweit eindeutig -> mit Präfix versehen.
         $ddl = preg_replace_callback('/\[([a-z_]+)\]/', fn ($m) => $db->quoteIdent($db->prefix() . $m[1]), $ddl);
         return $db->sql($ddl);
+    }
+
+    /** v7: E-Mail-Benachrichtigung bei neuen PNs (Einstellung + „schon benachrichtigt bis Nachricht X“). */
+    private static function v7(): array
+    {
+        return [
+            'ALTER TABLE {users} ADD COLUMN pm_notify SMALLINT NOT NULL DEFAULT 1',
+            'ALTER TABLE {conversation_users} ADD COLUMN notified_id %INT% NOT NULL DEFAULT 0',
+        ];
     }
 
     /** v6: Private Nachrichten (Unterhaltungen mit bis zu 10 Teilnehmern). */

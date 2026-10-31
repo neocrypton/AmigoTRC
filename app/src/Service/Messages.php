@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Amigo\Service;
 
 use Amigo\Core\App;
+use Amigo\Core\Crypto;
 use Amigo\Core\Database;
 use Amigo\Core\Settings;
 
@@ -19,6 +20,9 @@ final class Messages
     public const MAX_PARTICIPANTS = 10;
     public const SUBJECT_MAX = 150;
     public const BODY_MAX = 5000;
+
+    /** E-Mails, die nach dem Ausliefern der Seite verschickt werden. */
+    private static array $mailQueue = [];
 
     /** Nur aktiv, solange die öffentliche Registrierung freigegeben ist. */
     public static function enabled(): bool
@@ -133,6 +137,7 @@ final class Messages
             foreach ($recipientIds as $rid) {
                 $db->insert('conversation_users', ['conversation_id' => $cid, 'user_id' => (int)$rid, 'status' => 'active', 'last_read_id' => 0, 'joined_at' => $now]);
             }
+            self::notify($cid, $mid, $senderId);
             return $cid;
         });
     }
@@ -145,6 +150,7 @@ final class Messages
             $mid = $db->insert('messages', ['conversation_id' => $conversationId, 'user_id' => $userId, 'body' => $body, 'created_at' => $now]);
             $db->update('conversations', ['last_message_at' => $now, 'last_message_id' => $mid], ['id' => $conversationId]);
             $db->update('conversation_users', ['last_read_id' => $mid], ['conversation_id' => $conversationId, 'user_id' => $userId]);
+            self::notify($conversationId, $mid, $userId);
         });
     }
 
@@ -162,7 +168,7 @@ final class Messages
     }
 
     /** Teilnehmer hinzufügen (nur Ersteller). Gibt Anzahl hinzugefügter zurück. */
-    public static function addParticipants(int $conversationId, array $userIds): int
+    public static function addParticipants(int $conversationId, array $userIds, int $byUserId = 0): int
     {
         $db = App::db();
         $added = 0;
@@ -178,6 +184,15 @@ final class Messages
                 $db->insert('conversation_users', ['conversation_id' => $conversationId, 'user_id' => $uid, 'status' => 'active', 'last_read_id' => 0, 'joined_at' => Database::now()]);
             }
             $added++;
+        }
+        if ($added) {
+            // Hinzugefügte erhalten (falls gewünscht) eine Mail, auch wenn ihr letzter Besuch Mails blockieren würde.
+            $db->run(
+                'UPDATE {conversation_users} SET notified_id = 0 WHERE conversation_id = ? AND user_id IN (' . Database::placeholders(count($userIds)) . ')',
+                [$conversationId, ...array_map('intval', $userIds)]
+            );
+            $last = (int)$db->value('SELECT last_message_id FROM {conversations} WHERE id = ?', [$conversationId]);
+            self::notify($conversationId, $last, $byUserId, array_map('intval', $userIds));
         }
         return $added;
     }
@@ -208,6 +223,96 @@ final class Messages
             $db->update('conversations', ['last_message_at' => $last['created_at'], 'last_message_id' => (int)$last['id']], ['id' => $conversationId]);
         }
         return $n;
+    }
+
+    /**
+     * Merkt E-Mails für Teilnehmer vor, die das wünschen.
+     * Pro Unterhaltung gibt es nur eine Mail, bis der Empfänger sie wieder gelesen hat
+     * (notified_id <= last_read_id). Nur an bestätigte Adressen.
+     */
+    public static function notify(int $conversationId, int $messageId, int $senderId, ?array $onlyUserIds = null): void
+    {
+        if (!Mailer::configured()) {
+            return;
+        }
+        $db = App::db();
+        $rows = $db->all(
+            "SELECT u.id, u.username, u.email, cu.notified_id, cu.last_read_id FROM {conversation_users} cu JOIN {users} u ON u.id = cu.user_id
+             WHERE cu.conversation_id = ? AND cu.status = 'active' AND u.id <> ? AND u.is_active = 1
+               AND u.pm_notify = 1 AND u.email IS NOT NULL AND u.email_verified_at IS NOT NULL
+               AND cu.notified_id <= cu.last_read_id",
+            [$conversationId, $senderId]
+        );
+        if (!$rows) {
+            return;
+        }
+        $conv = $db->one('SELECT subject FROM {conversations} WHERE id = ?', [$conversationId]);
+        $sender = (string)($db->value('SELECT username FROM {users} WHERE id = ?', [$senderId]) ?? 'Jemand');
+        $site = (string)App::config('site_name', 'AMIGO!');
+        $base = Accounts::baseUrl();
+        foreach ($rows as $r) {
+            if ($onlyUserIds !== null && !in_array((int)$r['id'], $onlyUserIds, true)) {
+                continue;
+            }
+            $db->update('conversation_users', ['notified_id' => $messageId], ['conversation_id' => $conversationId, 'user_id' => $r['id']]);
+            self::$mailQueue[] = [
+                (string)$r['email'],
+                $site . ': Neue Nachricht von ' . $sender . ' – ' . mb_strimwidth((string)$conv['subject'], 0, 60, '…'),
+                implode("\n", [
+                    'Hallo ' . $r['username'] . ',',
+                    '',
+                    $sender . ' hat dir in der Unterhaltung „' . $conv['subject'] . '“ geschrieben.',
+                    '',
+                    'Lesen und antworten:',
+                    $base . 'index.php?' . http_build_query(['r' => 'message', 'id' => $conversationId]),
+                    '',
+                    'Weitere Nachrichten in dieser Unterhaltung lösen keine neue E-Mail aus, bis du sie gelesen hast.',
+                    '',
+                    'Keine E-Mails mehr zu privaten Nachrichten:',
+                    self::unsubscribeUrl((int)$r['id']),
+                    '',
+                    '– ' . $site,
+                ]),
+            ];
+        }
+        static $registered = false;
+        if (self::$mailQueue && !$registered) {
+            $registered = true;
+            register_shutdown_function([self::class, 'flushMail']);
+        }
+    }
+
+    /** Verschickt vorgemerkte Mails – nach Möglichkeit erst, nachdem die Seite ausgeliefert ist. */
+    public static function flushMail(): void
+    {
+        if (!self::$mailQueue) {
+            return;
+        }
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
+        @set_time_limit(120);
+        foreach (self::$mailQueue as [$to, $subject, $text]) {
+            try {
+                Mailer::send($to, $subject, $text);
+            } catch (\Throwable $e) {
+                error_log('AMIGO: PN-Benachrichtigung an ' . $to . ' fehlgeschlagen: ' . $e->getMessage());
+            }
+        }
+        self::$mailQueue = [];
+    }
+
+    public static function unsubscribeToken(int $userId): string
+    {
+        return substr(Crypto::hmac('pm-unsubscribe', (string)$userId), 0, 32);
+    }
+
+    public static function unsubscribeUrl(int $userId): string
+    {
+        return Accounts::baseUrl() . 'index.php?' . http_build_query(['r' => 'pm/unsubscribe', 'u' => $userId, 't' => self::unsubscribeToken($userId)]);
     }
 
     public static function deleteIfEmpty(int $conversationId): void

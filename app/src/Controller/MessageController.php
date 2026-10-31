@@ -169,7 +169,7 @@ final class MessageController
                 if ($active + count($new) > Messages::MAX_PARTICIPANTS) {
                     flash('error', 'Maximal ' . Messages::MAX_PARTICIPANTS . ' Teilnehmer pro Unterhaltung.');
                 } elseif ($new) {
-                    $n = Messages::addParticipants($cid, $new);
+                    $n = Messages::addParticipants($cid, $new, $uid);
                     flash('ok', $n . ' Teilnehmer hinzugefügt.');
                 }
                 break;

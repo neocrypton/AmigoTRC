@@ -113,6 +113,25 @@
 </div>
 
 <div class="cols">
+    <?php if (\Amigo\Service\Messages::enabled()): $mailOk = \Amigo\Service\Mailer::configured(); ?>
+    <section class="panel" id="benachrichtigungen">
+        <h2 class="panel-title">Benachrichtigungen</h2>
+        <form method="post" action="<?= e(url('account/notify')) ?>">
+            <?= csrf_field() ?>
+            <label class="check"><input type="checkbox" name="pm_notify" value="1"<?= checked((int)$user['pm_notify'] === 1) ?>> E-Mail bei neuen privaten Nachrichten</label>
+            <p class="hint">Pro Unterhaltung eine Mail – weitere erst wieder, nachdem du sie gelesen hast. Die Mail enthält Absender und Betreff, nicht den Nachrichtentext.</p>
+            <?php if (!$mailOk): ?>
+                <p class="flash flash-info">Auf dieser Installation ist noch kein E-Mail-Versand eingerichtet.</p>
+            <?php elseif (!$user['email']): ?>
+                <p class="flash flash-warn">Trage oben eine E-Mail-Adresse ein, um Benachrichtigungen zu erhalten.</p>
+            <?php elseif (!$user['email_verified_at']): ?>
+                <p class="flash flash-warn">Bitte bestätige zuerst deine E-Mail-Adresse (Button „Bestätigungs-Mail senden“ oben) – erst dann werden Benachrichtigungen verschickt.</p>
+            <?php endif; ?>
+            <button class="btn" type="submit">Speichern</button>
+        </form>
+    </section>
+    <?php endif; ?>
+
     <section class="panel" id="sichtbarkeit">
         <h2 class="panel-title">Sichtbarkeit</h2>
         <p>Andere angemeldete Nutzer sehen dich in der <a href="<?= e(url('community')) ?>">Community</a>. Was sie von dir ansehen dürfen, legst du hier fest:</p>

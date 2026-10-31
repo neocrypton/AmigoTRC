@@ -117,6 +117,32 @@ final class AccountController
         redirect('account');
     }
 
+    /** E-Mail-Benachrichtigung bei neuen PNs an/aus. */
+    public function notify(): void
+    {
+        if (is_post()) {
+            $on = isset($_POST['pm_notify']);
+            App::db()->update('users', ['pm_notify' => $on ? 1 : 0], ['id' => Auth::id()]);
+            flash('ok', $on ? 'Du bekommst eine E-Mail bei neuen privaten Nachrichten.' : 'Keine E-Mails mehr bei neuen privaten Nachrichten.');
+        }
+        redirect('account');
+    }
+
+    /** Abmelde-Link aus der Benachrichtigungs-Mail (ohne Login, mit Bestätigung). */
+    public function unsubscribe(): void
+    {
+        $uid = input_int('u', 1) ?? query_int('u', 1) ?? 0;
+        $token = input('t', 64) ?: query('t', 64);
+        $valid = $uid > 0 && hash_equals(\Amigo\Service\Messages::unsubscribeToken($uid), $token)
+            && App::db()->value('SELECT id FROM {users} WHERE id = ?', [$uid]);
+        $done = false;
+        if ($valid && is_post()) {
+            App::db()->update('users', ['pm_notify' => 0], ['id' => $uid]);
+            $done = true;
+        }
+        View::render('account/unsubscribe', ['title' => 'Benachrichtigungen', 'valid' => (bool)$valid, 'done' => $done, 'uid' => $uid, 'token' => $token], 'layout_plain');
+    }
+
     /** Sichtbarkeit der eigenen Sammlung / Durchgespielt-Liste für andere Nutzer. */
     public function privacy(): void
     {
