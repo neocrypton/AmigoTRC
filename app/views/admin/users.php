@@ -37,7 +37,7 @@
     <tbody>
     <?php foreach ($users as $u): $self = (int)$u['id'] === Auth::id(); ?>
         <tr<?= (int)$u['is_active'] ? '' : ' class="is-off"' ?>>
-            <td data-label="Benutzer"><strong><?= e($u['username']) ?></strong><?= $self ? ' <small class="muted">(du)</small>' : '' ?><br><small class="muted"><?= e($u['email'] ?? '') ?></small></td>
+            <td data-label="Benutzer"><span class="userline"><?= avatar($u, 32) ?><span><strong><?= e($u['username']) ?></strong><?= $self ? ' <small class="muted">(du)</small>' : '' ?><br><small class="muted"><?= e($u['email'] ?? '') ?></small></span></span></td>
             <td data-label="Rolle"><?= $u['role'] === 'admin' ? '<span class="chip">Admin</span>' : 'Benutzer' ?><?= (int)$u['is_active'] ? '' : ' <span class="cond cond-0">gesperrt</span>' ?></td>
             <td data-label="2FA"><?= (int)$u['totp_enabled'] ? '<span class="cond cond-5">an</span>' : '<span class="cond cond-1">aus</span>' ?></td>
             <td data-label="Einträge"><?= (int)$u['items'] ?></td>

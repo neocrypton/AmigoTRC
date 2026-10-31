@@ -39,6 +39,9 @@ auf dem Tablet und auf dem Smartphone.
   nur lesend. Kaufpreis, Kaufdatum, Händler und Notizen bleiben immer privat,
   nicht angemeldete Besucher sehen nichts
 - Eigener TheGamesDB-API-Key pro Nutzer (unter *Mein Konto*)
+- **Avatar:** 30 Pixel-Badges zur Auswahl oder ein eigenes Mini-Bild (max. 512 KB,
+  wird quadratisch auf 128×128 px gebracht, Pixel-Art bleibt scharf). Neue Badges
+  lassen sich in `tools/build-badges.py` zeichnen (`python3 tools/build-badges.py`)
 - Zwei-Faktor-Anmeldung (TOTP, z. B. Aegis, 2FAS, Bitwarden, Google/Microsoft
   Authenticator) mit QR-Code und 10 Einmal-Recovery-Codes
 - Admin: Benutzer anlegen/sperren/löschen, 2FA zurücksetzen, Registrierung
@@ -181,7 +184,7 @@ in der Datenschutzerklärung erwähnen.
 `.htaccess` wird von nginx ignoriert. Sperre die internen Ordner selbst:
 
 ```nginx
-location ~ ^/(app|config|data)(/|$) { deny all; return 404; }
+location ~ ^/(app|config|data|tools)(/|$) { deny all; return 404; }
 location ~ /\.(?!well-known) { deny all; }
 location ~ \.(md|sqlite|log|lock)$ { deny all; }
 ```

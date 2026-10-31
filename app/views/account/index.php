@@ -16,6 +16,46 @@
     <?php endif; ?>
 </nav>
 
+<section class="panel" id="avatar">
+    <h2 class="panel-title">Avatar</h2>
+    <?php $current = \Amigo\Service\Avatar::resolve($user); ?>
+    <div class="avatar-current">
+        <?= avatar($user, 96, 'avatar-big') ?>
+        <p><?= $current['type'] === 'upload' ? 'Eigenes Bild' : 'Badge: ' . e(\Amigo\Core\Badges::ALL[$current['value']] ?? '') ?><?= $user['avatar'] === null ? ' <small class="muted">(automatisch zugewiesen)</small>' : '' ?></p>
+    </div>
+    <form method="post" action="<?= e(url('account/avatar')) ?>">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="badge">
+        <fieldset class="badge-grid">
+            <legend class="label">Pixel-Badge wählen</legend>
+            <?php foreach (\Amigo\Core\Badges::ALL as $key => $label): ?>
+            <label class="badge-pick" title="<?= e($label) ?>">
+                <input type="radio" name="badge" value="<?= e($key) ?>"<?= checked($current['type'] === 'badge' && $current['value'] === $key) ?>>
+                <svg width="48" height="48" aria-hidden="true"><use href="<?= e(asset('img/badges.svg')) ?>#<?= e($key) ?>"></use></svg>
+                <span class="sr"><?= e($label) ?></span>
+            </label>
+            <?php endforeach; ?>
+        </fieldset>
+        <button class="btn btn-primary" type="submit">Badge übernehmen</button>
+    </form>
+    <form method="post" action="<?= e(url('account/avatar')) ?>" enctype="multipart/form-data" class="subform">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="upload">
+        <div class="field">
+            <label for="av-file">…oder eigenes Mini-Bild hochladen</label>
+            <input id="av-file" type="file" name="avatar" accept="image/png,image/jpeg,image/gif,image/webp" required>
+            <p class="hint">PNG, JPEG, GIF oder WebP, max. 512 KB. Wird mittig quadratisch zugeschnitten und auf 128×128 px gebracht – Pixel-Art bleibt scharf.</p>
+        </div>
+        <div class="btnrow">
+            <button class="btn" type="submit">⤒ Hochladen</button>
+            <?php if ($user['avatar'] !== null): ?>
+            <button class="btn btn-ghost" type="submit" form="avatar-reset">Zurücksetzen</button>
+            <?php endif; ?>
+        </div>
+    </form>
+    <form method="post" action="<?= e(url('account/avatar')) ?>" id="avatar-reset" hidden><?= csrf_field() ?><input type="hidden" name="action" value="reset"></form>
+</section>
+
 <div class="cols">
     <section class="panel">
         <h2 class="panel-title">Profil</h2>

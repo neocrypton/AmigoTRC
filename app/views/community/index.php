@@ -17,7 +17,7 @@
     <?php foreach ($users as $u): $self = (int)$u['id'] === Auth::id(); ?>
     <li>
         <a class="player" href="<?= e(url('u', ['name' => $u['username']])) ?>">
-            <span class="player-avatar" aria-hidden="true"><?= e(mb_strtoupper(mb_substr($u['username'], 0, 1))) ?></span>
+            <?= avatar($u, 48, 'player-avatar') ?>
             <span class="player-body">
                 <strong><?= e($u['username']) ?><?= $self ? ' <small class="muted">(du)</small>' : '' ?></strong>
                 <small>dabei seit <?= e(fmt_date($u['created_at'])) ?></small>

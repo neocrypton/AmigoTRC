@@ -7,7 +7,7 @@ $playsPublic = (int)$owner['plays_public'] === 1;
 <div class="pagehead">
     <div>
         <p class="crumbs"><a href="<?= e(url('community')) ?>">Community</a></p>
-        <h1 class="h1"><span class="player-avatar player-avatar-lg" aria-hidden="true"><?= e(mb_strtoupper(mb_substr($owner['username'], 0, 1))) ?></span> <?= e($owner['username']) ?></h1>
+        <h1 class="h1"><?= avatar($owner, 56, 'player-avatar player-avatar-lg') ?> <?= e($owner['username']) ?></h1>
         <p class="muted">dabei seit <?= e(fmt_date($owner['created_at'])) ?></p>
     </div>
     <?php if ($self): ?><a class="btn btn-ghost" href="<?= e(url('account')) ?>#sichtbarkeit">Sichtbarkeit ändern</a><?php endif; ?>

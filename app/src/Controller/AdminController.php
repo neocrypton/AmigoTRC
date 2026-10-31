@@ -39,7 +39,7 @@ final class AdminController
         }
         $users = App::db()->all(
             'SELECT u.id, u.username, u.email, u.role, u.is_active, u.totp_enabled, u.created_at, u.last_login_at,
-                    u.pending, u.email_verified_at,
+                    u.pending, u.email_verified_at, u.avatar,
                     (SELECT COUNT(*) FROM {items} i WHERE i.user_id = u.id) AS items
              FROM {users} u ORDER BY u.username'
         );
@@ -97,6 +97,7 @@ final class AdminController
                     flash('error', 'Zum Löschen den Benutzernamen exakt eingeben.');
                     break;
                 }
+                \Amigo\Service\Avatar::removeFile($user);
                 $dir = App::dataDir() . '/uploads/' . (int)$user['id'];
                 foreach (glob($dir . '/*.jpg') ?: [] as $f) {
                     @unlink($f);

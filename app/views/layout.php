@@ -50,7 +50,7 @@ $icon = static fn (string $name): string => '<svg class="ico" aria-hidden="true"
         </nav>
         <div class="topbar-actions">
             <a class="btn btn-primary btn-sm hide-sm" href="<?= e(url('item/edit')) ?>"><?= $icon('plus') ?> Neu</a>
-            <a class="iconbtn" href="<?= e(url('account')) ?>" title="Mein Konto (<?= e($user['username']) ?>)"><?= $icon('user') ?><span class="sr">Konto</span></a>
+            <a class="iconbtn" href="<?= e(url('account')) ?>" title="Mein Konto (<?= e($user['username']) ?>)"><?= avatar($user, 32, 'avatar-mini') ?><span class="sr">Konto</span></a>
             <button class="iconbtn" type="button" data-theme-toggle title="Farbschema wechseln"><?= $icon('palette') ?><span class="sr">Farbschema</span></button>
             <form method="post" action="<?= e(url('logout')) ?>" class="inline">
                 <?= csrf_field() ?>

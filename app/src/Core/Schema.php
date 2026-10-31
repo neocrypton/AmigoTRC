@@ -16,7 +16,7 @@ namespace Amigo\Core;
  */
 final class Schema
 {
-    public const VERSION = 3;
+    public const VERSION = 4;
 
     public static function migrate(Database $db): void
     {
@@ -24,7 +24,7 @@ final class Schema
         if ($current >= self::VERSION) {
             return;
         }
-        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3()];
+        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4()];
         foreach ($steps as $version => $statements) {
             if ($current < $version) {
                 foreach ($statements as $ddl) {
@@ -61,6 +61,12 @@ final class Schema
         // Index-Namen sind in SQLite datenbankweit eindeutig -> mit Präfix versehen.
         $ddl = preg_replace_callback('/\[([a-z_]+)\]/', fn ($m) => $db->quoteIdent($db->prefix() . $m[1]), $ddl);
         return $db->sql($ddl);
+    }
+
+    /** v4: Avatar (Pixel-Badge oder eigenes Bild). */
+    private static function v4(): array
+    {
+        return ['ALTER TABLE {users} ADD COLUMN avatar VARCHAR(48) NULL'];
     }
 
     /** v3: Konto-Aktivierung (E-Mail-Bestätigung / Admin-Freischaltung). */

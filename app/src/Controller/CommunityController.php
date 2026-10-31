@@ -25,7 +25,7 @@ final class CommunityController
         }
         // Zähler nur für freigegebene Bereiche ermitteln.
         $users = App::db()->all(
-            "SELECT u.id, u.username, u.created_at, u.collection_public, u.plays_public,
+            "SELECT u.id, u.username, u.avatar, u.created_at, u.collection_public, u.plays_public,
                     CASE WHEN u.collection_public = 1 THEN (SELECT COUNT(*) FROM {items} i WHERE i.user_id = u.id) END AS items,
                     CASE WHEN u.plays_public = 1 THEN (SELECT COUNT(*) FROM {plays} pl WHERE pl.user_id = u.id) END AS plays
              FROM {users} u WHERE $where ORDER BY u.username",
@@ -107,7 +107,7 @@ final class CommunityController
         $name = query('name', 40);
         $owner = $name !== ''
             ? App::db()->one(
-                'SELECT id, username, created_at, collection_public, plays_public FROM {users} WHERE LOWER(username) = LOWER(?) AND is_active = 1',
+                'SELECT id, username, avatar, created_at, collection_public, plays_public FROM {users} WHERE LOWER(username) = LOWER(?) AND is_active = 1',
                 [$name]
             )
             : null;

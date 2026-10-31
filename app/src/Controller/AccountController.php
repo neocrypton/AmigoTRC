@@ -10,7 +10,9 @@ use Amigo\Core\Options;
 use Amigo\Core\RateLimiter;
 use Amigo\Core\Totp;
 use Amigo\Core\View;
+use Amigo\Core\Badges;
 use Amigo\Service\Accounts;
+use Amigo\Service\Avatar;
 use Amigo\Service\Catalog;
 use Amigo\Service\Mailer;
 use Amigo\Service\TheGamesDb;
@@ -28,6 +30,70 @@ final class AccountController
             'keySource'     => Catalog::keySourceFor($user),
             'keyHint'       => ($k = Catalog::userKey($user)) !== '' ? '…' . substr($k, -4) : null,
         ]);
+    }
+
+    /** Avatar wählen (Badge), hochladen oder eigenes Bild entfernen. */
+    public function avatar(): void
+    {
+        if (!is_post()) {
+            redirect('account');
+        }
+        $user = Auth::user();
+        $db = App::db();
+        $action = input('action', 10);
+        if ($action === 'badge') {
+            $badge = input('badge', 40);
+            if (!isset(Badges::ALL[$badge])) {
+                flash('error', 'Unbekannter Badge.');
+            } else {
+                Avatar::removeFile($user);
+                $db->update('users', ['avatar' => 'b:' . $badge], ['id' => $user['id']]);
+                flash('ok', 'Avatar gewählt: ' . Badges::ALL[$badge] . '.');
+            }
+        } elseif ($action === 'upload') {
+            $bucket = 'avatar:' . $user['id'];
+            if (RateLimiter::tooMany($bucket, 10, 3600)) {
+                flash('error', 'Zu viele Uploads – bitte später erneut.');
+            } else {
+                RateLimiter::hit($bucket);
+                try {
+                    $name = Avatar::store(is_array($_FILES['avatar'] ?? null) ? $_FILES['avatar'] : []);
+                    Avatar::removeFile($user);
+                    $db->update('users', ['avatar' => 'u:' . $name], ['id' => $user['id']]);
+                    flash('ok', 'Eigenes Bild als Avatar gespeichert.');
+                } catch (\RuntimeException $e) {
+                    flash('error', $e->getMessage());
+                }
+            }
+        } elseif ($action === 'reset') {
+            Avatar::removeFile($user);
+            $db->update('users', ['avatar' => null], ['id' => $user['id']]);
+            flash('ok', 'Avatar zurückgesetzt.');
+        }
+        redirect('account');
+    }
+
+    /** Eigenes Avatarbild ausliefern (nur für angemeldete Nutzer, wie die Community). */
+    public function avatarImage(): void
+    {
+        $user = App::db()->one('SELECT id, avatar FROM {users} WHERE id = ?', [query_int('u', 1) ?? 0]);
+        $a = $user ? Avatar::resolve($user) : null;
+        $path = ($a && $a['type'] === 'upload') ? Avatar::file($a['value']) : null;
+        if (!$path) {
+            http_response_code(404);
+            exit;
+        }
+        $etag = '"' . $a['value'] . '"';
+        header('Cache-Control: private, max-age=31536000, immutable');
+        header('ETag: ' . $etag);
+        if (($_SERVER['HTTP_IF_NONE_MATCH'] ?? '') === $etag) {
+            http_response_code(304);
+            exit;
+        }
+        header('Content-Type: image/png');
+        header('Content-Length: ' . filesize($path));
+        readfile($path);
+        exit;
     }
 
     /** Bestätigungs-Mail für die eigene Adresse (erneut) senden. */

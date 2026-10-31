@@ -8,7 +8,7 @@ ServerSignature Off
 # Interne Verzeichnisse und versteckte Dateien sperren
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteRule ^(app|config|data)(/|$) - [F,L]
+    RewriteRule ^(app|config|data|tools)(/|$) - [F,L]
     RewriteRule (^|/)\.(?!well-known/) - [F,L]
     RewriteRule \.(md|lock|sqlite|sqlite3|db|log|sql|bak|dist)$ - [F,L,NC]
 </IfModule>

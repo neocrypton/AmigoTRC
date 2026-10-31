@@ -222,3 +222,17 @@ function probe_path(): ?string
     $rel = str_replace(DIRECTORY_SEPARATOR, '/', substr($data, strlen($root) + 1));
     return implode('/', array_map('rawurlencode', explode('/', $rel))) . '/probe.txt';
 }
+
+/** Avatar eines Nutzers als HTML (Pixel-Badge aus dem SVG-Sprite oder eigenes Bild). */
+function avatar(array $user, int $size = 44, string $class = ''): string
+{
+    $a = \Amigo\Service\Avatar::resolve($user);
+    $cls = trim('avatar ' . $class);
+    $alt = 'Avatar von ' . ($user['username'] ?? '');
+    if ($a['type'] === 'upload') {
+        return '<img class="' . e($cls) . '" src="' . e(url('avatar', ['u' => (int)$user['id'], 'v' => substr($a['value'], 0, 8)]))
+            . '" width="' . $size . '" height="' . $size . '" alt="' . e($alt) . '" loading="lazy">';
+    }
+    return '<svg class="' . e($cls) . '" width="' . $size . '" height="' . $size . '" role="img" aria-label="' . e($alt) . '">'
+        . '<use href="' . e(asset('img/badges.svg')) . '#' . e($a['value']) . '"></use></svg>';
+}

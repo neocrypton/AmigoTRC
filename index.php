@@ -58,6 +58,8 @@ $routes = [
 
     'account'           => [C\AccountController::class, 'index', 'auth'],
     'account/profile'   => [C\AccountController::class, 'profile', 'auth'],
+    'account/avatar'    => [C\AccountController::class, 'avatar', 'auth'],
+    'avatar'            => [C\AccountController::class, 'avatarImage', 'auth'],
     'account/verify'    => [C\AccountController::class, 'verifyMail', 'auth'],
     'account/privacy'   => [C\AccountController::class, 'privacy', 'auth'],
     'account/tgdb'      => [C\AccountController::class, 'tgdbKey', 'auth'],
@@ -123,7 +125,7 @@ if ($user && !(int)$user['totp_enabled'] && Settings::bool(App::db(), 'require_2
 }
 
 // HTML komprimiert ausliefern – spart bei langsamen Verbindungen (EDGE/3G) viel Zeit.
-if (!in_array($route, ['photo', 'cover', 'export'], true) && extension_loaded('zlib') && !ini_get('zlib.output_compression')) {
+if (!in_array($route, ['photo', 'cover', 'avatar', 'export'], true) && extension_loaded('zlib') && !ini_get('zlib.output_compression')) {
     ob_start('ob_gzhandler');
 }
 
