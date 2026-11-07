@@ -164,8 +164,11 @@ eigenen Key den System-Key mitbenutzen (Standard: aus).
 
 Ohne jeden Key funktioniert alles, nur ohne neue Vorschläge und Plattform-Import.
 
-Einen kostenlosen Key bekommst du über das
-[TheGamesDB-Forum](https://forums.thegamesdb.net/). Den System-Key trägst du im
+Einen kostenlosen Key bekommst du nach der
+[Registrierung bei TheGamesDB](https://thegamesdb.net/register.php). Nutzer, die
+weder einen eigenen Key haben noch den System-Key mitbenutzen dürfen, sehen auf der
+Startseite, beim Eintragen und beim Cover-Ergänzen einen Hinweis mit diesem Link
+und dem Weg zu *Mein Konto*. Den System-Key trägst du im
 Installer oder jederzeit unter **Admin › System** ein (dort auch „Verbindung
 testen“ und „Entfernen“). Alle Keys werden verschlüsselt in der Datenbank
 gespeichert und verlassen nie den Server. Der System-Key kann alternativ als

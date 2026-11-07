@@ -17,6 +17,8 @@ $int = static fn (string $k) => isset($item[$k]) && $item[$k] !== null && $item[
     <?php if (!empty($item['id'])): ?><a class="btn btn-ghost" href="<?= e(url('item', ['id' => $item['id']])) ?>">Abbrechen</a><?php endif; ?>
 </div>
 
+<?php require __DIR__ . '/../partials/tgdb_hint.php'; ?>
+
 <form method="post" action="<?= e(url('item/edit')) ?>" enctype="multipart/form-data" class="form">
     <?= csrf_field() ?>
     <?php if (!empty($item['id'])): ?><input type="hidden" name="id" value="<?= (int)$item['id'] ?>"><?php endif; ?>

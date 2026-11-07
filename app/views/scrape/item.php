@@ -8,7 +8,7 @@
 </div>
 
 <?php if (!$enabled): ?>
-<div class="flash flash-warn">Für die Suche brauchst du einen TheGamesDB-API-Key – hinterlege ihn unter <a href="<?= e(url('account')) ?>">Mein Konto</a>.</div>
+<?php require __DIR__ . '/../partials/tgdb_hint.php'; ?>
 <?php else: ?>
 <form class="filters" method="get" action="index.php" role="search">
     <input type="hidden" name="r" value="scrape/item">

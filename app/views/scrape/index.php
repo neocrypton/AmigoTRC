@@ -16,7 +16,7 @@
 </section>
 
 <?php if (!$enabled): ?>
-<div class="flash flash-warn">Für die Suche brauchst du einen TheGamesDB-API-Key – hinterlege ihn unter <a href="<?= e(url('account')) ?>">Mein Konto</a>.</div>
+<?php require __DIR__ . '/../partials/tgdb_hint.php'; ?>
 <?php elseif ($counts['open'] === 0): ?>
 <div class="panel empty-state">
     <p class="logo-type">ALL CLEAR</p>

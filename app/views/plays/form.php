@@ -7,6 +7,8 @@ $rating = isset($play['rating']) && $play['rating'] !== null ? (int)$play['ratin
     <a class="btn btn-ghost" href="<?= e(url('plays')) ?>">Abbrechen</a>
 </div>
 
+<?php require __DIR__ . '/../partials/tgdb_hint.php'; ?>
+
 <form method="post" action="<?= e(url('play/edit')) ?>" class="form">
     <?= csrf_field() ?>
     <?php if (!empty($play['id'])): ?><input type="hidden" name="id" value="<?= (int)$play['id'] ?>"><?php endif; ?>

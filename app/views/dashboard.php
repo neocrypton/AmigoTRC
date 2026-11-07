@@ -13,6 +13,8 @@ $u = Auth::user();
     </div>
 </section>
 
+<?php require __DIR__ . '/partials/tgdb_hint.php'; ?>
+
 <?php if (\Amigo\Core\Auth::isAdmin() && ($pc = \Amigo\Service\Accounts::pendingCount()) > 0): ?>
 <div class="flash flash-warn">⏳ <a href="<?= e(url('admin/users')) ?>#pending"><?= $pc ?> neue(s) Konto/Konten warten auf Freischaltung</a></div>
 <?php endif; ?>

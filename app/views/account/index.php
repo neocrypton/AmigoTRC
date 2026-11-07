@@ -147,7 +147,7 @@
         </form>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="tgdb">
         <h2 class="panel-title">TheGamesDB-API-Key</h2>
         <p>
             <?php if ($keySource === 'user'): ?>
@@ -163,7 +163,7 @@
             <div class="field">
                 <label for="u-tgdb"><?= $keySource === 'user' ? 'Neuen Key setzen' : 'Eigener API-Key' ?></label>
                 <input id="u-tgdb" name="tgdb_api_key" type="password" autocomplete="off" spellcheck="false" maxlength="200" placeholder="Key einfügen">
-                <p class="hint">Kostenlos über das <a href="https://forums.thegamesdb.net/" target="_blank" rel="noopener noreferrer">TheGamesDB-Forum</a>. Wird verschlüsselt gespeichert und nur für deine eigenen Suchen genutzt.</p>
+                <p class="hint">Kostenlos: <a href="https://thegamesdb.net/register.php" target="_blank" rel="noopener noreferrer">bei TheGamesDB registrieren</a> und dort einen API-Key anfordern. Wird verschlüsselt gespeichert und nur für deine eigenen Suchen genutzt.</p>
             </div>
             <div class="btnrow">
                 <button class="btn btn-primary" type="submit" name="action" value="save">Speichern &amp; testen</button>

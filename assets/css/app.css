@@ -287,6 +287,8 @@ code { font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace; }
   background: var(--panel);
 }
 .flash ul { margin: 0; padding-left: 18px; }
+.flash ol { margin: 6px 0 0; padding-left: 22px; }
+.flash .hint { margin: 6px 0 0; }
 .flash-ok { border-color: var(--ok); }
 .flash-warn { border-color: var(--warn); }
 .flash-error { border-color: var(--bad); }
