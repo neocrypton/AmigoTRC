@@ -57,7 +57,7 @@ final class CommunityController
             $data['stats']['plays'] = (int)$db->value('SELECT COUNT(*) FROM {plays} WHERE user_id = ?', [$uid]);
             $data['stats']['minutes'] = (int)$db->value('SELECT COALESCE(SUM(playtime_minutes), 0) FROM {plays} WHERE user_id = ?', [$uid]);
             $data['plays'] = $db->all(
-                'SELECT pl.title, pl.finished_on, pl.rating, p.name AS platform
+                'SELECT pl.title, pl.finished_on, pl.finished_precision, pl.rating, p.name AS platform
                  FROM {plays} pl LEFT JOIN {platforms} p ON p.id = pl.platform_id
                  WHERE pl.user_id = ? ORDER BY pl.finished_on IS NULL, pl.finished_on DESC, pl.id DESC LIMIT 5',
                 [$uid]

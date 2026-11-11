@@ -75,7 +75,7 @@ $params = ($owner ? ['name' => $owner['username']] : []) + array_filter(['q' => 
                 <span class="play-title"><?= e($pl['title']) ?></span>
                 <span class="play-meta">
                     <?= e($pl['platform_name'] ?? 'ohne Plattform') ?>
-                    <?php if ($pl['finished_on']): ?> · <?= e(fmt_date($pl['finished_on'])) ?><?php endif; ?>
+                    <?php if ($pl['finished_on']): ?> · <?= e(fmt_play_date($pl['finished_on'], $pl['finished_precision'] ?? null)) ?><?php endif; ?>
                 </span>
                 <span class="play-facts">
                     <?php if ($pl['playtime_minutes'] !== null): ?><span class="chip">⏱ <?= e(fmt_playtime((int)$pl['playtime_minutes'])) ?></span><?php endif; ?>

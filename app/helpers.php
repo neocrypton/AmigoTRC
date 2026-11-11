@@ -142,6 +142,19 @@ function fmt_date(?string $date): string
     return $ts ? date('d.m.Y', $ts) : '';
 }
 
+/** Durchgespielt-Datum: exakt „TT.MM.JJJJ“, ungefähr (precision 'month') „MM.JJJJ“, ohne Datum ''. */
+function fmt_play_date(?string $date, ?string $precision = null): string
+{
+    if (!$date) {
+        return '';
+    }
+    $ts = strtotime($date);
+    if (!$ts) {
+        return '';
+    }
+    return date($precision === 'month' ? 'm.Y' : 'd.m.Y', $ts);
+}
+
 function fmt_playtime(?int $minutes): string
 {
     if ($minutes === null) {

@@ -64,7 +64,7 @@ $playsPublic = (int)$owner['plays_public'] === 1;
         <?php else: ?>
             <ul class="minilist">
                 <?php foreach ($plays as $pl): ?>
-                <li><span class="minilist-row"><span class="noimg" aria-hidden="true">🏆</span><span><strong><?= e($pl['title']) ?></strong><small><?= e(implode(' · ', array_filter([$pl['platform'] ?? '', $pl['finished_on'] ? fmt_date($pl['finished_on']) : '']))) ?></small></span><?= stars($pl['rating'] !== null ? (int)$pl['rating'] : null, false) ?></span></li>
+                <li><span class="minilist-row"><span class="noimg" aria-hidden="true">🏆</span><span><strong><?= e($pl['title']) ?></strong><small><?= e(implode(' · ', array_filter([$pl['platform'] ?? '', fmt_play_date($pl['finished_on'], $pl['finished_precision'] ?? null)]))) ?></small></span><?= stars($pl['rating'] !== null ? (int)$pl['rating'] : null, false) ?></span></li>
                 <?php endforeach; ?>
             </ul>
             <p><a class="btn btn-sm" href="<?= e(url('u/plays', ['name' => $owner['username']])) ?>">Ganze Liste ansehen ▶</a></p>

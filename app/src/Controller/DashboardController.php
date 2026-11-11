@@ -35,7 +35,7 @@ final class DashboardController
         );
 
         $recentPlays = $db->all(
-            'SELECT pl.id, pl.title, pl.finished_on, pl.rating, pl.playtime_minutes, p.name AS platform
+            'SELECT pl.id, pl.title, pl.finished_on, pl.finished_precision, pl.rating, pl.playtime_minutes, p.name AS platform
              FROM {plays} pl LEFT JOIN {platforms} p ON p.id = pl.platform_id
              WHERE pl.user_id = ? ORDER BY pl.finished_on IS NULL, pl.finished_on DESC, pl.id DESC LIMIT 5',
             [$uid]

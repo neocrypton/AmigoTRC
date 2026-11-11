@@ -77,7 +77,7 @@ $skip = $state['skip_duplicates'] ?? true;
                     <td data-label="Preis"><?= e(fmt_money($d['price_cents'])) ?></td>
                     <td data-label="Kaufdatum"><?= e(fmt_date($d['purchase_date'])) ?></td>
                     <?php else: ?>
-                    <td data-label="Datum"><?= e(fmt_date($d['finished_on'])) ?></td>
+                    <td data-label="Datum"><?= e(fmt_play_date($d['finished_on'] ?? null, $d['finished_precision'] ?? null)) ?></td>
                     <td data-label="Spielzeit"><?= e(fmt_playtime($d['playtime_minutes'])) ?></td>
                     <td data-label="Punkte"><?= $d['score'] !== null ? e(fmt_num($d['score'])) : '' ?></td>
                     <td data-label="Wertung"><?= stars($d['rating'], false) ?></td>

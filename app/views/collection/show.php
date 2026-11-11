@@ -117,7 +117,7 @@ $cover = tgdb_image($game['boxart_large'] ?? null) ?? tgdb_image($game['boxart_t
     <h2 class="panel-title">Durchgespielt</h2>
     <ul class="minilist">
         <?php foreach ($plays as $pl): ?>
-        <li><a href="<?= e($owner ? url('u/plays', ['name' => $owner['username']]) : url('play/edit', ['id' => $pl['id']])) ?>"><span class="noimg">🏆</span><span><strong><?= e(fmt_date($pl['finished_on'])) ?: 'ohne Datum' ?></strong><small><?= e(fmt_playtime($pl['playtime_minutes'] !== null ? (int)$pl['playtime_minutes'] : null)) ?></small></span><?= stars($pl['rating'] !== null ? (int)$pl['rating'] : null, false) ?></a></li>
+        <li><a href="<?= e($owner ? url('u/plays', ['name' => $owner['username']]) : url('play/edit', ['id' => $pl['id']])) ?>"><span class="noimg">🏆</span><span><strong><?= e(fmt_play_date($pl['finished_on'], $pl['finished_precision'] ?? null)) ?: 'ohne Datum' ?></strong><small><?= e(fmt_playtime($pl['playtime_minutes'] !== null ? (int)$pl['playtime_minutes'] : null)) ?></small></span><?= stars($pl['rating'] !== null ? (int)$pl['rating'] : null, false) ?></a></li>
         <?php endforeach; ?>
     </ul>
 </section>

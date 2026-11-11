@@ -336,11 +336,18 @@ final class AccountController
         $db = App::db();
         if ($type === 'plays') {
             $rows = $db->all(
-                'SELECT pl.title, p.name AS platform, pl.finished_on, pl.playtime_minutes, pl.score, pl.rating, pl.review, g.tgdb_id
+                'SELECT pl.title, p.name AS platform, pl.finished_on, pl.finished_precision, pl.playtime_minutes, pl.score, pl.rating, pl.review, g.tgdb_id
                  FROM {plays} pl LEFT JOIN {platforms} p ON p.id = pl.platform_id LEFT JOIN {games} g ON g.id = pl.game_id
                  WHERE pl.user_id = ? ORDER BY pl.finished_on',
                 [Auth::id()]
             );
+            foreach ($rows as &$r) {
+                if ($r['finished_precision'] === 'month' && $r['finished_on']) {
+                    $r['finished_on'] = fmt_play_date($r['finished_on'], 'month'); // MM.JJJJ
+                }
+                unset($r['finished_precision']);
+            }
+            unset($r);
             $head = ['Titel', 'Plattform', 'Durchgespielt am', 'Spielzeit (Min)', 'Punkte', 'Sterne', 'Bewertung', 'TGDB-ID'];
         } else {
             $rows = $db->all(

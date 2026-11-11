@@ -116,7 +116,7 @@ final class PlayController
 
         if (!$play) {
             // Vorbelegung, z. B. aus einem Sammlungs-Eintrag heraus.
-            $play = ['id' => null, 'title' => '', 'game_id' => null, 'platform_id' => query_int('platform', 1), 'finished_on' => date('Y-m-d')];
+            $play = ['id' => null, 'title' => '', 'game_id' => null, 'platform_id' => query_int('platform', 1), 'finished_on' => null, 'finished_precision' => null];
             if ($gid = query_int('game', 1)) {
                 $g = $db->one('SELECT * FROM {games} WHERE id = ?', [$gid]);
                 if ($g) {
@@ -175,11 +175,25 @@ final class PlayController
         $scoreRaw = str_replace(['.', ' '], '', input('score', 25));
         $score = $scoreRaw === '' ? null : (preg_match('/^\d{1,15}$/', $scoreRaw) ? (int)$scoreRaw : false);
 
+        // Datum: exakt (Tag) oder ungefähr (Monat + Jahr); leer = kein Datum
+        $precision = input_enum('date_precision', ['day' => 1, 'month' => 1]) ?? 'day';
+        $dateError = false;
+        if ($precision === 'month') {
+            $month = input_int('finished_month', 1, 12);
+            $year = input_int('finished_year', 1950, 2100);
+            $finished = ($month && $year) ? sprintf('%04d-%02d-01', $year, $month) : null;
+            $dateError = ($month === null) !== ($year === null); // nur eins von beiden gewählt
+        } else {
+            $finished = input_date('finished_on');
+            $dateError = input('finished_on', 10) !== '' && $finished === null;
+        }
+
         $data = [
             'game_id'          => $game['id'] ?? null,
             'platform_id'      => input_int('platform_id', 1),
             'title'            => input('title', 255),
-            'finished_on'      => input_date('finished_on'),
+            'finished_on'      => $finished,
+            'finished_precision' => $finished !== null && $precision === 'month' ? 'month' : null,
             'playtime_minutes' => $playtime,
             'score'            => $score === false ? null : $score,
             'rating'           => input_int('rating', 1, 5),
@@ -196,8 +210,8 @@ final class PlayController
         if ($data['platform_id'] !== null && !Catalog::platformExists($data['platform_id'])) {
             $errors[] = 'Unbekannte Plattform.';
         }
-        if (input('finished_on', 10) !== '' && $data['finished_on'] === null) {
-            $errors[] = 'Das Datum ist ungültig.';
+        if ($dateError) {
+            $errors[] = $precision === 'month' ? 'Bitte für „ungefähr“ Monat und Jahr wählen.' : 'Das Datum ist ungültig.';
         }
         if ($score === false) {
             $errors[] = 'Punkte bitte als ganze Zahl angeben.';

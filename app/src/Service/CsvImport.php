@@ -429,8 +429,13 @@ final class CsvImport
                 $data['notes'] = mb_substr($data['notes'], 0, 10000);
             }
         } else {
+            $data['finished_precision'] = null;
             if (($v = $get('finished_on')) !== null) {
                 $data['finished_on'] = self::parseDate($v);
+                if ($data['finished_on'] === null && ($m = self::parseMonth($v)) !== null) {
+                    $data['finished_on'] = $m; // ungefähr: nur Monat + Jahr
+                    $data['finished_precision'] = 'month';
+                }
                 if ($data['finished_on'] === null) {
                     $warn('finished_on', $v, 'Datum nicht erkannt');
                 }
@@ -604,6 +609,20 @@ final class CsvImport
             return $v . '-01-01';
         }
         return null;
+    }
+
+    /** Monat + Jahr („03.2024“, „3/2024“, „2024-03“) → 'JJJJ-MM-01', sonst null. */
+    public static function parseMonth(string $v): ?string
+    {
+        $v = trim($v);
+        if (preg_match('#^(\d{1,2})[./-](\d{4})$#', $v, $m)) {
+            [$month, $year] = [(int)$m[1], (int)$m[2]];
+        } elseif (preg_match('#^(\d{4})-(\d{1,2})$#', $v, $m)) {
+            [$year, $month] = [(int)$m[1], (int)$m[2]];
+        } else {
+            return null;
+        }
+        return ($month >= 1 && $month <= 12 && $year >= 1950 && $year <= 2100) ? sprintf('%04d-%02d-01', $year, $month) : null;
     }
 
     public static function parsePrice(string $v): ?int

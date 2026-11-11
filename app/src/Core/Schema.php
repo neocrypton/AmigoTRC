@@ -16,7 +16,7 @@ namespace Amigo\Core;
  */
 final class Schema
 {
-    public const VERSION = 9;
+    public const VERSION = 10;
 
     public static function migrate(Database $db): void
     {
@@ -24,7 +24,7 @@ final class Schema
         if ($current >= self::VERSION) {
             return;
         }
-        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5(), 6 => self::v6(), 7 => self::v7(), 8 => self::v8(), 9 => []];
+        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5(), 6 => self::v6(), 7 => self::v7(), 8 => self::v8(), 9 => [], 10 => self::v10()];
         foreach ($steps as $version => $statements) {
             if ($current < $version) {
                 foreach ($statements as $ddl) {
@@ -109,6 +109,14 @@ final class Schema
                 sort %INT% NOT NULL DEFAULT 0,
                 enabled SMALLINT NOT NULL DEFAULT 1
             )%OPT%",
+        ];
+    }
+
+    /** v10: Durchgespielt-Datum exakt (Tag) oder ungefähr (nur Monat). NULL = exakt. */
+    private static function v10(): array
+    {
+        return [
+            'ALTER TABLE {plays} ADD COLUMN finished_precision VARCHAR(5) NULL',
         ];
     }
 

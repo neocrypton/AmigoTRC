@@ -1,6 +1,19 @@
 <?php
 $minutes = isset($play['playtime_minutes']) && $play['playtime_minutes'] !== null ? (int)$play['playtime_minutes'] : null;
 $rating = isset($play['rating']) && $play['rating'] !== null ? (int)$play['rating'] : 0;
+// Datum: exakt oder ungefähr (Monat); nach einem Fehler die Auswahl aus dem Formular behalten
+$finished = $play['finished_on'] ?? null;
+if (is_post()) {
+    $precision = input_enum('date_precision', ['day' => 1, 'month' => 1]) ?? 'day';
+    $selMonth = input_int('finished_month', 1, 12);
+    $selYear = input_int('finished_year', 1950, 2100);
+} else {
+    $precision = ($play['finished_precision'] ?? null) === 'month' ? 'month' : 'day';
+    $selMonth = $finished ? (int)substr($finished, 5, 2) : null;
+    $selYear = $finished ? (int)substr($finished, 0, 4) : null;
+}
+$months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+$thisYear = (int)date('Y');
 ?>
 <div class="pagehead">
     <h1 class="h1"><?= e($title) ?></h1>
@@ -23,11 +36,33 @@ $rating = isset($play['rating']) && $play['rating'] !== null ? (int)$play['ratin
 
     <section class="panel">
         <h2 class="panel-title">Ergebnis <small class="muted">alles optional</small></h2>
-        <div class="row3">
-            <div class="field">
-                <label for="f-finished">Durchgespielt am</label>
-                <input id="f-finished" type="date" name="finished_on" value="<?= e($play['finished_on'] ?? '') ?>" max="<?= date('Y-m-d') ?>">
+        <fieldset class="field datefield">
+            <legend class="label">Durchgespielt am</legend>
+            <div class="segmented">
+                <label><input type="radio" name="date_precision" value="day"<?= checked($precision === 'day') ?>><span>Exakt (TT.MM.JJJJ)</span></label>
+                <label><input type="radio" name="date_precision" value="month"<?= checked($precision === 'month') ?>><span>Ungefähr (MM.JJJJ)</span></label>
             </div>
+            <div class="date-exact">
+                <input id="f-finished" type="date" name="finished_on" value="<?= e($precision === 'day' ? ($finished ?? '') : '') ?>" max="<?= date('Y-m-d') ?>" aria-label="Datum (exakt)">
+            </div>
+            <div class="date-month inputgroup">
+                <select name="finished_month" aria-label="Monat">
+                    <option value="">Monat</option>
+                    <?php foreach ($months as $i => $m): ?>
+                    <option value="<?= $i + 1 ?>"<?= selected($selMonth, $i + 1) ?>><?= sprintf('%02d', $i + 1) ?> – <?= e($m) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <select name="finished_year" aria-label="Jahr">
+                    <option value="">Jahr</option>
+                    <?php for ($y = $thisYear; $y >= 1970; $y--): ?>
+                    <option value="<?= $y ?>"<?= selected($selYear, $y) ?>><?= $y ?></option>
+                    <?php endfor; ?>
+                </select>
+            </div>
+            <p class="hint">Optional – leer lassen, wenn du es nicht mehr weißt.</p>
+        </fieldset>
+
+        <div class="row2">
             <div class="field">
                 <span class="label" id="l-time">Spielzeit</span>
                 <div class="inputgroup" role="group" aria-labelledby="l-time">
