@@ -67,7 +67,7 @@ $u = Auth::user();
             <li>
                 <a href="<?= e(url('play/edit', ['id' => $pl['id']])) ?>">
                     <span class="noimg" aria-hidden="true">🏆</span>
-                    <span><strong><?= e($pl['title']) ?></strong><small><?= e($pl['platform'] ?? '') ?><?= $pl['finished_on'] ? ' · ' . e(fmt_date($pl['finished_on'])) : '' ?></small></span>
+                    <span><strong><?= e($pl['title']) ?></strong><small><?= e(implode(' · ', array_filter([$pl['platform'] ?? '', $pl['finished_on'] ? fmt_date($pl['finished_on']) : '']))) ?></small></span>
                     <?= stars($pl['rating'] !== null ? (int)$pl['rating'] : null, false) ?>
                 </a>
             </li>

@@ -419,12 +419,14 @@ meter::-moz-meter-bar { background: var(--accent); }
 /* ---------- Listen ---------- */
 .minilist { list-style: none; margin: 0; padding: 0; }
 .minilist li + li { border-top: 1px dashed var(--line); }
-.minilist a { display: flex; align-items: center; gap: 12px; padding: 10px 0; color: var(--text); text-decoration: none; }
+.minilist a, .minilist-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; color: var(--text); text-decoration: none; }
 .minilist a:hover strong { color: var(--accent); }
 .minilist img, .noimg { width: 40px; height: 40px; object-fit: cover; flex: 0 0 auto; border: 2px solid var(--line); }
 .noimg { display: inline-grid; place-items: center; background: var(--bg); color: var(--muted); font-size: 18px; }
-.minilist span:not(.noimg):not(.stars):not(.star) { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.minilist span:not(.noimg):not(.stars):not(.star):not(.minilist-row) { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .minilist strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Smartphone/Tablet: lange Titel umbrechen statt abkürzen */
+@media (max-width: 899px) { .minilist strong { white-space: normal; overflow-wrap: break-word; } }
 .minilist small { color: var(--muted); }
 
 /* Sammlung als Modul-Kacheln */
