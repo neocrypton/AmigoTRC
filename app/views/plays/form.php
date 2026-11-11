@@ -1,14 +1,14 @@
 <?php
 $minutes = isset($play['playtime_minutes']) && $play['playtime_minutes'] !== null ? (int)$play['playtime_minutes'] : null;
 $rating = isset($play['rating']) && $play['rating'] !== null ? (int)$play['rating'] : 0;
-// Datum: exakt oder ungefähr (Monat); nach einem Fehler die Auswahl aus dem Formular behalten
+// Datum: exakt, ungefähr (Monat) oder keins; nach einem Fehler die Auswahl aus dem Formular behalten
 $finished = $play['finished_on'] ?? null;
 if (is_post()) {
-    $precision = input_enum('date_precision', ['day' => 1, 'month' => 1]) ?? 'day';
+    $precision = input_enum('date_precision', ['day' => 1, 'month' => 1, 'none' => 1]) ?? 'day';
     $selMonth = input_int('finished_month', 1, 12);
     $selYear = input_int('finished_year', 1950, 2100);
 } else {
-    $precision = ($play['finished_precision'] ?? null) === 'month' ? 'month' : 'day';
+    $precision = !$finished ? 'none' : (($play['finished_precision'] ?? null) === 'month' ? 'month' : 'day');
     $selMonth = $finished ? (int)substr($finished, 5, 2) : null;
     $selYear = $finished ? (int)substr($finished, 0, 4) : null;
 }
@@ -41,6 +41,7 @@ $thisYear = (int)date('Y');
             <div class="radio-row">
                 <label class="check"><input type="radio" name="date_precision" value="day"<?= checked($precision === 'day') ?>> exakt</label>
                 <label class="check"><input type="radio" name="date_precision" value="month"<?= checked($precision === 'month') ?>> ungefähr</label>
+                <label class="check"><input type="radio" name="date_precision" value="none"<?= checked($precision === 'none') ?>> keins</label>
             </div>
             <div class="date-exact">
                 <input id="f-finished" type="date" name="finished_on" value="<?= e($precision === 'day' ? ($finished ?? '') : '') ?>" max="<?= date('Y-m-d') ?>" aria-label="Datum (exakt)">
@@ -59,7 +60,6 @@ $thisYear = (int)date('Y');
                     <?php endfor; ?>
                 </select>
             </div>
-            <p class="hint">Optional – leer lassen, wenn du es nicht mehr weißt.</p>
         </fieldset>
 
         <div class="row2">

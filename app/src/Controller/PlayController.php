@@ -175,10 +175,12 @@ final class PlayController
         $scoreRaw = str_replace(['.', ' '], '', input('score', 25));
         $score = $scoreRaw === '' ? null : (preg_match('/^\d{1,15}$/', $scoreRaw) ? (int)$scoreRaw : false);
 
-        // Datum: exakt (Tag) oder ungefähr (Monat + Jahr); leer = kein Datum
-        $precision = input_enum('date_precision', ['day' => 1, 'month' => 1]) ?? 'day';
+        // Datum: exakt (Tag), ungefähr (Monat + Jahr) oder keins
+        $precision = input_enum('date_precision', ['day' => 1, 'month' => 1, 'none' => 1]) ?? 'day';
         $dateError = false;
-        if ($precision === 'month') {
+        if ($precision === 'none') {
+            $finished = null;
+        } elseif ($precision === 'month') {
             $month = input_int('finished_month', 1, 12);
             $year = input_int('finished_year', 1950, 2100);
             $finished = ($month && $year) ? sprintf('%04d-%02d-01', $year, $month) : null;
