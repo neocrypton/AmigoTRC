@@ -61,6 +61,35 @@ auf dem Tablet und auf dem Smartphone.
 - Mobil: App-artige Navigationsleiste unten, große Touch-Ziele,
   „Zum Startbildschirm hinzufügen“ (Web-App-Manifest)
 
+## Öffentliche Website
+
+Optional bekommt jede Installation eine öffentliche Website im gleichen Retro-Look –
+z. B. um AMIGO vorzustellen oder deine Community einzuladen. Alles wird unter
+**Admin › Website** eingestellt:
+
+- **Ein-/Ausschalter:** Eingeschaltet sehen Besucher auf der Startadresse die Website,
+  ausgeschaltet (Standard) wie bisher nur die Anmeldung.
+- **Seiten:** Start, Installation (Single- und Community-Variante), FAQ, Impressum und
+  Datenschutz – mit fertigen Texten vorbefüllt, einzeln aktivierbar, Titel = Menüpunkt.
+  Impressum und Datenschutz sind **Vorlagen mit Platzhaltern** und deshalb zunächst
+  aus; einmal aktiviert, stehen sie auch auf der Anmeldeseite und in der App unten.
+- **FAQ:** Fragen anlegen, sortieren, ausblenden; Anzeige als aufklappbare Liste.
+- **News:** separat ein-/ausschaltbar, mit Entwürfen und geplanter Veröffentlichung;
+  die neuesten drei erscheinen auf der Startseite.
+- **Links & Partner** in der Seitenleiste: Textlink oder Banner im Format **160×50**
+  (andere Größen werden zugeschnitten, animierte GIFs in genau 160×50 bleiben animiert).
+- **Editor:** Alle Texte werden mit dem **CKEditor 5** (Open-Source-Version, GPL)
+  bearbeitet: Überschriften, Schriftarten/-größen/-farben, Markierungen, Ausrichtung,
+  Listen (auch Aufgabenlisten), Tabellen, Bilder mit Bildunterschrift und Größe,
+  Links und Anker, Zitate, Code-Blöcke, Sonderzeichen, Suchen & Ersetzen,
+  Quelltext-Ansicht, Vollbild und eigene Retro-Stile (Pixel-Schrift, Info-Kasten,
+  Neon). Der Editor liegt lokal unter `assets/vendor/` und wird nur im Adminbereich
+  geladen – für Besucher bleibt die Seite schlank.
+- **Sicher:** Jeder Text läuft beim Speichern und bei der Ausgabe durch einen
+  HTML-Filter (Whitelist für Tags, Attribute, Links und Styles). Bilder kommen nur
+  aus dem eigenen Speicher (`data/site/`, neu berechnet), eingebettete Videos werden
+  als Link angezeigt – keine fremden Player, kein Tracking.
+
 ## CSV-Import
 
 Unter **Mein Konto › CSV-Import** (oder in Sammlung / Durchgespielt) lassen sich
@@ -239,7 +268,10 @@ location ~ \.(md|sqlite|log|lock)$ { deny all; }
 - **SQL-Injection:** ausschließlich vorbereitete Statements (PDO, echte
   Prepared Statements), Sortierungen/Filter nur über Whitelists
 - **XSS:** jede Ausgabe wird escaped; strenge Content-Security-Policy
-  (keine Inline-Scripts, nur eigene Dateien + Cover-Bilder von TheGamesDB)
+  (keine Inline-Scripts, nur eigene Dateien + Cover-Bilder von TheGamesDB);
+  Website-Texte aus dem Editor laufen durch einen HTML-Filter (Whitelist). Nur auf
+  Website- und Editor-Seiten sind Inline-Style-*Attribute* erlaubt (für Textfarben
+  u. Ä.), Skripte nie
 - **CSRF:** Token in jedem Formular + Prüfung des Origin-Headers
 - **Passwörter:** Argon2id (Fallback bcrypt), automatisches Rehashing,
   Mindestlänge 10; Passwortwechsel meldet andere Sitzungen ab
@@ -282,7 +314,7 @@ app/src/Controller   Seitenlogik
 app/views            Templates
 assets/              CSS, JS, Schrift, Icons
 config/              config.php (wird erzeugt, nicht ins Git!)
-data/                Fotos, SQLite, Sessions, Logs (falls nicht ausgelagert)
+data/                Fotos, Website-Bilder, SQLite, Sessions, Logs (falls nicht ausgelagert)
 ```
 
 ## Hinweise zum Umstieg von Version 1
@@ -297,4 +329,5 @@ gültig sind, das Passwort bitte ändern.
 
 - Schrift „Press Start 2P“ – SIL Open Font License (`assets/fonts/OFL.txt`)
 - QR-Code-Generator von Kazuhiko Arase – MIT-Lizenz
+- CKEditor 5 – GPL-2.0-or-later (`assets/vendor/ckeditor5-49.1.0/LICENSE.md`)
 - Spieldaten und Cover: [TheGamesDB](https://thegamesdb.net)

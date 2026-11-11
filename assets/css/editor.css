@@ -1,0 +1,47 @@
+/* CKEditor 5 im AMIGO-Look (nur auf den Bearbeiten-Seiten geladen). */
+.editor-field .ck.ck-editor {
+  --ck-color-base-background: var(--panel);
+  --ck-color-base-foreground: var(--panel2);
+  --ck-color-base-border: var(--line);
+  --ck-color-base-text: var(--text);
+  --ck-color-text: var(--text);
+  --ck-color-focus-border: var(--accent);
+  --ck-color-shadow-inner: transparent;
+  --ck-color-toolbar-background: var(--panel2);
+  --ck-color-toolbar-border: var(--line);
+  --ck-color-button-default-hover-background: var(--panel);
+  --ck-color-button-default-active-background: var(--bg);
+  --ck-color-button-on-background: var(--bg);
+  --ck-color-button-on-hover-background: var(--bg2);
+  --ck-color-button-on-color: var(--accent);
+  --ck-color-button-action-background: var(--accent);
+  --ck-color-button-action-text: var(--accent-ink);
+  --ck-color-dropdown-panel-background: var(--panel2);
+  --ck-color-dropdown-panel-border: var(--line);
+  --ck-color-panel-background: var(--panel2);
+  --ck-color-panel-border: var(--line);
+  --ck-color-input-background: var(--bg);
+  --ck-color-input-border: var(--line);
+  --ck-color-input-text: var(--text);
+  --ck-color-labeled-field-label-background: var(--panel2);
+  --ck-color-list-background: var(--panel2);
+  --ck-color-list-button-hover-background: var(--panel);
+  --ck-color-list-button-on-background: var(--bg);
+  --ck-color-list-button-on-text: var(--accent);
+  --ck-color-split-button-hover-background: var(--panel);
+  --ck-color-split-button-hover-border: var(--line);
+  --ck-color-tooltip-background: var(--bg);
+  --ck-color-tooltip-text: var(--text);
+  --ck-color-link-default: var(--neon);
+  --ck-color-widget-blurred-border: var(--line);
+  --ck-color-widget-hover-border: var(--neon);
+  --ck-color-widget-editable-focus-background: var(--bg2);
+  --ck-color-engine-placeholder-text: var(--muted);
+  --ck-border-radius: 0;
+  --ck-font-face: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--text);
+}
+.editor-field .ck-editor__editable_inline { min-height: 320px; max-height: 70vh; background: var(--bg2) !important; color: var(--text); padding: 4px 18px !important; }
+.ck.ck-editor__editable.ck-focused:not(.ck-editor__nested-editable) { border-color: var(--accent) !important; }
+.ck-body-wrapper .ck { --ck-color-base-background: var(--panel2); --ck-color-base-border: var(--line); --ck-color-text: var(--text); --ck-color-panel-background: var(--panel2); --ck-color-panel-border: var(--line); --ck-color-input-background: var(--bg); --ck-color-input-text: var(--text); --ck-color-input-border: var(--line); --ck-color-list-background: var(--panel2); --ck-color-list-button-hover-background: var(--panel); --ck-color-button-default-hover-background: var(--panel); --ck-color-labeled-field-label-background: var(--panel2); --ck-color-tooltip-background: var(--bg); --ck-color-dropdown-panel-background: var(--panel2); --ck-border-radius: 0; color: var(--text); }
+.ck.ck-fullscreen__main-wrapper .ck-editor__editable, .ck-fullscreen__editable .ck-editor__editable { background: var(--bg2) !important; color: var(--text); }

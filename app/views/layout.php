@@ -24,6 +24,12 @@ $icon = static fn (string $name): string => '<svg class="ico" aria-hidden="true"
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="preload" href="<?= e(asset('fonts/press-start-2p-latin.woff2')) ?>" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
+    <?php foreach ($styles ?? [] as $s): ?>
+    <link rel="stylesheet" href="<?= e(asset($s)) ?>">
+    <?php endforeach; ?>
+    <?php foreach ($modules ?? [] as $s): ?>
+    <script type="module" src="<?= e(asset($s)) ?>"></script>
+    <?php endforeach; ?>
     <?php foreach ($scripts ?? [] as $s): ?>
     <script src="<?= e(asset($s)) ?>" defer></script>
     <?php endforeach; ?>
@@ -71,6 +77,8 @@ $icon = static fn (string $name): string => '<svg class="ico" aria-hidden="true"
 
 <footer class="shell footer">
     <span class="blink">▮</span> <?= e($site) ?> v<?= e(AMIGO_VERSION) ?> · Spieldaten von <a href="https://thegamesdb.net" rel="noopener noreferrer" target="_blank">TheGamesDB</a>
+    <?php if (\Amigo\Service\Site::enabled()): ?> · <a href="<?= e(url('site')) ?>">Website</a><?php endif; ?>
+    <?php foreach (\Amigo\Service\Site::legalLinks() as [$href, $label]): ?> · <a href="<?= e($href) ?>"><?= e($label) ?></a><?php endforeach; ?>
 </footer>
 
 <?php if ($user): ?>

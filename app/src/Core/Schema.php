@@ -16,7 +16,7 @@ namespace Amigo\Core;
  */
 final class Schema
 {
-    public const VERSION = 7;
+    public const VERSION = 8;
 
     public static function migrate(Database $db): void
     {
@@ -24,11 +24,14 @@ final class Schema
         if ($current >= self::VERSION) {
             return;
         }
-        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5(), 6 => self::v6(), 7 => self::v7()];
+        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5(), 6 => self::v6(), 7 => self::v7(), 8 => self::v8()];
         foreach ($steps as $version => $statements) {
             if ($current < $version) {
                 foreach ($statements as $ddl) {
                     $db->pdo()->exec(self::translate($db, $ddl));
+                }
+                if ($version === 8) {
+                    \Amigo\Service\SiteDefaults::install($db);
                 }
                 Settings::set($db, 'schema_version', (string)$version);
             }
@@ -61,6 +64,48 @@ final class Schema
         // Index-Namen sind in SQLite datenbankweit eindeutig -> mit Präfix versehen.
         $ddl = preg_replace_callback('/\[([a-z_]+)\]/', fn ($m) => $db->quoteIdent($db->prefix() . $m[1]), $ddl);
         return $db->sql($ddl);
+    }
+
+    /** v8: öffentliche Website (Seiten, FAQ, News, Links/Partner) – Standardinhalte über SiteDefaults. */
+    private static function v8(): array
+    {
+        return [
+            "CREATE TABLE {site_pages} (
+                id %ID%,
+                slug VARCHAR(30) NOT NULL UNIQUE,
+                title VARCHAR(150) NOT NULL,
+                body %TEXT% NOT NULL,
+                enabled SMALLINT NOT NULL DEFAULT 1,
+                updated_at %DT% NULL
+            )%OPT%",
+            "CREATE TABLE {site_faq} (
+                id %ID%,
+                question VARCHAR(255) NOT NULL,
+                answer %TEXT% NOT NULL,
+                sort %INT% NOT NULL DEFAULT 0,
+                enabled SMALLINT NOT NULL DEFAULT 1
+            )%OPT%",
+            "CREATE TABLE {site_news} (
+                id %ID%,
+                title VARCHAR(200) NOT NULL,
+                body %TEXT% NOT NULL,
+                published SMALLINT NOT NULL DEFAULT 0,
+                published_at %DT% NOT NULL,
+                author_id %INT% NULL,
+                created_at %DT% NOT NULL,
+                updated_at %DT% NULL,
+                FOREIGN KEY (author_id) REFERENCES {users} (id) ON DELETE SET NULL
+            )%OPT%",
+            "CREATE INDEX [site_news_pub] ON {site_news} (published, published_at)",
+            "CREATE TABLE {site_links} (
+                id %ID%,
+                name VARCHAR(100) NOT NULL,
+                url VARCHAR(500) NOT NULL,
+                banner VARCHAR(40) NULL,
+                sort %INT% NOT NULL DEFAULT 0,
+                enabled SMALLINT NOT NULL DEFAULT 1
+            )%OPT%",
+        ];
     }
 
     /** v7: E-Mail-Benachrichtigung bei neuen PNs (Einstellung + „schon benachrichtigt bis Nachricht X“). */

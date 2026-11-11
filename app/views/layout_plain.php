@@ -31,6 +31,21 @@ $site = (string)App::config('site_name', 'AMIGO!');
         <?= $content ?>
     </div>
     <p class="boot-foot">© <?= date('Y') ?> · <span class="blink">PRESS START</span></p>
+    <?php
+    try { // im Installer gibt es noch keine Datenbank
+        $legal = \Amigo\Service\Site::legalLinks();
+        $siteOn = \Amigo\Service\Site::enabled();
+    } catch (\Throwable) {
+        $legal = [];
+        $siteOn = false;
+    }
+    ?>
+    <?php if ($legal || $siteOn): ?>
+    <p class="boot-links">
+        <?php if ($siteOn): ?><a href="<?= e(url('site')) ?>">◀ Zur Website</a><?php endif; ?>
+        <?php foreach ($legal as [$href, $label]): ?><a href="<?= e($href) ?>"><?= e($label) ?></a><?php endforeach; ?>
+    </p>
+    <?php endif; ?>
 </main>
 </body>
 </html>

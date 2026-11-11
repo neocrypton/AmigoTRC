@@ -15,6 +15,7 @@
     <a href="<?= e(url('admin/settings')) ?>">⚙<span>System</span></a>
     <a href="<?= e(url('admin/users')) ?>">👥<span>Benutzer</span></a>
     <a href="<?= e(url('admin/platforms')) ?>">📥<span>Plattform-Import</span></a>
+    <a href="<?= e(url('admin/site')) ?>">🌐<span>Website</span></a>
     <?php endif; ?>
 </nav>
 

@@ -33,6 +33,13 @@ $routes = [
     'verify/resend'     => [C\AuthController::class, 'resend', 'public'],
     'register'          => [C\AuthController::class, 'register', 'guest'],
 
+    // Öffentliche Website (im Adminbereich ein-/ausschaltbar)
+    'site'              => [C\SiteController::class, 'home', 'public'],
+    'page'              => [C\SiteController::class, 'page', 'public'],
+    'news'              => [C\SiteController::class, 'news', 'public'],
+    'news/item'         => [C\SiteController::class, 'newsItem', 'public'],
+    'site/file'         => [C\SiteController::class, 'file', 'public'],
+
     'collection'        => [C\CollectionController::class, 'index', 'auth'],
     'item'              => [C\CollectionController::class, 'show', 'auth'],
     'item/edit'         => [C\CollectionController::class, 'edit', 'auth'],
@@ -93,6 +100,16 @@ $routes = [
     'admin/platforms'      => [C\AdminController::class, 'platformImport', 'admin'],
     'admin/platform/edit'  => [C\AdminController::class, 'platformEdit', 'admin'],
     'admin/platform/delete' => [C\AdminController::class, 'platformDelete', 'admin'],
+    'admin/site'           => [C\SiteAdminController::class, 'index', 'admin'],
+    'admin/site/page'      => [C\SiteAdminController::class, 'page', 'admin'],
+    'admin/site/faq'       => [C\SiteAdminController::class, 'faq', 'admin'],
+    'admin/site/faq/edit'  => [C\SiteAdminController::class, 'faqEdit', 'admin'],
+    'admin/site/news'      => [C\SiteAdminController::class, 'news', 'admin'],
+    'admin/site/news/edit' => [C\SiteAdminController::class, 'newsEdit', 'admin'],
+    'admin/site/links'     => [C\SiteAdminController::class, 'links', 'admin'],
+    'admin/site/link/edit' => [C\SiteAdminController::class, 'linkEdit', 'admin'],
+    'admin/site/action'    => [C\SiteAdminController::class, 'action', 'admin'],
+    'admin/site/upload'    => [C\SiteAdminController::class, 'upload', 'admin'],
 ];
 
 $route = isset($_GET['r']) && is_string($_GET['r']) ? $_GET['r'] : 'home';
@@ -118,6 +135,10 @@ if (is_post() && !Csrf::check()) {
 }
 
 $user = Auth::user();
+// Gäste sehen auf der Startadresse die öffentliche Website, sofern eingeschaltet.
+if ($route === 'home' && !$user && \Amigo\Service\Site::enabled()) {
+    [$controller, $method, $access] = [C\SiteController::class, 'home', 'public'];
+}
 if ($access === 'guest' && $user) {
     redirect('home');
 }
@@ -141,7 +162,7 @@ if ($user && !(int)$user['totp_enabled'] && Settings::bool(App::db(), 'require_2
 }
 
 // HTML komprimiert ausliefern – spart bei langsamen Verbindungen (EDGE/3G) viel Zeit.
-if (!in_array($route, ['photo', 'cover', 'avatar', 'export'], true) && extension_loaded('zlib') && !ini_get('zlib.output_compression')) {
+if (!in_array($route, ['photo', 'cover', 'avatar', 'export', 'site/file'], true) && extension_loaded('zlib') && !ini_get('zlib.output_compression')) {
     ob_start('ob_gzhandler');
 }
 

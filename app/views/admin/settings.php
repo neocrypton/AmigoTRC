@@ -3,6 +3,7 @@
     <div class="btnrow">
         <a class="btn" href="<?= e(url('admin/users')) ?>">👥 Benutzer</a>
         <a class="btn" href="<?= e(url('admin/platforms')) ?>">📥 Plattformen</a>
+        <a class="btn" href="<?= e(url('admin/site')) ?>">🌐 Website</a>
     </div>
 </div>
 
