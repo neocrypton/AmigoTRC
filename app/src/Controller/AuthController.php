@@ -255,6 +255,7 @@ final class AuthController
             'emailRequired' => $emailRequired,
             'mode'    => $mode,
             'theme'   => ($_COOKIE['amigo_theme'] ?? 'crt') === 'dmg' ? 'light' : 'dark',
+            'privacyUrl' => \Amigo\Service\Site::visible(\Amigo\Service\Site::page('privacy')) ? url('page', ['p' => 'privacy']) : null,
         ], 'layout_plain');
     }
 

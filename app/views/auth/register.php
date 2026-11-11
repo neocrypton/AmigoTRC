@@ -21,9 +21,13 @@
     <div class="field captcha">
         <div class="g-recaptcha" data-sitekey="<?= e($siteKey) ?>" data-theme="<?= e($theme) ?>"></div>
         <noscript><p class="flash flash-warn">Für die Registrierung wird JavaScript benötigt (Bot-Schutz).</p></noscript>
-        <p class="hint">Zum Schutz vor Bots wird auf dieser Seite Google reCAPTCHA geladen.</p>
     </div>
     <?php if ($mode === 'admin' || $mode === 'email_admin'): ?><p class="hint">Neue Konten werden von einem Admin freigeschaltet.</p><?php endif; ?>
+    <p class="privacy-note">
+        🔒 Mit dem Absenden werden deine Angaben gespeichert, um dein Konto bereitzustellen.
+        Zum Schutz vor Bots lädt diese Seite <strong>Google reCAPTCHA</strong> – dabei werden u. a. deine IP-Adresse und Browserdaten an Google übertragen.
+        <?php if ($privacyUrl): ?>Mehr dazu in der <a href="<?= e($privacyUrl) ?>" target="_blank" rel="noopener">Datenschutzerklärung</a>.<?php endif; ?>
+    </p>
     <button class="btn btn-primary btn-block" type="submit">▶ KONTO ERSTELLEN</button>
     <script src="https://www.google.com/recaptcha/api.js?hl=de" async defer></script>
     <p class="center muted"><a href="<?= e(url('login')) ?>">Zurück zum Login</a></p>
