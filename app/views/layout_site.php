@@ -63,7 +63,21 @@ $indexable = Site::enabled() && empty($preview);
     <?php elseif (!empty($preview)): ?>
     <div class="flash flash-info">👁 Vorschau – dieser Inhalt ist für Besucher nicht sichtbar. <a href="<?= e(url('admin/site')) ?>">Admin › Website</a></div>
     <?php endif; ?>
-    <div class="site-grid<?= $links ? '' : ' site-grid-single' ?>">
+    <div class="site-grid<?= $links || !empty($hero) ? ' has-side' : '' ?>">
+        <?php if (!empty($hero)): ?>
+        <section class="panel site-herobox">
+            <h1 class="logo-type"><?= e($site) ?></h1>
+            <p class="herobox-sub">The Retro Collector<span class="blink">_</span></p>
+            <div class="herobox-actions">
+                <?php if ($user): ?>
+                <a class="btn btn-primary btn-block" href="<?= e(url()) ?>">▶ Zur Sammlung</a>
+                <?php else: ?>
+                <a class="btn btn-primary btn-block" href="<?= e(url('login')) ?>">▶ Login</a>
+                <?php if (!empty($registration)): ?><a class="btn btn-block" href="<?= e(url('register')) ?>">Konto erstellen</a><?php endif; ?>
+                <?php endif; ?>
+            </div>
+        </section>
+        <?php endif; ?>
         <div class="site-content"><?= $content ?></div>
         <?php if ($links): ?>
         <aside class="site-aside" aria-label="Links und Partner">

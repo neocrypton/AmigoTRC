@@ -25,6 +25,7 @@ final class SiteController
             'page'         => $page,
             'title'        => '',
             'siteNav'      => 'home',
+            'hero'         => true,
             'preview'      => !Site::visible($page),
             'description'  => Html::text($page['body'], 160),
             'news'         => Site::newsEnabled() ? Site::news(3) : [],
