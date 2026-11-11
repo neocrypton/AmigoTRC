@@ -38,9 +38,9 @@ $thisYear = (int)date('Y');
         <h2 class="panel-title">Ergebnis <small class="muted">alles optional</small></h2>
         <fieldset class="field datefield">
             <legend class="label">Durchgespielt am</legend>
-            <div class="segmented">
-                <label><input type="radio" name="date_precision" value="day"<?= checked($precision === 'day') ?>><span>Exakt (TT.MM.JJJJ)</span></label>
-                <label><input type="radio" name="date_precision" value="month"<?= checked($precision === 'month') ?>><span>Ungefähr (MM.JJJJ)</span></label>
+            <div class="radio-row">
+                <label class="check"><input type="radio" name="date_precision" value="day"<?= checked($precision === 'day') ?>> exakt</label>
+                <label class="check"><input type="radio" name="date_precision" value="month"<?= checked($precision === 'month') ?>> ungefähr</label>
             </div>
             <div class="date-exact">
                 <input id="f-finished" type="date" name="finished_on" value="<?= e($precision === 'day' ? ($finished ?? '') : '') ?>" max="<?= date('Y-m-d') ?>" aria-label="Datum (exakt)">

@@ -326,7 +326,8 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: .8; }
 .hint { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
 .hint-warn { color: var(--warn); }
 /* Durchgespielt-Datum: exakt (Datumsfeld) oder ungefähr (Monat + Jahr) */
-.datefield .segmented { margin-bottom: 10px; }
+.radio-row { display: flex; flex-wrap: wrap; gap: 6px 32px; margin: 0 0 6px; }
+.radio-row .check { margin: 0 0 4px; }
 .datefield .date-month select { flex: 1; min-width: 0; }
 .datefield:has(input[value="month"]:checked) .date-exact,
 .datefield:has(input[value="day"]:checked) .date-month { display: none; }
