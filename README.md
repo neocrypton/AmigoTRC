@@ -232,6 +232,16 @@ gesichert – ohne Google, ohne Schlüssel, ohne Einrichtung:
 - Keine Cookies, keine Daten an Dritte – deshalb auch keine Einwilligung nötig.
   Ohne JavaScript ist keine Registrierung möglich (Hinweis wird angezeigt).
 
+**Ausweichmöglichkeit Google reCAPTCHA v2:** Unter **Admin › System › Bot-Schutz**
+kann stattdessen reCAPTCHA („Ich bin kein Roboter“) gewählt werden – z. B. wenn
+gezielte Bot-Angriffe den eingebauten Schutz überwinden. Dafür unter
+[google.com/recaptcha/admin](https://www.google.com/recaptcha/admin/create) eine
+Website (Typ reCAPTCHA v2, Kästchen) anlegen, Website- und Geheimschlüssel eintragen
+(„Speichern & prüfen“, Geheimschlüssel wird verschlüsselt gespeichert) und dann
+reCAPTCHA auswählen. Das Google-Script wird nur auf der Registrierungsseite geladen
+und überträgt Daten an Google – dann bitte die Datenschutzerklärung ergänzen. Werden
+die Schlüssel entfernt, schaltet AMIGO automatisch auf den eingebauten Schutz zurück.
+
 **Aktivierung neuer Konten** (Admin › System):
 
 | Modus | Ablauf |
@@ -290,7 +300,8 @@ location ~ \.(md|sqlite|log|lock)$ { deny all; }
   serverseitig entfernt (nicht nur ausgeblendet)
 - **Header:** HSTS, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy
 - **Registrierung:** eigener Bot-Schutz (Proof-of-Work mit HMAC-signierten,
-  einmal gültigen Aufgaben + Honeypot), Rate-Limit je IP, auch für Fehlversuche
+  einmal gültigen Aufgaben + Honeypot) oder wahlweise reCAPTCHA v2 (serverseitig
+  geprüft, inkl. Domain), Rate-Limit je IP, auch für Fehlversuche
 - **CSV-Export** mit Schutz gegen Formel-Injection
 - Fehlerdetails nur im Log (`data/logs`), nie im Browser
 

@@ -91,8 +91,37 @@
 
     <section class="panel" id="botschutz">
         <h2 class="panel-title">Bot-Schutz · Registrierung</h2>
-        <p><span class="cond cond-5">EINGEBAUT</span> Keine Einrichtung nötig.</p>
-        <p class="hint">Die Registrierung ist durch einen eigenen Bot-Schutz gesichert: Der Browser löst eine kleine Rechenaufgabe (Proof-of-Work, ca. 1 Sekunde), dazu kommen ein unsichtbares Fallen-Feld und Rate-Limits je IP. Alles läuft auf diesem Server – ohne Google, ohne Cookies, ohne Daten an Dritte.</p>
+        <form method="post" action="<?= e(url('admin/recaptcha')) ?>">
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="mode">
+            <label class="check"><input type="radio" name="bot_protection" value="builtin"<?= checked(!$useRecaptcha) ?>> <span><strong>Eingebaut</strong> (empfohlen)</span></label>
+            <p class="hint">Der Browser löst eine kleine Rechenaufgabe (ca. 1 Sekunde), dazu ein unsichtbares Fallen-Feld und Rate-Limits je IP. Alles läuft auf diesem Server – ohne Google, ohne Cookies, ohne Daten an Dritte.</p>
+            <label class="check"><input type="radio" name="bot_protection" value="recaptcha"<?= checked($useRecaptcha) ?><?= $captchaOk ? '' : ' disabled' ?>> <span><strong>Google reCAPTCHA v2</strong> („Ich bin kein Roboter“)</span></label>
+            <p class="hint"><?= $captchaOk ? 'Stärker gegen gezielte Angriffe, überträgt aber Daten an Google – dann bitte die Datenschutzerklärung um reCAPTCHA ergänzen.' : 'Erst wählbar, wenn unten die reCAPTCHA-Schlüssel eingetragen sind.' ?></p>
+            <button class="btn btn-primary" type="submit">Speichern</button>
+        </form>
+        <details class="subdetails"<?= $captchaOk ? ' open' : '' ?>>
+            <summary>reCAPTCHA-Schlüssel <?= $captchaOk ? '<span class="cond cond-5">HINTERLEGT</span>' : '<span class="cond cond-na">KEINE</span>' ?></summary>
+            <form method="post" action="<?= e(url('admin/recaptcha')) ?>">
+                <?= csrf_field() ?>
+                <div class="field">
+                    <label for="rc-site">Website-Schlüssel (Site Key)</label>
+                    <input id="rc-site" name="site_key" value="<?= e($captchaSite) ?>" autocomplete="off" spellcheck="false" maxlength="120">
+                </div>
+                <div class="field">
+                    <label for="rc-secret">Geheimschlüssel (Secret Key)</label>
+                    <input id="rc-secret" name="secret_key" type="password" autocomplete="off" spellcheck="false" maxlength="120" placeholder="<?= $captchaOk ? 'leer lassen = unverändert' : 'Schlüssel einfügen' ?>">
+                    <p class="hint">Schlüssel für <strong>reCAPTCHA v2 – Kästchen „Ich bin kein Roboter“</strong> erstellst du unter <a href="https://www.google.com/recaptcha/admin/create" target="_blank" rel="noopener noreferrer">google.com/recaptcha/admin</a>. Als Domain deine Seite eintragen (z. B. <code><?= e($_SERVER['HTTP_HOST'] ?? '') ?></code>).</p>
+                </div>
+                <div class="btnrow">
+                    <button class="btn" type="submit" name="action" value="save">Speichern &amp; prüfen</button>
+                    <?php if ($captchaOk): ?>
+                    <button class="btn" type="submit" name="action" value="test">Prüfen</button>
+                    <button class="btn btn-danger" type="submit" name="action" value="remove" data-confirm="reCAPTCHA-Schlüssel entfernen? Die Registrierung nutzt dann den eingebauten Bot-Schutz.">Entfernen</button>
+                    <?php endif; ?>
+                </div>
+            </form>
+        </details>
     </section>
 
     <section class="panel">

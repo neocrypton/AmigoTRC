@@ -14,6 +14,7 @@ use Amigo\Core\View;
 use Amigo\Service\Accounts;
 use Amigo\Service\Mailer;
 use Amigo\Service\BotGuard;
+use Amigo\Service\Recaptcha;
 
 final class AuthController
 {
@@ -197,6 +198,10 @@ final class AuthController
             flash('info', 'Die Registrierung ist geschlossen.');
             redirect('login');
         }
+        $useRecaptcha = Recaptcha::active();
+        if ($useRecaptcha) {
+            App::sendSecurityHeaders(Recaptcha::CSP);
+        }
         $mode = Accounts::mode();
         $emailRequired = Accounts::emailRequired();
         if (Accounts::needsEmail($mode) && !Mailer::configured()) {
@@ -214,10 +219,14 @@ final class AuthController
 
             if (RateLimiter::tooMany($bucket, 5, 3600)) {
                 $errors[] = 'Zu viele Registrierungen von dieser Adresse. Bitte später erneut versuchen.';
-            } elseif (($_POST['website'] ?? '') !== '' || !BotGuard::verify((string)($_POST['botguard'] ?? ''))) {
+            } elseif (($_POST['website'] ?? '') !== '' || !($useRecaptcha
+                ? Recaptcha::verify((string)($_POST['g-recaptcha-response'] ?? ''), RateLimiter::ip())
+                : BotGuard::verify((string)($_POST['botguard'] ?? '')))) {
                 // Fehlversuche zählen mit, damit Bots nicht endlos probieren können.
                 RateLimiter::hit($bucket . ':bot');
-                $errors[] = 'Der Bot-Schutz wurde nicht bestanden. Bitte warte, bis „Bot-Schutz bestanden“ erscheint, und sende das Formular erneut ab.';
+                $errors[] = $useRecaptcha
+                    ? 'Bitte bestätige „Ich bin kein Roboter“.'
+                    : 'Der Bot-Schutz wurde nicht bestanden. Bitte warte, bis „Bot-Schutz bestanden“ erscheint, und sende das Formular erneut ab.';
             }
             if (RateLimiter::tooMany($bucket . ':bot', 20, 3600)) {
                 $errors = ['Zu viele fehlgeschlagene Versuche. Bitte später erneut versuchen.'];
@@ -262,6 +271,9 @@ final class AuthController
             'data'    => $data,
             'emailRequired' => $emailRequired,
             'mode'    => $mode,
+            'useRecaptcha' => $useRecaptcha,
+            'siteKey' => $useRecaptcha ? Recaptcha::siteKey() : '',
+            'theme'   => ($_COOKIE['amigo_theme'] ?? 'crt') === 'dmg' ? 'light' : 'dark',
             'privacyUrl' => \Amigo\Service\Site::visible(\Amigo\Service\Site::page('privacy')) ? url('page', ['p' => 'privacy']) : null,
         ], 'layout_plain');
     }

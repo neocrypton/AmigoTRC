@@ -12,6 +12,7 @@ use Amigo\Core\View;
 use Amigo\Service\Accounts;
 use Amigo\Service\Catalog;
 use Amigo\Service\Mailer;
+use Amigo\Service\Recaptcha;
 use Amigo\Service\TheGamesDb;
 
 final class AdminController
@@ -167,6 +168,9 @@ final class AdminController
             'keySource'    => Catalog::systemKeySource(),
             'keyHint'      => Catalog::systemKey() !== '' ? '…' . substr(Catalog::systemKey(), -4) : null,
             'tgdbShared'   => Settings::bool($db, 'tgdb_shared'),
+            'captchaSite'  => Recaptcha::siteKey(),
+            'captchaOk'    => Recaptcha::configured(),
+            'useRecaptcha' => Recaptcha::active(),
             'mode'         => Accounts::mode(),
             'requireEmail' => Settings::bool($db, 'require_email'),
             'mail'         => Mailer::settings(),
@@ -221,6 +225,54 @@ final class AdminController
                 flash('error', 'Versand fehlgeschlagen: ' . $e->getMessage());
             }
         }
+        redirect('admin/settings');
+    }
+
+    /** Bot-Schutz wählen sowie reCAPTCHA-Schlüssel speichern, prüfen oder entfernen. */
+    public function recaptcha(): void
+    {
+        if (!is_post()) {
+            redirect('admin/settings');
+        }
+        $db = App::db();
+        $action = input('action', 10);
+        if ($action === 'mode') {
+            $want = input('bot_protection', 10) === 'recaptcha' ? 'recaptcha' : 'builtin';
+            if ($want === 'recaptcha' && !Recaptcha::configured()) {
+                flash('error', 'Für reCAPTCHA bitte zuerst Website-Schlüssel und Geheimschlüssel eintragen.');
+            } else {
+                Settings::set($db, 'bot_protection', $want);
+                flash('ok', $want === 'recaptcha'
+                    ? 'Die Registrierung nutzt jetzt Google reCAPTCHA. Bitte die Datenschutzerklärung um reCAPTCHA ergänzen.'
+                    : 'Die Registrierung nutzt jetzt den eingebauten Bot-Schutz.');
+            }
+            redirect('admin/settings');
+        }
+        if ($action === 'remove') {
+            Recaptcha::clear();
+            if (Recaptcha::selected()) {
+                Settings::set($db, 'bot_protection', 'builtin');
+                flash('warn', 'reCAPTCHA entfernt – die Registrierung nutzt wieder den eingebauten Bot-Schutz.');
+            } else {
+                flash('ok', 'reCAPTCHA-Schlüssel entfernt.');
+            }
+            redirect('admin/settings');
+        }
+        if ($action === 'save') {
+            $site = trim(input('site_key', 120));
+            $secret = trim(input('secret_key', 120));
+            if ($secret === '' && Recaptcha::secret() !== '') {
+                $secret = Recaptcha::secret(); // nur Website-Schlüssel geändert
+            }
+            if (!Recaptcha::validKey($site) || !Recaptcha::validKey($secret)) {
+                flash('error', 'Website-Schlüssel und Geheimschlüssel sehen ungültig aus.');
+                redirect('admin/settings');
+            }
+            Recaptcha::save($site, $secret);
+        }
+        $result = Recaptcha::checkSecret();
+        $prefix = $action === 'save' ? 'reCAPTCHA-Schlüssel gespeichert. ' : '';
+        flash($result['ok'] ? 'ok' : ($action === 'save' ? 'warn' : 'error'), $prefix . $result['message']);
         redirect('admin/settings');
     }
 

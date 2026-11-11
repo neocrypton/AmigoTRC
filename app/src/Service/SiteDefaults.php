@@ -42,6 +42,7 @@ final class SiteDefaults
     /**
      * Schema v9 (reCAPTCHA → eigener Bot-Schutz): Standardtexte, die noch unverändert sind,
      * durch die neue Fassung ersetzen; selbst bearbeitete Texte bleiben unangetastet.
+     * Vorhandene reCAPTCHA-Schlüssel bleiben erhalten (reCAPTCHA ist im Admin weiter wählbar).
      */
     public static function refreshV9(Database $db): void
     {
@@ -59,7 +60,6 @@ final class SiteDefaults
                 $db->update('site_faq', ['answer' => $newFaq[$f['question']]], ['id' => $f['id']]);
             }
         }
-        $db->run("DELETE FROM {settings} WHERE skey IN ('recaptcha_site', 'recaptcha_secret')");
     }
 
     /** @return array<string, array{0:string,1:string,2:int}> slug => [Titel, HTML, aktiv] */
@@ -125,7 +125,7 @@ HTML, 1],
 <li><strong>TheGamesDB:</strong> Jeder Nutzer kann einen eigenen Key hinterlegen. Alternativ erlaubst du, dass alle deinen System-Key mitbenutzen – das teilt aber dein Kontingent.</li>
 <li><strong>Website einschalten</strong> (<em>Admin › Website</em>), Impressum und Datenschutzerklärung ausfüllen und aktivieren.</li>
 </ol>
-<p>Ein <strong>Bot-Schutz</strong> für die Registrierung ist eingebaut: Der Browser löst eine kleine Rechenaufgabe – ohne Google, ohne Cookies, ohne Einrichtung.</p>
+<p>Ein <strong>Bot-Schutz</strong> für die Registrierung ist eingebaut: Der Browser löst eine kleine Rechenaufgabe – ohne Google, ohne Cookies, ohne Einrichtung. Wer möchte, kann unter <em>Admin › System</em> alternativ auf Google reCAPTCHA umstellen.</p>
 <h3>Updates</h3>
 <p>Neue Version herunterladen und die Dateien einfach überschreiben. <code>config/config.php</code> und dein Datenverzeichnis bleiben erhalten; die Datenbank wird beim ersten Aufruf automatisch aktualisiert.</p>
 <h3>Backup</h3>
@@ -173,6 +173,7 @@ HTML, 0],
 <p>Zum Schutz vor Angriffen (z. B. Passwort-Raten) speichern wir fehlgeschlagene Anmeldeversuche kurzzeitig mit einer <strong>gehashten</strong> IP-Adresse (Art. 6 Abs. 1 lit. f DSGVO).</p>
 <h3>6. Registrierung und Bot-Schutz</h3>
 <p>Zum Schutz vor automatisierten Anmeldungen löst dein Browser auf der Registrierungsseite eine kleine Rechenaufgabe (Proof-of-Work). Die Aufgabe kommt von unserem eigenen Server; es werden keine Daten an Dritte übertragen und keine Cookies gesetzt. Fehlgeschlagene Registrierungsversuche speichern wir höchstens 24 Stunden zusammen mit einem Hash deiner IP-Adresse (Art. 6 Abs. 1 lit. f DSGVO).</p>
+<p><em>[Falls du im Admin auf Google reCAPTCHA umstellst, ersetze diesen Abschnitt durch einen Hinweis auf reCAPTCHA: Anbieter Google Ireland Limited, Übertragung von IP-Adresse und Browserdaten an Google, mögliche Übermittlung in die USA (EU-US Data Privacy Framework), Rechtsgrundlage Art. 6 Abs. 1 lit. f DSGVO.]</em></p>
 <h3>7. E-Mails</h3>
 <p>Wenn du eine E-Mail-Adresse angibst, nutzen wir sie für die Bestätigung deines Kontos, Informationen zur Freischaltung und – sofern nicht abgeschaltet – für Hinweise auf neue private Nachrichten (ohne Nachrichtentext). Die Benachrichtigungen kannst du jederzeit im Konto oder über den Link in jeder Mail abbestellen.</p>
 <h3>8. TheGamesDB</h3>

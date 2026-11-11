@@ -529,6 +529,12 @@ meter::-moz-meter-bar { background: var(--accent); }
 .botguard-status.is-ok { border-color: var(--ok); color: var(--ok); }
 .botguard-status.is-error { border-color: var(--bad); color: var(--bad); }
 button[disabled] { opacity: .55; cursor: wait; }
+/* reCAPTCHA-Widget (optional) hat feste Breite (304px) – auf schmalen Displays skalieren */
+.captcha { overflow: hidden; }
+@media (max-width: 360px) { .g-recaptcha { transform: scale(.88); transform-origin: 0 0; } }
+#botschutz .hint { margin-bottom: 14px; }
+.subdetails { margin-top: 18px; border-top: 1px dashed var(--line); padding-top: 12px; }
+.subdetails summary { cursor: pointer; font-weight: 700; display: flex; gap: 8px; align-items: center; }
 
 /* CSV-Import */
 .steps { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; padding: 0; }
