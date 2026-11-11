@@ -522,9 +522,13 @@ meter::-moz-meter-bar { background: var(--accent); }
 @media (min-width: 700px) { .checklist { grid-template-columns: 1fr 1fr; } }
 .checklist .check { margin: 0; padding: 6px 0; }
 
-/* reCAPTCHA-Widget hat feste Breite (304px) – auf schmalen Displays skalieren */
-.captcha { overflow: hidden; }
-@media (max-width: 360px) { .g-recaptcha { transform: scale(.88); transform-origin: 0 0; } }
+/* Bot-Schutz der Registrierung */
+.hp { position: absolute !important; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.botguard { margin: 0 0 12px; }
+.botguard-status { margin: 0; padding: 10px 12px; border: 2px solid var(--line); background: var(--bg2); font-weight: 600; font-size: 14px; }
+.botguard-status.is-ok { border-color: var(--ok); color: var(--ok); }
+.botguard-status.is-error { border-color: var(--bad); color: var(--bad); }
+button[disabled] { opacity: .55; cursor: wait; }
 
 /* CSV-Import */
 .steps { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; padding: 0; }

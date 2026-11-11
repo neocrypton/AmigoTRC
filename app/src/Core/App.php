@@ -82,7 +82,7 @@ final class App
             && strtolower((string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
     }
 
-    /** @param array<string, string[]> $extra zusätzliche Quellen je Direktive (z. B. für reCAPTCHA) */
+    /** @param array<string, string[]> $extra zusätzliche Quellen je Direktive (z. B. für Website-Seiten) */
     public static function sendSecurityHeaders(array $extra = []): void
     {
         $policy = [

@@ -16,7 +16,7 @@ namespace Amigo\Core;
  */
 final class Schema
 {
-    public const VERSION = 8;
+    public const VERSION = 9;
 
     public static function migrate(Database $db): void
     {
@@ -24,7 +24,7 @@ final class Schema
         if ($current >= self::VERSION) {
             return;
         }
-        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5(), 6 => self::v6(), 7 => self::v7(), 8 => self::v8()];
+        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5(), 6 => self::v6(), 7 => self::v7(), 8 => self::v8(), 9 => []];
         foreach ($steps as $version => $statements) {
             if ($current < $version) {
                 foreach ($statements as $ddl) {
@@ -32,6 +32,10 @@ final class Schema
                 }
                 if ($version === 8) {
                     \Amigo\Service\SiteDefaults::install($db);
+                }
+                if ($version === 9) {
+                    // reCAPTCHA wurde durch den eigenen Bot-Schutz ersetzt: Texte auffrischen, alte Schlüssel entfernen
+                    \Amigo\Service\SiteDefaults::refreshV9($db);
                 }
                 Settings::set($db, 'schema_version', (string)$version);
             }

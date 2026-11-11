@@ -32,6 +32,7 @@ $routes = [
     'verify'            => [C\AuthController::class, 'verify', 'public'],
     'verify/resend'     => [C\AuthController::class, 'resend', 'public'],
     'register'          => [C\AuthController::class, 'register', 'guest'],
+    'api/challenge'     => [C\AuthController::class, 'challenge', 'guest'],
 
     // Öffentliche Website (im Adminbereich ein-/ausschaltbar)
     'site'              => [C\SiteController::class, 'home', 'public'],
@@ -95,7 +96,6 @@ $routes = [
     'admin/user/action'    => [C\AdminController::class, 'userAction', 'admin'],
     'admin/settings'       => [C\AdminController::class, 'settings', 'admin'],
     'admin/mail'           => [C\AdminController::class, 'mail', 'admin'],
-    'admin/recaptcha'      => [C\AdminController::class, 'recaptcha', 'admin'],
     'admin/tgdb'           => [C\AdminController::class, 'tgdbKey', 'admin'],
     'admin/platforms'      => [C\AdminController::class, 'platformImport', 'admin'],
     'admin/platform/edit'  => [C\AdminController::class, 'platformEdit', 'admin'],

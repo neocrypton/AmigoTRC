@@ -13,7 +13,7 @@ use Amigo\Core\Totp;
 use Amigo\Core\View;
 use Amigo\Service\Accounts;
 use Amigo\Service\Mailer;
-use Amigo\Service\Recaptcha;
+use Amigo\Service\BotGuard;
 
 final class AuthController
 {
@@ -70,7 +70,7 @@ final class AuthController
             'title'        => 'Login',
             'error'        => $error,
             'username'     => $username,
-            'registration' => Settings::bool(App::db(), 'registration_open') && Recaptcha::configured(),
+            'registration' => Settings::bool(App::db(), 'registration_open'),
             'canResend'    => $canResend,
         ], 'layout_plain');
     }
@@ -176,18 +176,27 @@ final class AuthController
         redirect('login');
     }
 
+    /** Neue Bot-Schutz-Aufgabe für das Registrierungsformular (JSON). */
+    public function challenge(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store');
+        $bucket = 'challenge:' . RateLimiter::ip();
+        if (!Settings::bool(App::db(), 'registration_open') || RateLimiter::tooMany($bucket, 30, 600)) {
+            http_response_code(429);
+            echo json_encode(['error' => 'Zu viele Anfragen.']);
+            return;
+        }
+        RateLimiter::hit($bucket);
+        echo json_encode(BotGuard::challenge());
+    }
+
     public function register(): void
     {
         if (!Settings::bool(App::db(), 'registration_open')) {
             flash('info', 'Die Registrierung ist geschlossen.');
             redirect('login');
         }
-        // Öffentliche Registrierung nur mit Bot-Schutz.
-        if (!Recaptcha::configured()) {
-            flash('info', 'Die Registrierung ist vorübergehend nicht möglich.');
-            redirect('login');
-        }
-        App::sendSecurityHeaders(Recaptcha::CSP);
         $mode = Accounts::mode();
         $emailRequired = Accounts::emailRequired();
         if (Accounts::needsEmail($mode) && !Mailer::configured()) {
@@ -205,12 +214,12 @@ final class AuthController
 
             if (RateLimiter::tooMany($bucket, 5, 3600)) {
                 $errors[] = 'Zu viele Registrierungen von dieser Adresse. Bitte später erneut versuchen.';
-            } elseif (!Recaptcha::verify((string)($_POST['g-recaptcha-response'] ?? ''), RateLimiter::ip())) {
+            } elseif (($_POST['website'] ?? '') !== '' || !BotGuard::verify((string)($_POST['botguard'] ?? ''))) {
                 // Fehlversuche zählen mit, damit Bots nicht endlos probieren können.
-                RateLimiter::hit($bucket . ':captcha');
-                $errors[] = 'Bitte bestätige „Ich bin kein Roboter“.';
+                RateLimiter::hit($bucket . ':bot');
+                $errors[] = 'Der Bot-Schutz wurde nicht bestanden. Bitte warte, bis „Bot-Schutz bestanden“ erscheint, und sende das Formular erneut ab.';
             }
-            if (RateLimiter::tooMany($bucket . ':captcha', 20, 3600)) {
+            if (RateLimiter::tooMany($bucket . ':bot', 20, 3600)) {
                 $errors = ['Zu viele fehlgeschlagene Versuche. Bitte später erneut versuchen.'];
             }
             if ($emailRequired && $data['email'] === '') {
@@ -251,10 +260,8 @@ final class AuthController
             'title'   => 'Registrieren',
             'errors'  => $errors,
             'data'    => $data,
-            'siteKey' => Recaptcha::siteKey(),
             'emailRequired' => $emailRequired,
             'mode'    => $mode,
-            'theme'   => ($_COOKIE['amigo_theme'] ?? 'crt') === 'dmg' ? 'light' : 'dark',
             'privacyUrl' => \Amigo\Service\Site::visible(\Amigo\Service\Site::page('privacy')) ? url('page', ['p' => 'privacy']) : null,
         ], 'layout_plain');
     }

@@ -18,8 +18,7 @@
         <h2 class="panel-title">Einstellungen</h2>
         <form method="post" action="<?= e(url('admin/settings')) ?>">
             <?= csrf_field() ?>
-            <label class="check"><input type="checkbox" name="registration_open" value="1"<?= checked($registration) ?><?= $captchaOk ? '' : ' disabled' ?>> Öffentliche Registrierung erlauben</label>
-            <?php if (!$captchaOk): ?><p class="hint">Erst möglich, wenn unten reCAPTCHA eingerichtet ist.</p><?php endif; ?>
+            <label class="check"><input type="checkbox" name="registration_open" value="1"<?= checked($registration) ?>> Öffentliche Registrierung erlauben</label>
             <p class="hint">Solange die Registrierung offen ist, sind auch private Nachrichten (PN) aktiv.</p>
             <?php if (!\Amigo\Service\Site::visible(\Amigo\Service\Site::page('privacy'))): ?>
             <p class="hint hint-warn">⚠ Die <a href="<?= e(url('admin/site/page', ['p' => 'privacy'])) ?>">Datenschutzerklärung</a> ist noch nicht aktiv – auf der Registrierungsseite fehlt dann der Link dorthin.</p>
@@ -90,34 +89,10 @@
         <?php endif; ?>
     </section>
 
-    <section class="panel" id="recaptcha">
-        <h2 class="panel-title">reCAPTCHA v2 · Registrierung</h2>
-        <p>
-            <?php if ($captchaOk): ?>
-                <span class="cond cond-5">AKTIV</span> Website-Schlüssel <code><?= e(substr($captchaSite, 0, 8)) ?>…</code>, Geheimschlüssel verschlüsselt gespeichert.
-            <?php else: ?>
-                <span class="cond cond-1">AUS</span> Ohne reCAPTCHA bleibt die öffentliche Registrierung geschlossen.
-            <?php endif; ?>
-        </p>
-        <form method="post" action="<?= e(url('admin/recaptcha')) ?>">
-            <?= csrf_field() ?>
-            <div class="field">
-                <label for="rc-site">Website-Schlüssel (Site Key)</label>
-                <input id="rc-site" name="site_key" value="<?= e($captchaSite) ?>" autocomplete="off" spellcheck="false" maxlength="120">
-            </div>
-            <div class="field">
-                <label for="rc-secret">Geheimschlüssel (Secret Key)</label>
-                <input id="rc-secret" name="secret_key" type="password" autocomplete="off" spellcheck="false" maxlength="120" placeholder="<?= $captchaOk ? 'leer lassen = unverändert' : 'Schlüssel einfügen' ?>">
-                <p class="hint">Schlüssel für <strong>reCAPTCHA v2 – Kästchen „Ich bin kein Roboter“</strong> erstellst du unter <a href="https://www.google.com/recaptcha/admin/create" target="_blank" rel="noopener noreferrer">google.com/recaptcha/admin</a>. Als Domain deine Seite eintragen (z. B. <code><?= e($_SERVER['HTTP_HOST'] ?? '') ?></code>).</p>
-            </div>
-            <div class="btnrow">
-                <button class="btn btn-primary" type="submit" name="action" value="save">Speichern &amp; prüfen</button>
-                <?php if ($captchaOk): ?>
-                <button class="btn" type="submit" name="action" value="test">Prüfen</button>
-                <button class="btn btn-danger" type="submit" name="action" value="remove" data-confirm="reCAPTCHA entfernen? Die öffentliche Registrierung wird dann geschlossen.">Entfernen</button>
-                <?php endif; ?>
-            </div>
-        </form>
+    <section class="panel" id="botschutz">
+        <h2 class="panel-title">Bot-Schutz · Registrierung</h2>
+        <p><span class="cond cond-5">EINGEBAUT</span> Keine Einrichtung nötig.</p>
+        <p class="hint">Die Registrierung ist durch einen eigenen Bot-Schutz gesichert: Der Browser löst eine kleine Rechenaufgabe (Proof-of-Work, ca. 1 Sekunde), dazu kommen ein unsichtbares Fallen-Feld und Rate-Limits je IP. Alles läuft auf diesem Server – ohne Google, ohne Cookies, ohne Daten an Dritte.</p>
     </section>
 
     <section class="panel">

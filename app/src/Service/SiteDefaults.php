@@ -39,6 +39,29 @@ final class SiteDefaults
         }
     }
 
+    /**
+     * Schema v9 (reCAPTCHA → eigener Bot-Schutz): Standardtexte, die noch unverändert sind,
+     * durch die neue Fassung ersetzen; selbst bearbeitete Texte bleiben unangetastet.
+     */
+    public static function refreshV9(Database $db): void
+    {
+        $old = ['install' => '15190d13598625126f258ad0f1377ed8c1a703c6', 'privacy' => 'ac52493eeb6a2c873b6b87538326080bf3458227'];
+        $pages = self::pages();
+        foreach ($old as $slug => $hash) {
+            $body = $db->value('SELECT body FROM {site_pages} WHERE slug = ?', [$slug]);
+            if (is_string($body) && sha1($body) === $hash) {
+                $db->update('site_pages', ['body' => $pages[$slug][1], 'updated_at' => Database::now()], ['slug' => $slug]);
+            }
+        }
+        $newFaq = array_column(self::faq(), 1, 0);
+        foreach ($db->all('SELECT id, question, answer FROM {site_faq}') as $f) {
+            if (sha1((string)$f['answer']) === '5cc59cba0e725bf71fc26d4c83cc8208e5fad12e' && isset($newFaq[$f['question']])) {
+                $db->update('site_faq', ['answer' => $newFaq[$f['question']]], ['id' => $f['id']]);
+            }
+        }
+        $db->run("DELETE FROM {settings} WHERE skey IN ('recaptcha_site', 'recaptcha_secret')");
+    }
+
     /** @return array<string, array{0:string,1:string,2:int}> slug => [Titel, HTML, aktiv] */
     public static function pages(): array
     {
@@ -97,12 +120,12 @@ HTML, 1],
 <p>Du möchtest AMIGO für eine Gruppe, einen Verein oder deine Community öffnen? Dann zusätzlich unter <em>Admin › System</em>:</p>
 <ol>
 <li><strong>E-Mail-Versand einrichten</strong> (PHP <code>mail()</code> oder SMTP deines Hosters) und mit der Testmail prüfen.</li>
-<li><strong>Google reCAPTCHA v2</strong> („Ich bin kein Roboter“) anlegen und die Schlüssel eintragen – ohne Captcha lässt sich die Registrierung nicht öffnen.</li>
 <li><strong>Aktivierung neuer Konten</strong> wählen: per E-Mail-Bestätigung, durch dich als Admin oder beides.</li>
 <li><strong>Öffentliche Registrierung erlauben.</strong> Damit werden auch die privaten Nachrichten aktiv.</li>
 <li><strong>TheGamesDB:</strong> Jeder Nutzer kann einen eigenen Key hinterlegen. Alternativ erlaubst du, dass alle deinen System-Key mitbenutzen – das teilt aber dein Kontingent.</li>
 <li><strong>Website einschalten</strong> (<em>Admin › Website</em>), Impressum und Datenschutzerklärung ausfüllen und aktivieren.</li>
 </ol>
+<p>Ein <strong>Bot-Schutz</strong> für die Registrierung ist eingebaut: Der Browser löst eine kleine Rechenaufgabe – ohne Google, ohne Cookies, ohne Einrichtung.</p>
 <h3>Updates</h3>
 <p>Neue Version herunterladen und die Dateien einfach überschreiben. <code>config/config.php</code> und dein Datenverzeichnis bleiben erhalten; die Datenbank wird beim ersten Aufruf automatisch aktualisiert.</p>
 <h3>Backup</h3>
@@ -130,7 +153,7 @@ HTML, 1],
 HTML, 0],
 
             'privacy' => ['Datenschutz', <<<HTML
-<p class="retro-box"><strong>Vorlage:</strong> Diese Datenschutzerklärung beschreibt, was AMIGO technisch tut. Ersetze die Angaben in [eckigen Klammern], entferne Abschnitte zu Funktionen, die du nicht nutzt (z. B. Registrierung/reCAPTCHA), und ergänze Angaben zu deinem Hoster. Lösche danach diesen Kasten. Diese Vorlage ist keine Rechtsberatung.</p>
+<p class="retro-box"><strong>Vorlage:</strong> Diese Datenschutzerklärung beschreibt, was AMIGO technisch tut. Ersetze die Angaben in [eckigen Klammern], entferne Abschnitte zu Funktionen, die du nicht nutzt (z. B. Registrierung), und ergänze Angaben zu deinem Hoster. Lösche danach diesen Kasten. Diese Vorlage ist keine Rechtsberatung.</p>
 <h2>Datenschutzerklärung</h2>
 <h3>1. Verantwortlicher</h3>
 <p>[Vorname Nachname]<br>[Straße Hausnummer], [PLZ Ort]<br>E-Mail: [deine@e-mail.de]</p>
@@ -148,8 +171,8 @@ HTML, 0],
 <p>Für ein Konto speichern wir Benutzername, Passwort (nur als sicherer Hash), optional deine E-Mail-Adresse und Profileinstellungen sowie die Inhalte, die du selbst anlegst: Sammlungseinträge, Fotos (ohne EXIF-/Standortdaten), Durchgespielt-Liste, Avatar und private Nachrichten. Ein eigener TheGamesDB-API-Key und das Geheimnis der Zwei-Faktor-Anmeldung werden verschlüsselt gespeichert. Rechtsgrundlage ist die Bereitstellung des Dienstes (Art. 6 Abs. 1 lit. b DSGVO).</p>
 <p>Sammlung und Durchgespielt-Liste sind standardmäßig privat. Nur wenn du sie freigibst, können andere angemeldete Nutzer sie ansehen; Kaufpreis, Kaufdatum, Händler und Notizen bleiben immer privat.</p>
 <p>Zum Schutz vor Angriffen (z. B. Passwort-Raten) speichern wir fehlgeschlagene Anmeldeversuche kurzzeitig mit einer <strong>gehashten</strong> IP-Adresse (Art. 6 Abs. 1 lit. f DSGVO).</p>
-<h3>6. Registrierung und Google reCAPTCHA</h3>
-<p>Zum Schutz vor automatisierten Anmeldungen nutzen wir auf der Registrierungsseite Google reCAPTCHA v2 der Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Dabei werden u. a. IP-Adresse und Informationen über deinen Browser an Google übertragen; eine Übermittlung in die USA ist möglich (Grundlage: EU-US Data Privacy Framework). reCAPTCHA wird nur auf der Registrierungsseite geladen. Rechtsgrundlage ist unser berechtigtes Interesse am Schutz vor Missbrauch (Art. 6 Abs. 1 lit. f DSGVO). Weitere Informationen: <a href="https://policies.google.com/privacy" target="_blank">Datenschutzerklärung von Google</a>.</p>
+<h3>6. Registrierung und Bot-Schutz</h3>
+<p>Zum Schutz vor automatisierten Anmeldungen löst dein Browser auf der Registrierungsseite eine kleine Rechenaufgabe (Proof-of-Work). Die Aufgabe kommt von unserem eigenen Server; es werden keine Daten an Dritte übertragen und keine Cookies gesetzt. Fehlgeschlagene Registrierungsversuche speichern wir höchstens 24 Stunden zusammen mit einem Hash deiner IP-Adresse (Art. 6 Abs. 1 lit. f DSGVO).</p>
 <h3>7. E-Mails</h3>
 <p>Wenn du eine E-Mail-Adresse angibst, nutzen wir sie für die Bestätigung deines Kontos, Informationen zur Freischaltung und – sofern nicht abgeschaltet – für Hinweise auf neue private Nachrichten (ohne Nachrichtentext). Die Benachrichtigungen kannst du jederzeit im Konto oder über den Link in jeder Mail abbestellen.</p>
 <h3>8. TheGamesDB</h3>
@@ -177,7 +200,7 @@ HTML, 0],
             ['Wer kann meine Sammlung sehen?', '<p>Standardmäßig niemand außer dir. Du kannst Sammlung und Durchgespielt-Liste getrennt für andere angemeldete Nutzer freigeben. Kaufpreis, Kaufdatum, Händler und Notizen bleiben immer privat – sie werden gar nicht erst ausgeliefert.</p>'],
             ['Funktioniert AMIGO auf dem Smartphone?', '<p>Ja. AMIGO ist für Smartphone, Tablet und PC gebaut, mit Navigationsleiste unten wie in einer App. Über „Zum Home-Bildschirm hinzufügen“ startet es wie eine eigene App. Fotos nimmst du direkt mit der Kamera auf.</p>'],
             ['Kann ich meine bisherige Liste übernehmen?', '<p>Ja, per <strong>CSV-Import</strong> (z. B. aus Excel, LibreOffice, Google Sheets oder anderen Sammler-Apps). Du ordnest die Spalten zu, siehst eine Vorschau und kannst unbekannte Plattformen von Hand zuordnen. Danach lassen sich Cover nachträglich automatisch ergänzen.</p>'],
-            ['Was ist der Unterschied zwischen Single- und Community-Betrieb?', '<p>Im <strong>Single-Betrieb</strong> ist die Registrierung geschlossen; nur du (und Konten, die du selbst anlegst) nutzen AMIGO. Im <strong>Community-Betrieb</strong> können sich Besucher selbst registrieren (geschützt durch reCAPTCHA und Freischaltung), sich gegenseitig die Sammlungen ansehen und private Nachrichten schreiben. Die Anleitung zu beiden Varianten findest du unter <a href="index.php?r=page&amp;p=install">Installation</a>.</p>'],
+            ['Was ist der Unterschied zwischen Single- und Community-Betrieb?', '<p>Im <strong>Single-Betrieb</strong> ist die Registrierung geschlossen; nur du (und Konten, die du selbst anlegst) nutzen AMIGO. Im <strong>Community-Betrieb</strong> können sich Besucher selbst registrieren (geschützt durch den eingebauten Bot-Schutz und auf Wunsch eine Freischaltung durch dich), sich gegenseitig die Sammlungen ansehen und private Nachrichten schreiben. Die Anleitung zu beiden Varianten findest du unter <a href="index.php?r=page&amp;p=install">Installation</a>.</p>'],
             ['Wie sicher ist AMIGO?', '<p>AMIGO setzt auf Zwei-Faktor-Anmeldung, Argon2id-Passwort-Hashes, verschlüsselte Geheimnisse, CSRF-Schutz, strenge Content-Security-Policy, Rate-Limits gegen Passwort-Raten und neu berechnete Foto-Uploads ohne EXIF-Daten. Details stehen in der README auf <a href="' . $repo . '" target="_blank">GitHub</a>.</p>'],
             ['Ich habe mein Handy mit der 2FA-App verloren – was nun?', '<p>Melde dich mit einem deiner <strong>Recovery-Codes</strong> an, die du beim Einrichten erhalten hast. Hast du keine mehr, kann der Admin die Zwei-Faktor-Anmeldung für dein Konto zurücksetzen.</p>'],
             ['Wie mache ich ein Update?', '<p>Neue Version herunterladen und die Dateien auf dem Webspace überschreiben. Konfiguration und Daten bleiben erhalten, die Datenbank wird beim nächsten Aufruf automatisch angepasst.</p>'],

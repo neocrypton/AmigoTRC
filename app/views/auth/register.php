@@ -18,17 +18,18 @@
         <label for="password2">Passwort wiederholen</label>
         <input id="password2" name="password2" type="password" autocomplete="new-password" minlength="10" required>
     </div>
-    <div class="field captcha">
-        <div class="g-recaptcha" data-sitekey="<?= e($siteKey) ?>" data-theme="<?= e($theme) ?>"></div>
+    <div class="hp" aria-hidden="true"><label>Website (bitte leer lassen) <input name="website" tabindex="-1" autocomplete="off"></label></div>
+    <div class="botguard" data-botguard data-api="<?= e(url('api/challenge')) ?>">
+        <input type="hidden" name="botguard" value="" data-botguard-field>
+        <p class="botguard-status" data-botguard-status role="status">🤖 Bot-Schutz wird vorbereitet…</p>
         <noscript><p class="flash flash-warn">Für die Registrierung wird JavaScript benötigt (Bot-Schutz).</p></noscript>
     </div>
     <?php if ($mode === 'admin' || $mode === 'email_admin'): ?><p class="hint">Neue Konten werden von einem Admin freigeschaltet.</p><?php endif; ?>
     <p class="privacy-note">
         🔒 Mit dem Absenden werden deine Angaben gespeichert, um dein Konto bereitzustellen.
-        Zum Schutz vor Bots lädt diese Seite <strong>Google reCAPTCHA</strong> – dabei werden u. a. deine IP-Adresse und Browserdaten an Google übertragen.
+        Der Bot-Schutz läuft komplett auf diesem Server: Dein Browser löst eine kleine Rechenaufgabe – ohne Cookies und ohne Daten an Dritte.
         <?php if ($privacyUrl): ?>Mehr dazu in der <a href="<?= e($privacyUrl) ?>" target="_blank" rel="noopener">Datenschutzerklärung</a>.<?php endif; ?>
     </p>
-    <button class="btn btn-primary btn-block" type="submit">▶ KONTO ERSTELLEN</button>
-    <script src="https://www.google.com/recaptcha/api.js?hl=de" async defer></script>
+    <button class="btn btn-primary btn-block" type="submit" data-botguard-submit>▶ KONTO ERSTELLEN</button>
     <p class="center muted"><a href="<?= e(url('login')) ?>">Zurück zum Login</a></p>
 </form>

@@ -216,17 +216,21 @@ Alle Antworten werden für alle Nutzer gemeinsam zwischengespeichert (Suche
 schonen. Das Restkontingent des System-Keys steht unter **Admin › System**, das
 des eigenen Keys unter **Mein Konto**.
 
-### Öffentliche Registrierung & reCAPTCHA
+### Öffentliche Registrierung & Bot-Schutz
 
-Die öffentliche Registrierung lässt sich unter **Admin › System** erst öffnen,
-wenn **Google reCAPTCHA v2** („Ich bin kein Roboter“-Kästchen) eingerichtet ist:
+Die öffentliche Registrierung öffnest du unter **Admin › System** mit
+„Öffentliche Registrierung erlauben“. Sie ist durch einen **eingebauten Bot-Schutz**
+gesichert – ohne Google, ohne Schlüssel, ohne Einrichtung:
 
-1. Unter [google.com/recaptcha/admin](https://www.google.com/recaptcha/admin/create)
-   eine Website anlegen, Typ **reCAPTCHA v2 → Kästchen „Ich bin kein Roboter“**,
-   deine Domain eintragen.
-2. Website-Schlüssel und Geheimschlüssel unter **Admin › System › reCAPTCHA v2**
-   eintragen und „Speichern & prüfen“ klicken.
-3. Danach „Öffentliche Registrierung erlauben“ anhaken.
+- **Proof-of-Work** (Prinzip wie [ALTCHA](https://altcha.org)): Der Browser holt sich
+  vom eigenen Server eine signierte Rechenaufgabe und probiert im Hintergrund Zahlen
+  durch, bis der SHA-256-Hash passt (meist unter 1 Sekunde, auch auf dem Handy). Für
+  Massen-Bots wird jede Registrierung dadurch teuer. Jede Aufgabe gilt nur einmal und
+  höchstens 20 Minuten.
+- **Fallen-Feld** (Honeypot), das Menschen nicht sehen, und eine Mindest-Ausfüllzeit.
+- **Rate-Limits** je IP für Aufgaben, Registrierungen und Fehlversuche.
+- Keine Cookies, keine Daten an Dritte – deshalb auch keine Einwilligung nötig.
+  Ohne JavaScript ist keine Registrierung möglich (Hinweis wird angezeigt).
 
 **Aktivierung neuer Konten** (Admin › System):
 
@@ -246,12 +250,6 @@ E-Mail-Adresse zur Pflicht gemacht werden (bei E-Mail-Bestätigung automatisch).
 **E-Mail-Versand** (Admin › System): PHP `mail()` oder SMTP (STARTTLS/SSL,
 Passwort verschlüsselt gespeichert) mit Testmail-Button. Die „Adresse der Seite“
 wird für Links in Mails verwendet.
-
-Der Geheimschlüssel wird verschlüsselt gespeichert, die Prüfung erfolgt
-serverseitig bei Google. Das Google-Script wird **nur auf der
-Registrierungsseite** geladen. Wird reCAPTCHA entfernt, schließt sich die
-Registrierung automatisch. Hinweis: reCAPTCHA überträgt Daten an Google – bitte
-in der Datenschutzerklärung erwähnen.
 
 ### nginx
 
@@ -291,8 +289,8 @@ location ~ \.(md|sqlite|log|lock)$ { deny all; }
   fremde Sammlungen nur lesend und nur bei Freigabe, private Felder werden
   serverseitig entfernt (nicht nur ausgeblendet)
 - **Header:** HSTS, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy
-- **Registrierung:** nur mit reCAPTCHA v2 (serverseitig geprüft, inkl. Domain),
-  Rate-Limit je IP, auch für fehlgeschlagene Captcha-Versuche
+- **Registrierung:** eigener Bot-Schutz (Proof-of-Work mit HMAC-signierten,
+  einmal gültigen Aufgaben + Honeypot), Rate-Limit je IP, auch für Fehlversuche
 - **CSV-Export** mit Schutz gegen Formel-Injection
 - Fehlerdetails nur im Log (`data/logs`), nie im Browser
 

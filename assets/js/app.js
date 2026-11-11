@@ -472,4 +472,74 @@
         box.textContent = box.getAttribute(exposed ? 'data-probe-fail' : 'data-probe-ok');
       });
   });
+
+  /* ---------- Bot-Schutz (Proof-of-Work, läuft komplett lokal) ---------- */
+  // SHA-256 für kurze ASCII-Texte – eigene Implementierung, funktioniert auch ohne HTTPS (kein crypto.subtle nötig).
+  var K256 = [0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2];
+  function sha256hex(str) {
+    var len = str.length, blocks = ((len + 8) >> 6) + 1, w = new Array(blocks * 16), i, j;
+    for (i = 0; i < w.length; i++) w[i] = 0;
+    for (i = 0; i < len; i++) w[i >> 2] |= str.charCodeAt(i) << (24 - (i % 4) * 8);
+    w[len >> 2] |= 0x80 << (24 - (len % 4) * 8);
+    w[w.length - 1] = len * 8;
+    var H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19], W = new Array(64);
+    for (j = 0; j < w.length; j += 16) {
+      var a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+      for (i = 0; i < 64; i++) {
+        if (i < 16) {
+          W[i] = w[j + i] | 0;
+        } else {
+          var x = W[i - 15], y = W[i - 2];
+          W[i] = (W[i - 16] + (((x >>> 7) | (x << 25)) ^ ((x >>> 18) | (x << 14)) ^ (x >>> 3)) + W[i - 7]
+            + (((y >>> 17) | (y << 15)) ^ ((y >>> 19) | (y << 13)) ^ (y >>> 10))) | 0;
+        }
+        var t1 = (h + (((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7))) + ((e & f) ^ (~e & g)) + K256[i] + W[i]) | 0;
+        var t2 = ((((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10))) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
+        h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+      }
+      H[0] = (H[0] + a) | 0; H[1] = (H[1] + b) | 0; H[2] = (H[2] + c) | 0; H[3] = (H[3] + d) | 0;
+      H[4] = (H[4] + e) | 0; H[5] = (H[5] + f) | 0; H[6] = (H[6] + g) | 0; H[7] = (H[7] + h) | 0;
+    }
+    var out = '';
+    for (i = 0; i < 8; i++) out += ('0000000' + (H[i] >>> 0).toString(16)).slice(-8);
+    return out;
+  }
+
+  $$('[data-botguard]').forEach(function (box) {
+    var field = $('[data-botguard-field]', box), status = $('[data-botguard-status]', box);
+    var form = box.closest('form'), submit = form && $('[data-botguard-submit]', form);
+    var say = function (t, cls) { status.textContent = t; status.className = 'botguard-status' + (cls ? ' ' + cls : ''); };
+    if (submit) submit.disabled = true;
+    say('🤖 Bot-Schutz läuft … 0 %');
+    fetch(box.getAttribute('data-api'), { credentials: 'same-origin', cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (ch) {
+        var n = 0, max = ch.maxnumber, started = Date.now();
+        (function step() {
+          var stop = Math.min(n + 4000, max);
+          for (; n <= stop; n++) {
+            if (sha256hex(ch.salt + n) === ch.challenge) {
+              field.value = btoa(JSON.stringify({ algorithm: ch.algorithm, challenge: ch.challenge, number: n, salt: ch.salt, signature: ch.signature }));
+              // Kurz sichtbar lassen, damit klar ist, dass etwas passiert ist
+              setTimeout(function () {
+                say('✓ Bot-Schutz bestanden', 'is-ok');
+                if (submit) submit.disabled = false;
+              }, Math.max(0, 600 - (Date.now() - started)));
+              return;
+            }
+          }
+          if (n > max) { say('Bot-Schutz fehlgeschlagen – bitte Seite neu laden.', 'is-error'); return; }
+          say('🤖 Bot-Schutz läuft … ' + Math.min(99, Math.round(n / max * 100)) + ' %');
+          setTimeout(step, 0);
+        })();
+      })
+      .catch(function () { say('Bot-Schutz konnte nicht geladen werden – bitte Seite neu laden.', 'is-error'); });
+  });
 })();

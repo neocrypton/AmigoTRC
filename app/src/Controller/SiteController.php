@@ -8,7 +8,6 @@ use Amigo\Core\Auth;
 use Amigo\Core\Settings;
 use Amigo\Core\View;
 use Amigo\Service\Html;
-use Amigo\Service\Recaptcha;
 use Amigo\Service\Site;
 
 /** Öffentliche Website: Startseite, Inhaltsseiten, FAQ, News, Bilder. */
@@ -29,7 +28,7 @@ final class SiteController
             'preview'      => !Site::visible($page),
             'description'  => Html::text($page['body'], 160),
             'news'         => Site::newsEnabled() ? Site::news(3) : [],
-            'registration' => Settings::bool(App::db(), 'registration_open') && Recaptcha::configured(),
+            'registration' => Settings::bool(App::db(), 'registration_open'),
         ]);
     }
 
