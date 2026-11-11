@@ -27,7 +27,7 @@
             <?php else: ?>
                 <span class="noimg" aria-hidden="true">🕹</span>
             <?php endif; ?>
-            <span><strong><?= e($p['name']) ?></strong><small><?= e($p['manufacturer'] ?? '') ?></small></span>
+            <span><strong><?= e($p['name']) ?></strong><small><?= trim((string)($p['manufacturer'] ?? '')) !== '' ? e($p['manufacturer']) : '&nbsp;' ?></small></span>
             <span class="platform-counts">
                 <?php if ($p['items']): ?><span class="chip" title="Einträge in der Sammlung">📦 <?= (int)$p['items'] ?></span><?php endif; ?>
                 <?php if ($p['plays']): ?><span class="chip" title="Durchgespielt">🏆 <?= (int)$p['plays'] ?></span><?php endif; ?>
