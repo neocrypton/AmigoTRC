@@ -148,8 +148,11 @@ final class AccountController
     {
         if (is_post()) {
             App::db()->update('users', [
-                'collection_public' => isset($_POST['collection_public']) ? 1 : 0,
-                'plays_public'      => isset($_POST['plays_public']) ? 1 : 0,
+                'collection_public'     => isset($_POST['collection_public']) ? 1 : 0,
+                'plays_public'          => isset($_POST['plays_public']) ? 1 : 0,
+                'allow_friend_requests' => isset($_POST['allow_friend_requests']) ? 1 : 0,
+                'friends_public'        => isset($_POST['friends_public']) ? 1 : 0,
+                'allow_likes'           => isset($_POST['no_likes']) ? 0 : 1,
             ], ['id' => Auth::id()]);
             flash('ok', 'Sichtbarkeit gespeichert.');
         }
@@ -387,6 +390,118 @@ final class AccountController
     {
         $v = (string)($v ?? '');
         return ($v !== '' && str_contains('=+-@' . "\t\r", $v[0])) ? "'" . $v : $v;
+    }
+
+    /** Schritt 1: Löschung anfordern – Bestätigungslink an die bestätigte E-Mail-Adresse. */
+    public function deleteRequest(): void
+    {
+        if (!is_post()) {
+            redirect('account');
+        }
+        $user = Auth::user();
+        if (Accounts::isLastAdmin($user)) {
+            flash('error', 'Du bist der letzte Admin. Ernenne zuerst einen anderen Admin, bevor du dein Konto löschst.');
+            redirect('account', [], 'loeschen');
+        }
+        if (empty($user['email']) || empty($user['email_verified_at'])) {
+            flash('error', 'Für die Löschung brauchst du eine bestätigte E-Mail-Adresse – hinterlege und bestätige sie zuerst oben unter „Profil“.');
+            redirect('account', [], 'loeschen');
+        }
+        if (!Mailer::configured()) {
+            flash('error', 'Der E-Mail-Versand ist auf dieser Seite nicht eingerichtet. Bitte wende dich an einen Admin.');
+            redirect('account', [], 'loeschen');
+        }
+        $bucket = 'delete-req:' . $user['id'];
+        if (RateLimiter::tooMany($bucket, 3, 3600)) {
+            flash('error', 'Es wurden bereits mehrere Lösch-Mails angefordert. Bitte prüfe dein Postfach oder versuche es später erneut.');
+            redirect('account', [], 'loeschen');
+        }
+        RateLimiter::hit($bucket);
+        try {
+            Accounts::sendDeleteLink($user);
+            flash('ok', 'Wir haben dir eine E-Mail an ' . $user['email'] . ' geschickt. Bestätige die Löschung über den Link darin (1 Stunde gültig).');
+        } catch (\Throwable) {
+            flash('error', 'Die E-Mail konnte nicht verschickt werden. Bitte später erneut versuchen.');
+        }
+        redirect('account', [], 'loeschen');
+    }
+
+    /** Schritt 2 (Link aus der Mail, auch ohne Anmeldung): Passwort + ggf. 2FA → sofortige Löschung. */
+    public function deleteConfirm(): void
+    {
+        $uidIn = input_int('u', 1) ?? query_int('u', 1) ?? 0;
+        $token = input('t', 64) ?: query('t', 64);
+        $ipBucket = 'delete-link:' . RateLimiter::ip();
+        $user = RateLimiter::tooMany($ipBucket, 20, 3600) ? null : Accounts::checkDeleteToken($uidIn, $token);
+        if (!$user) {
+            RateLimiter::hit($ipBucket);
+            View::render('account/delete_done', ['title' => 'Link ungültig', 'ok' => false], 'layout_plain');
+            return;
+        }
+        $error = null;
+        if (is_post()) {
+            $bucket = 'delete-confirm:' . $user['id'];
+            $code = preg_replace('/\s+/', '', input('code', 40));
+            if (RateLimiter::tooMany($bucket, 6, 900)) {
+                $error = 'Zu viele Fehlversuche. Bitte in 15 Minuten erneut versuchen.';
+            } elseif (Accounts::isLastAdmin($user)) {
+                $error = 'Du bist der letzte Admin – ernenne zuerst einen anderen Admin.';
+            } elseif (!$this->checkPassword($user, (string)($_POST['password'] ?? ''))) {
+                RateLimiter::hit($bucket);
+                $error = 'Das Passwort ist falsch.';
+            } elseif ((int)$user['totp_enabled'] === 1 && !$this->checkSecondFactor($user, $code)) {
+                RateLimiter::hit($bucket);
+                $error = 'Der 2FA-Code ist falsch oder abgelaufen.';
+            } else {
+                $email = (string)$user['email'];
+                $name = (string)$user['username'];
+                $wasLoggedIn = Auth::id() === (int)$user['id'];
+                Accounts::deleteUser($user);
+                if ($wasLoggedIn) {
+                    Auth::logout();
+                }
+                $site = (string)App::config('site_name', 'AMIGO!');
+                try {
+                    Mailer::send($email, $site . ': Dein Konto wurde gelöscht', implode("\n", [
+                        'Hallo ' . $name . ',',
+                        '',
+                        'dein Konto wurde soeben auf deinen Wunsch gelöscht – zusammen mit deiner Sammlung,',
+                        'deiner Durchgespielt-Liste und allen von dir hochgeladenen Bildern.',
+                        '',
+                        'Schade, dass du gehst. Game Over – aber vielleicht gibt es ja ein Continue? ;)',
+                        '',
+                        '– ' . $site,
+                    ]));
+                } catch (\Throwable) {
+                    // Löschung ist erfolgt; die Info-Mail ist nur eine Bestätigung
+                }
+                View::render('account/delete_done', ['title' => 'Konto gelöscht', 'ok' => true, 'name' => $name], 'layout_plain');
+                return;
+            }
+        }
+        View::render('account/delete_confirm', [
+            'title' => 'Konto löschen', 'user' => $user, 'token' => $token, 'error' => $error,
+            'counts' => [
+                'items'  => (int)App::db()->value('SELECT COUNT(*) FROM {items} WHERE user_id = ?', [$user['id']]),
+                'plays'  => (int)App::db()->value('SELECT COUNT(*) FROM {plays} WHERE user_id = ?', [$user['id']]),
+                'photos' => (int)App::db()->value('SELECT COUNT(*) FROM {photos} WHERE user_id = ?', [$user['id']]),
+            ],
+        ], 'layout_plain');
+    }
+
+    /** 2FA-Code (TOTP) oder Recovery-Code prüfen, wie beim Login. */
+    private function checkSecondFactor(array $user, string $code): bool
+    {
+        $secret = Crypto::decrypt((string)$user['totp_secret']);
+        if ($secret !== null && preg_match('/^\d{6}$/', $code)) {
+            $step = Totp::verify($secret, $code, (int)$user['totp_last_step']);
+            if ($step !== null) {
+                App::db()->update('users', ['totp_last_step' => $step], ['id' => $user['id']]);
+                return true;
+            }
+            return false;
+        }
+        return $code !== '' && Auth::useRecoveryCode($user, $code);
     }
 
     private function checkPassword(array $user, string $password): bool

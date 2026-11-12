@@ -3,6 +3,12 @@ use Amigo\Core\Options;
 
 $colPublic = (int)$owner['collection_public'] === 1;
 $playsPublic = (int)$owner['plays_public'] === 1;
+/** Aktion auf der Profilseite (Freundschaft, Like, Blockieren). */
+$act = static function (string $action, string $label, string $cls = 'btn', ?string $confirm = null) use ($owner): string {
+    return '<form method="post" action="' . e(url('friend/action')) . '" class="inline"' . ($confirm ? ' data-confirm="' . e($confirm) . '"' : '') . '>'
+        . csrf_field() . '<input type="hidden" name="id" value="' . (int)$owner['id'] . '"><input type="hidden" name="back" value="profile">'
+        . '<input type="hidden" name="action" value="' . e($action) . '"><button class="' . e($cls) . '" type="submit">' . $label . '</button></form>';
+};
 ?>
 <div class="pagehead">
     <div>
@@ -10,8 +16,24 @@ $playsPublic = (int)$owner['plays_public'] === 1;
         <h1 class="h1"><?= avatar($owner, 56, 'player-avatar player-avatar-lg') ?> <?= e($owner['username']) ?></h1>
         <p class="muted">dabei seit <?= e(fmt_date($owner['created_at'])) ?></p>
     </div>
+    <div class="btnrow">
     <?php if ($self): ?><a class="btn btn-ghost" href="<?= e(url('account')) ?>#sichtbarkeit">Sichtbarkeit ändern</a>
-    <?php elseif (\Amigo\Service\Messages::enabled()): ?><a class="btn btn-primary" href="<?= e(url('message/new', ['to' => $owner['username']])) ?>">✉ Nachricht senden</a><?php endif; ?>
+    <?php else: ?>
+        <?php if (\Amigo\Service\Messages::enabled()): ?><a class="btn btn-primary" href="<?= e(url('message/new', ['to' => $owner['username']])) ?>">✉ Nachricht senden</a><?php endif; ?>
+        <?php if ($social): ?>
+            <?php if ($friendState === 'friends'): ?>
+                <span class="chip chip-friend">👥 Ihr seid befreundet</span>
+            <?php elseif ($friendState === 'outgoing'): ?>
+                <?= $act('cancel', '⏳ Anfrage gesendet – zurückziehen', 'btn btn-ghost') ?>
+            <?php elseif ($friendState === 'incoming'): ?>
+                <?= $act('accept', '✓ Freundschaftsanfrage annehmen', 'btn btn-primary') ?>
+            <?php elseif (!$requestProblem): ?>
+                <?= $act('request', '👥 Freundschaftsanfrage senden') ?>
+            <?php endif; ?>
+        <?php endif; ?>
+        <?= $act('block', '⛔ Blockieren', 'btn btn-ghost btn-sm', $owner['username'] . ' blockieren? Ihr seht euch dann gegenseitig nicht mehr, könnt euch nicht schreiben und nicht liken. Eine Freundschaft wird beendet.') ?>
+    <?php endif; ?>
+    </div>
 </div>
 
 <?php if ($self): ?>
@@ -29,7 +51,15 @@ $playsPublic = (int)$owner['plays_public'] === 1;
 
 <div class="cols">
     <section class="panel">
-        <h2 class="panel-title">Sammlung</h2>
+        <h2 class="panel-title panel-title-row">Sammlung
+            <?php if ($colPublic && $social && ((int)($owner['allow_likes'] ?? 1) === 1 || $likes)): ?>
+                <?php if ($canLike): ?>
+                    <?= $act('like', pixel_heart($liked) . ' <span>' . (int)$likes . '</span>', 'likebtn' . ($liked ? ' is-on' : '')) ?>
+                <?php else: ?>
+                    <span class="likebtn is-static" title="Likes"><?= pixel_heart($likes > 0) ?> <span><?= (int)$likes ?></span></span>
+                <?php endif; ?>
+            <?php endif; ?>
+        </h2>
         <?php if (!$colPublic): ?>
             <p class="empty">🔒 Die Sammlung ist privat.</p>
         <?php elseif (!$items): ?>
@@ -71,3 +101,21 @@ $playsPublic = (int)$owner['plays_public'] === 1;
         <?php endif; ?>
     </section>
 </div>
+
+<?php if ($social || $friendList): ?>
+<section class="panel">
+    <h2 class="panel-title">Freunde<?php if ($friendList): ?> <span class="count"><?= count($friendList) ?></span><?php endif; ?></h2>
+    <?php if ($friendList === null): ?>
+        <p class="empty">🔒 Die Freundesliste ist privat.</p>
+    <?php elseif (!$friendList): ?>
+        <p class="empty">Noch keine Freunde.</p>
+    <?php else: ?>
+        <ul class="friendgrid">
+            <?php foreach ($friendList as $f): ?>
+            <li><a href="<?= e(url('u', ['name' => $f['username']])) ?>" title="<?= e($f['username']) ?>"><?= avatar($f, 48, 'player-avatar') ?><span><?= e($f['username']) ?></span></a></li>
+            <?php endforeach; ?>
+        </ul>
+    <?php endif; ?>
+    <?php if ($self): ?><p class="hint"><a href="<?= e(url('friends')) ?>">Freunde verwalten ▶</a><?= (int)$owner['friends_public'] === 1 ? '' : ' · Deine Freundesliste ist privat, nur du siehst sie hier.' ?></p><?php endif; ?>
+</section>
+<?php endif; ?>

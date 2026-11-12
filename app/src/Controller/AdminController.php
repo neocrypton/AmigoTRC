@@ -97,14 +97,7 @@ final class AdminController
                     flash('error', 'Zum Löschen den Benutzernamen exakt eingeben.');
                     break;
                 }
-                \Amigo\Service\Avatar::removeFile($user);
-                $dir = App::dataDir() . '/uploads/' . (int)$user['id'];
-                foreach (glob($dir . '/*.jpg') ?: [] as $f) {
-                    @unlink($f);
-                }
-                @rmdir($dir);
-                $db->delete('users', ['id' => $user['id']]);
-                \Amigo\Service\Messages::cleanup(); // Unterhaltungen ohne verbliebene Teilnehmer
+                Accounts::deleteUser($user);
                 flash('ok', 'Benutzer und alle Daten gelöscht.');
                 break;
         }

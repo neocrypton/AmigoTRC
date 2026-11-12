@@ -16,7 +16,7 @@ namespace Amigo\Core;
  */
 final class Schema
 {
-    public const VERSION = 12;
+    public const VERSION = 13;
 
     public static function migrate(Database $db): void
     {
@@ -24,7 +24,7 @@ final class Schema
         if ($current >= self::VERSION) {
             return;
         }
-        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5(), 6 => self::v6(), 7 => self::v7(), 8 => self::v8(), 9 => [], 10 => self::v10(), 11 => self::v11(), 12 => self::v12()];
+        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5(), 6 => self::v6(), 7 => self::v7(), 8 => self::v8(), 9 => [], 10 => self::v10(), 11 => self::v11(), 12 => self::v12(), 13 => self::v13()];
         foreach ($steps as $version => $statements) {
             if ($current < $version) {
                 foreach ($statements as $ddl) {
@@ -109,6 +109,51 @@ final class Schema
                 sort %INT% NOT NULL DEFAULT 0,
                 enabled SMALLINT NOT NULL DEFAULT 1
             )%OPT%",
+        ];
+    }
+
+    /**
+     * v13: Freunde, Blockieren, Likes für Sammlungen, Online-Status, Konto selbst löschen.
+     * friendships: eine Zeile je Paar (requester → addressee), status pending|accepted.
+     */
+    private static function v13(): array
+    {
+        return [
+            'ALTER TABLE {users} ADD COLUMN allow_friend_requests SMALLINT NOT NULL DEFAULT 0',
+            'ALTER TABLE {users} ADD COLUMN friends_public SMALLINT NOT NULL DEFAULT 0',
+            'ALTER TABLE {users} ADD COLUMN allow_likes SMALLINT NOT NULL DEFAULT 1',
+            'ALTER TABLE {users} ADD COLUMN last_seen_at %BIG% NULL',
+            'ALTER TABLE {users} ADD COLUMN delete_token VARCHAR(64) NULL',
+            'ALTER TABLE {users} ADD COLUMN delete_expires %BIG% NULL',
+            "CREATE TABLE {friendships} (
+                requester_id %INT% NOT NULL,
+                addressee_id %INT% NOT NULL,
+                status VARCHAR(10) NOT NULL DEFAULT 'pending',
+                created_at %DT% NOT NULL,
+                accepted_at %DT% NULL,
+                PRIMARY KEY (requester_id, addressee_id),
+                FOREIGN KEY (requester_id) REFERENCES {users} (id) ON DELETE CASCADE,
+                FOREIGN KEY (addressee_id) REFERENCES {users} (id) ON DELETE CASCADE
+            )%OPT%",
+            "CREATE INDEX [friendships_addressee] ON {friendships} (addressee_id, status)",
+            "CREATE TABLE {user_blocks} (
+                user_id %INT% NOT NULL,
+                blocked_id %INT% NOT NULL,
+                created_at %DT% NOT NULL,
+                PRIMARY KEY (user_id, blocked_id),
+                FOREIGN KEY (user_id) REFERENCES {users} (id) ON DELETE CASCADE,
+                FOREIGN KEY (blocked_id) REFERENCES {users} (id) ON DELETE CASCADE
+            )%OPT%",
+            "CREATE INDEX [user_blocks_blocked] ON {user_blocks} (blocked_id)",
+            "CREATE TABLE {collection_likes} (
+                owner_id %INT% NOT NULL,
+                user_id %INT% NOT NULL,
+                created_at %DT% NOT NULL,
+                PRIMARY KEY (owner_id, user_id),
+                FOREIGN KEY (owner_id) REFERENCES {users} (id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id) REFERENCES {users} (id) ON DELETE CASCADE
+            )%OPT%",
+            "CREATE INDEX [collection_likes_user] ON {collection_likes} (user_id)",
         ];
     }
 

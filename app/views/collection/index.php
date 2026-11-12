@@ -12,6 +12,16 @@ $params = ($owner ? ['name' => $owner['username']] : []) + array_filter(['q' => 
         <p class="crumbs"><a href="<?= e(url('community')) ?>">Community</a> › <a href="<?= e(url('u', ['name' => $owner['username']])) ?>"><?= e($owner['username']) ?></a></p>
         <h1 class="h1">Sammlung von <?= e($owner['username']) ?> <span class="count"><?= fmt_num($total) ?></span></h1>
     </div>
+    <?php
+    $me = (int)\Amigo\Core\Auth::id();
+    if (\Amigo\Service\Social::enabled() && (int)($owner['allow_likes'] ?? 1) === 1):
+        $likes = \Amigo\Service\Social::likeCount((int)$owner['id']); $liked = \Amigo\Service\Social::hasLiked((int)$owner['id'], $me);
+        if (\Amigo\Service\Social::canLike($me, $owner)): ?>
+    <form method="post" action="<?= e(url('friend/action')) ?>" class="inline">
+        <?= csrf_field() ?><input type="hidden" name="id" value="<?= (int)$owner['id'] ?>"><input type="hidden" name="action" value="like"><input type="hidden" name="back" value="collection">
+        <button class="likebtn likebtn-lg<?= $liked ? ' is-on' : '' ?>" type="submit" title="<?= $liked ? 'Like zurücknehmen' : 'Diese Sammlung mögen' ?>"><?= pixel_heart($liked, 24) ?> <span><?= $likes ?></span></button>
+    </form>
+    <?php endif; endif; ?>
     <?php else: ?>
     <h1 class="h1">Sammlung <span class="count"><?= fmt_num($total) ?></span></h1>
     <div class="btnrow">

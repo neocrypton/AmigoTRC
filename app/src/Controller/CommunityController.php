@@ -7,6 +7,7 @@ use Amigo\Core\App;
 use Amigo\Core\Auth;
 use Amigo\Core\Database;
 use Amigo\Core\View;
+use Amigo\Service\Social;
 
 /**
  * Community: Nutzerliste und Profile. Sammlung und Durchgespielt-Liste anderer
@@ -17,8 +18,9 @@ final class CommunityController
     public function index(): void
     {
         $q = query('q', 40);
-        $params = [];
-        $where = 'u.is_active = 1';
+        $uid = (int)Auth::id();
+        [$nb, $params] = Social::notBlockedSql('u.id', $uid);   // Blockierte (beide Richtungen) ausblenden
+        $where = 'u.is_active = 1 AND ' . $nb;
         if ($q !== '') {
             $where .= " AND u.username LIKE ? ESCAPE '!'";
             $params[] = Database::like($q);
@@ -31,7 +33,11 @@ final class CommunityController
              FROM {users} u WHERE $where ORDER BY u.username",
             $params
         );
-        View::render('community/index', ['title' => 'Community', 'nav' => 'community', 'users' => $users, 'q' => $q]);
+        $friendIds = array_map(fn ($f) => (int)$f['id'], Social::friends($uid));
+        View::render('community/index', [
+            'title' => 'Community', 'nav' => 'community', 'users' => $users, 'q' => $q,
+            'friendIds' => $friendIds, 'incomingCount' => Social::incomingCount($uid), 'social' => Social::enabled(),
+        ]);
     }
 
     public function profile(): void
@@ -63,6 +69,18 @@ final class CommunityController
                 [$uid]
             );
         }
+
+        // Freunde, Likes
+        $me = (int)Auth::id();
+        $data['social'] = Social::enabled();
+        $data['friendState'] = $self ? null : Social::friendState($me, $uid);
+        $data['requestProblem'] = $self ? null : Social::requestProblem($me, $owner);
+        $data['likes'] = (int)$owner['collection_public'] === 1 ? Social::likeCount($uid) : 0;
+        $data['liked'] = !$self && Social::hasLiked($uid, $me);
+        $data['canLike'] = !$self && Social::canLike($me, $owner);
+        $data['friendList'] = ($self || (int)$owner['friends_public'] === 1)
+            ? array_values(array_filter(Social::friends($uid), fn ($f) => !Social::isBlocked($me, (int)$f['id'])))
+            : null;
 
         View::render('community/profile', ['title' => $owner['username'], 'nav' => 'community', 'owner' => $owner, 'self' => $self] + $data);
     }
@@ -107,11 +125,13 @@ final class CommunityController
         $name = query('name', 40);
         $owner = $name !== ''
             ? App::db()->one(
-                'SELECT id, username, avatar, created_at, collection_public, plays_public FROM {users} WHERE LOWER(username) = LOWER(?) AND is_active = 1',
+                'SELECT id, username, avatar, created_at, collection_public, plays_public, allow_friend_requests, friends_public, allow_likes
+                 FROM {users} WHERE LOWER(username) = LOWER(?) AND is_active = 1',
                 [$name]
             )
             : null;
-        if (!$owner) {
+        // Blockiert (in eine der beiden Richtungen): wie nicht vorhanden behandeln
+        if (!$owner || Social::isBlocked((int)Auth::id(), (int)$owner['id'])) {
             $this->notFound('Diesen Spieler gibt es nicht.');
         }
         return $owner;

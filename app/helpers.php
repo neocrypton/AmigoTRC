@@ -33,9 +33,10 @@ function csrf_field(): string
     return '<input type="hidden" name="_csrf" value="' . e(Csrf::token()) . '">';
 }
 
-function redirect(string $route = 'home', array $params = []): never
+function redirect(string $route = 'home', array $params = [], string $fragment = ''): never
 {
-    header('Location: ' . url($route, $params), true, 303);
+    $fragment = preg_replace('/[^a-z0-9_-]/i', '', $fragment);
+    header('Location: ' . url($route, $params) . ($fragment !== '' ? '#' . $fragment : ''), true, 303);
     exit;
 }
 
@@ -211,6 +212,26 @@ function tgdb_image(?string $url): ?string
 {
     $path = \Amigo\Service\CoverCache::pathFromUrl($url);
     return $path === null ? null : url('cover', ['p' => $path]);
+}
+
+/** Pixel-Herz (9×8) für Likes; Farbe per CSS (.pxheart, .is-on). */
+function pixel_heart(bool $on, int $size = 18): string
+{
+    static $d = null;
+    if ($d === null) {
+        $rows = ['.AA...AA.', 'AAAA.AAAA', 'AAAAAAAAA', 'AAAAAAAAA', '.AAAAAAA.', '..AAAAA..', '...AAA...', '....A....'];
+        $d = '';
+        foreach ($rows as $y => $row) {
+            if (preg_match_all('/A+/', $row, $m, PREG_OFFSET_CAPTURE)) {
+                foreach ($m[0] as [$run, $x]) {
+                    $d .= 'M' . $x . ' ' . $y . 'h' . strlen($run) . 'v1h-' . strlen($run) . 'z';
+                }
+            }
+        }
+    }
+    $h = (int)round($size * 8 / 9);
+    return '<svg class="pxheart' . ($on ? ' is-on' : '') . '" width="' . $size . '" height="' . $h . '" viewBox="0 0 9 8" aria-hidden="true" shape-rendering="crispEdges">'
+        . '<path d="' . $d . '"/><rect class="pxheart-shine" x="1" y="1" width="1" height="1"/></svg>';
 }
 
 /** Konsolen-/Controller-Foto einer Plattform (Pfad aus platforms.console_img) über den Cover-Cache. */

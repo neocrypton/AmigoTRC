@@ -116,7 +116,8 @@ final class Messages
         $errors = [];
         foreach (array_slice($names, 0, 50) as $name) {
             $u = App::db()->one('SELECT id, username FROM {users} WHERE LOWER(username) = LOWER(?) AND is_active = 1', [$name]);
-            if (!$u) {
+            // Blockierte (beide Richtungen) wie unbekannte Nutzer behandeln – verrät die Blockierung nicht
+            if (!$u || Social::isBlocked($senderId, (int)$u['id'])) {
                 $errors[] = 'Unbekannter Empfänger: ' . mb_substr($name, 0, 40);
             } elseif ((int)$u['id'] !== $senderId) {
                 $found[(int)$u['id']] = $u;
@@ -253,6 +254,9 @@ final class Messages
         foreach ($rows as $r) {
             if ($onlyUserIds !== null && !in_array((int)$r['id'], $onlyUserIds, true)) {
                 continue;
+            }
+            if (Social::isBlocked($senderId, (int)$r['id'])) {
+                continue; // keine Benachrichtigung über Nachrichten blockierter Nutzer
             }
             $db->update('conversation_users', ['notified_id' => $messageId], ['conversation_id' => $conversationId, 'user_id' => $r['id']]);
             self::$mailQueue[] = [

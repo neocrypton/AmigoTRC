@@ -7,6 +7,7 @@
     <?php if (\Amigo\Service\Messages::enabled()): ?><a href="<?= e(url('messages')) ?>">✉<span>Nachrichten</span></a><?php endif; ?>
     <a href="<?= e(url('community')) ?>">👾<span>Community</span></a>
     <a href="<?= e(url('u', ['name' => $user['username']])) ?>">🪪<span>Mein Profil</span></a>
+    <a href="<?= e(url('friends')) ?>">👥<span>Freunde<?php $fc = \Amigo\Service\Social::incomingCount((int)$user['id']); echo $fc ? ' <span class="count">' . $fc . '</span>' : ''; ?></span></a>
     <a href="<?= e(url('platforms')) ?>">🕹<span>Plattformen</span></a>
     <a href="<?= e(url('import')) ?>">⤒<span>CSV-Import</span></a>
     <a href="<?= e(url('export', ['type' => 'collection'])) ?>">⤓<span>Sammlung als CSV</span></a>
@@ -146,6 +147,11 @@
             <label class="check"><input type="checkbox" name="collection_public" value="1"<?= checked((int)$user['collection_public'] === 1) ?>> Meine Sammlung ist öffentlich</label>
             <label class="check"><input type="checkbox" name="plays_public" value="1"<?= checked((int)$user['plays_public'] === 1) ?>> Meine Durchgespielt-Liste ist öffentlich</label>
             <p class="hint">Kaufpreis, Kaufdatum, Händler und Notizen bleiben immer privat. Nicht angemeldete Besucher sehen nichts.</p>
+            <h3 class="h3">Freunde &amp; Likes</h3>
+            <label class="check"><input type="checkbox" name="allow_friend_requests" value="1"<?= checked((int)$user['allow_friend_requests'] === 1) ?>> Freundschaftsanfragen zulassen</label>
+            <label class="check"><input type="checkbox" name="friends_public" value="1"<?= checked((int)$user['friends_public'] === 1) ?>> Meine Freundesliste ist öffentlich</label>
+            <label class="check"><input type="checkbox" name="no_likes" value="1"<?= checked((int)$user['allow_likes'] !== 1) ?>> Keine Likes für meine Sammlung erhalten</label>
+            <p class="hint"><?= \Amigo\Service\Social::enabled() ? 'Freunde und Likes gibt es, solange die Community geöffnet ist.' : 'Die Community ist derzeit geschlossen – Freunde und Likes sind pausiert, deine Einstellungen bleiben gespeichert.' ?> Unerwünschte Nutzer kannst du über ihr Profil blockieren (Übersicht unter <a href="<?= e(url('friends')) ?>">Freunde</a>).</p>
             <button class="btn" type="submit">Speichern</button>
         </form>
     </section>
@@ -198,6 +204,20 @@
         <button type="button" class="btn theme-swatch theme-<?= e($k) ?>" data-theme-set="<?= e($k) ?>"><?= e($label) ?></button>
         <?php endforeach; ?>
     </div>
+</section>
+
+<section class="panel danger-panel" id="loeschen">
+    <h2 class="panel-title">Konto löschen</h2>
+    <p>Du kannst dein Konto jederzeit selbst löschen. Dabei werden <strong>dein Konto, deine Sammlung, deine Durchgespielt-Liste und alle von dir hochgeladenen Bilder</strong> endgültig entfernt. Einträge im gemeinsamen Zubehör-Katalog bleiben erhalten (ohne deine Bilder).</p>
+    <p class="hint">Zur Sicherheit schicken wir dir zuerst eine E-Mail mit einem Bestätigungslink (1 Stunde gültig). Dort bestätigst du mit deinem Passwort<?= (int)$user['totp_enabled'] ? ' und deinem 2FA-Code' : '' ?>. Tipp: Vorher die Sammlung als CSV exportieren.</p>
+    <?php if (empty($user['email']) || empty($user['email_verified_at'])): ?>
+        <p class="hint hint-warn">Dafür brauchst du eine <strong>bestätigte E-Mail-Adresse</strong> – hinterlege und bestätige sie oben unter „Profil“.</p>
+    <?php else: ?>
+    <form method="post" action="<?= e(url('account/delete')) ?>" data-confirm="Lösch-Bestätigung an <?= e($user['email']) ?> schicken?">
+        <?= csrf_field() ?>
+        <button class="btn btn-danger" type="submit">🗑 Konto löschen …</button>
+    </form>
+    <?php endif; ?>
 </section>
 
 <form method="post" action="<?= e(url('logout')) ?>" class="center">

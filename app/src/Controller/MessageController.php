@@ -9,6 +9,7 @@ use Amigo\Core\Database;
 use Amigo\Core\RateLimiter;
 use Amigo\Core\View;
 use Amigo\Service\Messages;
+use Amigo\Service\Social;
 
 /** Private Nachrichten: Posteingang, neue Unterhaltung, Unterhaltung lesen/antworten, Teilnehmer verwalten. */
 final class MessageController
@@ -101,11 +102,18 @@ final class MessageController
         $conv = $this->findOrFail(query_int('id', 1));
         $lastRead = (int)$conv['last_read_id'];
         Messages::markRead((int)$conv['id'], $uid);
+        // Nachrichten blockierter Nutzer (beide Richtungen) ausblenden
+        $all = Messages::messages((int)$conv['id']);
+        $blocked = Social::blockedIds((int)$uid);
+        $visible = array_values(array_filter($all, fn ($m) => !in_array((int)$m['user_id'], $blocked, true)));
+        if (count($visible) < count($all)) {
+            flash('info', (count($all) - count($visible)) . ' Nachricht(en) von blockierten Nutzern ausgeblendet.');
+        }
         View::render('messages/show', [
             'title'        => $conv['subject'],
             'nav'          => 'messages',
             'conv'         => $conv,
-            'messages'     => Messages::messages((int)$conv['id']),
+            'messages'     => $visible,
             'participants' => Messages::participants((int)$conv['id']),
             'isCreator'    => (int)$conv['creator_id'] === $uid,
             'lastRead'     => $lastRead,
@@ -122,6 +130,8 @@ final class MessageController
             flash('error', 'Die Nachricht ist leer.');
         } elseif (Messages::activeCount((int)$conv['id']) < 2) {
             flash('error', 'Alle anderen haben die Unterhaltung verlassen – lade jemanden ein oder starte eine neue.');
+        } elseif (!$this->reachableOthers((int)$conv['id'], (int)$uid)) {
+            flash('error', 'Mit den übrigen Teilnehmern dieser Unterhaltung ist keine Interaktion möglich.');
         } elseif (RateLimiter::tooMany('pm-msg:' . $uid, 120, 3600)) {
             flash('error', 'Zu viele Nachrichten in kurzer Zeit – bitte etwas warten.');
         } else {
@@ -190,12 +200,25 @@ final class MessageController
         header('Content-Type: application/json; charset=utf-8');
         header('Cache-Control: private, no-store');
         $q = query('q', 40);
+        [$nb, $nbParams] = Social::notBlockedSql('id', (int)Auth::id());
         $rows = mb_strlen($q) < 1 ? [] : App::db()->all(
-            "SELECT username FROM {users} WHERE is_active = 1 AND id <> ? AND username LIKE ? ESCAPE '!' ORDER BY username LIMIT 8",
-            [Auth::id(), ltrim(Database::like($q), '%')] // Anfang des Namens („an“ → „anna“)
+            "SELECT username FROM {users} WHERE is_active = 1 AND id <> ? AND username LIKE ? ESCAPE '!' AND $nb ORDER BY username LIMIT 8",
+            [Auth::id(), ltrim(Database::like($q), '%'), ...$nbParams] // Anfang des Namens („an“ → „anna“)
         );
         echo json_encode(['users' => array_column($rows, 'username')], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);
         exit;
+    }
+
+    /** Gibt es außer mir aktive Teilnehmer, mit denen keine Blockierung besteht? */
+    private function reachableOthers(int $cid, int $uid): bool
+    {
+        $blocked = Social::blockedIds($uid);
+        foreach (App::db()->all("SELECT user_id FROM {conversation_users} WHERE conversation_id = ? AND status = 'active' AND user_id <> ?", [$cid, $uid]) as $r) {
+            if (!in_array((int)$r['user_id'], $blocked, true)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function findOrFail(?int $id): array

@@ -46,6 +46,14 @@ auf dem Tablet und auf dem Smartphone.
   nur lesend. Kaufpreis, Kaufdatum, Händler und Notizen bleiben immer privat,
   nicht angemeldete Besucher sehen nichts
 - Eigener TheGamesDB-API-Key pro Nutzer (unter *Mein Konto*)
+- **Freunde** (im Community-Modus, d. h. bei offener Registrierung): Anfrage über das Profil,
+  muss angenommen werden; nur an Nutzer, die Anfragen zulassen (Standard: aus). Freundesliste
+  im Profil öffentlich oder privat; in der eigenen Liste sieht man, wer online ist
+- **Likes:** ein Pixel-❤ für öffentliche Sammlungen (im Konto abschaltbar)
+- **Blockieren:** sperrt Sichtbarkeit, Nachrichten, Likes und Anfragen in beide Richtungen
+- **Konto selbst löschen:** Bestätigung per E-Mail-Link, dann Passwort (und 2FA) – löscht
+  Konto, Sammlung, Durchgespielt-Liste und alle hochgeladenen Bilder; Einträge im
+  Zubehör-Katalog bleiben (ohne die eigenen Bilder)
 - **Private Nachrichten** (nur aktiv, solange die öffentliche Registrierung offen ist):
   Unterhaltungen mit Betreff und bis zu 10 Teilnehmern, die drin bleiben, bis der
   Ersteller sie entfernt oder sie austreten; Ungelesen-Zähler, mehrere

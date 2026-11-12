@@ -64,6 +64,8 @@ $routes = [
     'cover'             => [C\CoverController::class, 'show', 'auth'],
     'api/games'         => [C\ApiController::class, 'games', 'auth'],
     'api/accessories'   => [C\ApiController::class, 'accessories', 'auth'],
+    'friends'           => [C\SocialController::class, 'index', 'auth'],
+    'friend/action'     => [C\SocialController::class, 'action', 'auth'],
     'messages'          => [C\MessageController::class, 'index', 'auth'],
     'message/new'       => [C\MessageController::class, 'compose', 'auth'],
     'message'           => [C\MessageController::class, 'show', 'auth'],
@@ -93,6 +95,8 @@ $routes = [
     'account/2fa'       => [C\AccountController::class, 'twoFactorSetup', 'auth'],
     'account/2fa/off'   => [C\AccountController::class, 'twoFactorDisable', 'auth'],
     'account/recovery'  => [C\AccountController::class, 'recoveryCodes', 'auth'],
+    'account/delete'    => [C\AccountController::class, 'deleteRequest', 'auth'],
+    'account/delete/confirm' => [C\AccountController::class, 'deleteConfirm', 'public'],
 
     'admin/users'          => [C\AdminController::class, 'users', 'admin'],
     'admin/user/action'    => [C\AdminController::class, 'userAction', 'admin'],
@@ -167,6 +171,7 @@ if ($user && $access !== 'public') {
     if (($user['theme'] ?? null) !== $userTheme) {
         App::db()->update('users', ['theme' => $userTheme], ['id' => (int)$user['id']]);
     }
+    \Amigo\Service\Social::touch($user);   // Online-Status (höchstens einmal pro Minute)
 }
 
 // 2FA-Pflicht: Konten ohne 2FA dürfen nur noch die Einrichtung aufrufen.

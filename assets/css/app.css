@@ -383,6 +383,37 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: .8; }
 .catalog-photo-note { margin-top: 10px; }
 .catalog-img { margin: 0; }
 .catalog-img figcaption { margin-top: 4px; }
+/* Freunde, Likes */
+.pxheart { fill: var(--muted); vertical-align: -3px; }
+.pxheart.is-on { fill: #e43b44; }
+.pxheart-shine { fill: transparent; }
+.pxheart.is-on .pxheart-shine { fill: #fff; }
+.likebtn { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; font: inherit; font-size: 13px; font-weight: 700; color: var(--text);
+  background: var(--bg); border: 2px solid var(--line); cursor: pointer; text-transform: none; letter-spacing: 0; line-height: 1; }
+.likebtn:hover .pxheart { fill: #e43b44; }
+.likebtn.is-on { border-color: #e43b44; }
+.likebtn.is-static { cursor: default; }
+.likebtn-lg { font-size: 15px; padding: 8px 12px; }
+.panel-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.panel-title-row .inline { margin: 0; }
+.chip-friend { border-color: var(--ok); color: var(--ok); font-size: 11px; }
+.friendlist { list-style: none; margin: 0; padding: 0; }
+.friendlist li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 10px 0; }
+.friendlist li + li { border-top: 1px dashed var(--line); }
+.friend { display: flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; min-width: 0; flex: 1 1 220px; }
+.friend > span:last-child { display: flex; flex-direction: column; min-width: 0; }
+.friend strong { overflow-wrap: anywhere; }
+.friend-ava { position: relative; display: inline-block; flex: 0 0 auto; }
+.dot { position: absolute; right: -3px; bottom: -3px; width: 12px; height: 12px; background: var(--muted); border: 2px solid var(--panel); }
+.dot.is-online { background: #39d353; }
+.online-text { color: #2fae47; font-weight: 600; }
+[data-theme="crt"] .online-text, [data-theme="c64"] .online-text { color: #4ef06a; }
+.friendlist .btnrow { gap: 6px; }
+.friendlist .inline { margin: 0; }
+.friendgrid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 12px; }
+.friendgrid a { display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; color: var(--text); font-size: 13px; text-align: center; }
+.friendgrid a span { overflow-wrap: anywhere; }
+
 /* Admin › Zubehör-Katalog */
 .acc-admin { list-style: none; margin: 0; padding: 0; }
 .acc-admin > li { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px; margin-bottom: 12px; }
@@ -776,6 +807,9 @@ button[disabled] { opacity: .55; cursor: wait; }
 .gameinfo-body > div { flex: 1 1 260px; }
 details summary { cursor: pointer; color: var(--neon); margin: 8px 0; }
 .danger-zone { margin: 8px 0 24px; text-align: right; }
+.danger-panel { border-color: var(--bad); }
+.danger-panel .panel-title { color: var(--bad); }
+.danger-panel ul { margin: 0 0 12px; padding-left: 22px; }
 .mini-danger { margin-top: 6px; }
 .mini-danger form { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
 
