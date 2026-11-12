@@ -85,6 +85,30 @@ final class ApiController
         $this->json(['results' => $results, 'error' => $error, 'page' => $page, 'more' => $more]);
     }
 
+    /** Live-Vorschläge aus dem gemeinsamen Zubehör-Katalog. */
+    public function accessories(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: private, no-store');
+        $q = query('q', 100);
+        if (mb_strlen($q) < 2) {
+            $this->json(['results' => []]);
+        }
+        $results = [];
+        foreach (\Amigo\Service\AccessoryCatalog::search($q, query_int('platform', 1)) as $a) {
+            $results[] = [
+                'accessory_id' => (int)$a['id'],
+                'title'        => $a['name'],
+                'platform'     => $a['platform_name'],
+                'platform_id'  => $a['platform_id'] ? (int)$a['platform_id'] : null,
+                'year'         => $a['manufacturer'],                 // wird als Zusatzzeile angezeigt
+                'uses'         => (int)$a['uses'],
+                'thumb'        => \Amigo\Service\AccessoryCatalog::imageUrl($a),
+            ];
+        }
+        $this->json(['results' => $results, 'more' => false]);
+    }
+
     private function json(array $data): never
     {
         echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP);

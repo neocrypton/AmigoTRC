@@ -46,6 +46,7 @@ $routes = [
     'item/edit'         => [C\CollectionController::class, 'edit', 'auth'],
     'item/delete'       => [C\CollectionController::class, 'delete', 'auth'],
     'photo'             => [C\CollectionController::class, 'photo', 'auth'],
+    'accessory/image'   => [C\CollectionController::class, 'accessoryImage', 'auth'],
 
     'plays'             => [C\PlayController::class, 'index', 'auth'],
     'play/edit'         => [C\PlayController::class, 'edit', 'auth'],
@@ -62,6 +63,7 @@ $routes = [
 
     'cover'             => [C\CoverController::class, 'show', 'auth'],
     'api/games'         => [C\ApiController::class, 'games', 'auth'],
+    'api/accessories'   => [C\ApiController::class, 'accessories', 'auth'],
     'messages'          => [C\MessageController::class, 'index', 'auth'],
     'message/new'       => [C\MessageController::class, 'compose', 'auth'],
     'message'           => [C\MessageController::class, 'show', 'auth'],
@@ -96,6 +98,8 @@ $routes = [
     'admin/user/action'    => [C\AdminController::class, 'userAction', 'admin'],
     'admin/settings'       => [C\AdminController::class, 'settings', 'admin'],
     'admin/stats'          => [C\AdminController::class, 'stats', 'admin'],
+    'admin/accessories'    => [C\AdminController::class, 'accessories', 'admin'],
+    'admin/accessory/edit' => [C\AdminController::class, 'accessoryEdit', 'admin'],
     'admin/mail'           => [C\AdminController::class, 'mail', 'admin'],
     'admin/recaptcha'      => [C\AdminController::class, 'recaptcha', 'admin'],
     'admin/tgdb'           => [C\AdminController::class, 'tgdbKey', 'admin'],
@@ -173,7 +177,7 @@ if ($user && !(int)$user['totp_enabled'] && Settings::bool(App::db(), 'require_2
 }
 
 // HTML komprimiert ausliefern – spart bei langsamen Verbindungen (EDGE/3G) viel Zeit.
-if (!in_array($route, ['photo', 'cover', 'avatar', 'export', 'site/file'], true) && extension_loaded('zlib') && !ini_get('zlib.output_compression')) {
+if (!in_array($route, ['photo', 'cover', 'avatar', 'export', 'site/file', 'accessory/image'], true) && extension_loaded('zlib') && !ini_get('zlib.output_compression')) {
     ob_start('ob_gzhandler');
 }
 

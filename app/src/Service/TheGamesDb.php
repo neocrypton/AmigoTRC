@@ -176,6 +176,8 @@ final class TheGamesDb
             'memory'       => $s($p['memory'] ?? null),
             'overview'     => isset($p['overview']) ? (string)$p['overview'] : null,
             'icon'         => $s($p['icon'] ?? null),
+            'console'      => $s($p['console'] ?? null),      // Foto der Konsole (Dateiname oder Pfad)
+            'controller'   => $s($p['controller'] ?? null),   // Foto des Controllers
         ];
     }
 

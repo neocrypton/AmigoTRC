@@ -2,7 +2,12 @@
 use Amigo\Core\Options;
 
 $owner ??= null;
+$accessory ??= null;
 $cover = tgdb_image($game['boxart_large'] ?? null) ?? tgdb_image($game['boxart_thumb'] ?? null);
+$accImg = $accessory ? \Amigo\Service\AccessoryCatalog::imageUrl($accessory, false) : null;
+$isConsole = $item['kind'] === 'console' && $platform;
+$consoleImg = $isConsole ? platform_photo($platform['console_img'] ?? null) : null;
+$consoleIcon = $isConsole ? platform_icon($platform['icon'] ?? null) : null;
 ?>
 <div class="pagehead">
     <div>
@@ -28,7 +33,12 @@ $cover = tgdb_image($game['boxart_large'] ?? null) ?? tgdb_image($game['boxart_t
         <h2 class="panel-title">Fotos <span class="count"><?= count($photos) ?></span></h2>
         <?php if (!$photos): ?>
             <p class="empty">Keine Fotos.<?php if (!$owner): ?> <a href="<?= e(url('item/edit', ['id' => $item['id']])) ?>#photos">Fotos hinzufügen</a><?php endif; ?></p>
-            <?php if ($cover): ?><img class="cover" src="<?= e($cover) ?>" alt="Cover von <?= e($item['title']) ?> (TheGamesDB)" loading="lazy"><?php endif; ?>
+            <?php if ($cover): ?><img class="cover" src="<?= e($cover) ?>" alt="Cover von <?= e($item['title']) ?> (TheGamesDB)" loading="lazy">
+            <?php elseif ($accImg): ?>
+                <figure class="catalog-img"><img class="cover" src="<?= e($accImg) ?>" alt="<?= e($accessory['name']) ?>" loading="lazy"><figcaption class="hint">Standardbild aus dem gemeinsamen Zubehör-Katalog</figcaption></figure>
+            <?php elseif ($consoleImg || $consoleIcon): ?>
+                <figure class="catalog-img"><img class="cover<?= $consoleImg ? '' : ' is-icon' ?>" src="<?= e($consoleImg ?? $consoleIcon) ?>"<?= $consoleImg && $consoleIcon ? ' data-fallback="' . e($consoleIcon) . '"' : '' ?> alt="<?= e($platform['name']) ?>" loading="lazy"><figcaption class="hint">Bild von TheGamesDB</figcaption></figure>
+            <?php endif; ?>
         <?php else: ?>
         <ul class="gallery">
             <?php foreach ($photos as $ph): ?>
@@ -109,6 +119,35 @@ $cover = tgdb_image($game['boxart_large'] ?? null) ?? tgdb_image($game['boxart_t
             <?php if (!$owner): ?><p><a class="muted" href="<?= e(url('scrape/item', ['target' => 'collection', 'id' => $item['id']])) ?>">Falsches Spiel? Andere Zuordnung wählen</a></p><?php endif; ?>
         </div>
     </div>
+</section>
+<?php endif; ?>
+
+<?php if ($isConsole): ?>
+<section class="panel gameinfo">
+    <h2 class="panel-title">Konsole <small class="muted">TheGamesDB</small></h2>
+    <dl class="specs">
+        <dt>Plattform</dt><dd><a href="<?= e(url('platform', ['id' => $platform['id']])) ?>"><?= e($platform['name']) ?></a></dd>
+        <?php if ($platform['manufacturer']): ?><dt>Hersteller</dt><dd><?= e($platform['manufacturer']) ?></dd><?php endif; ?>
+        <?php if ($platform['developer'] && $platform['developer'] !== $platform['manufacturer']): ?><dt>Entwickler</dt><dd><?= e($platform['developer']) ?></dd><?php endif; ?>
+        <?php if ($platform['media']): ?><dt>Medium</dt><dd><?= e($platform['media']) ?></dd><?php endif; ?>
+        <?php if ($platform['cpu']): ?><dt>CPU</dt><dd><?= e($platform['cpu']) ?></dd><?php endif; ?>
+        <?php if ($platform['memory']): ?><dt>Speicher</dt><dd><?= e($platform['memory']) ?></dd><?php endif; ?>
+    </dl>
+    <?php if ($platform['overview']): ?><details><summary>Beschreibung</summary><div class="text"><?= nl2br(e($platform['overview'])) ?></div></details><?php endif; ?>
+    <?php if ($platform['tgdb_id']): ?><p><a href="https://thegamesdb.net/platform.php?id=<?= (int)$platform['tgdb_id'] ?>" target="_blank" rel="noopener noreferrer">Auf TheGamesDB ansehen ↗</a></p><?php endif; ?>
+</section>
+<?php endif; ?>
+
+<?php if ($accessory): ?>
+<section class="panel gameinfo">
+    <h2 class="panel-title">Zubehör <small class="muted">gemeinsamer Katalog</small></h2>
+    <dl class="specs">
+        <dt>Im Katalog</dt><dd><?= e($accessory['name']) ?></dd>
+        <?php if ($accessory['platform_name']): ?><dt>Plattform</dt><dd><?= e($accessory['platform_name']) ?></dd><?php endif; ?>
+        <?php if ($accessory['manufacturer']): ?><dt>Hersteller</dt><dd><?= e($accessory['manufacturer']) ?></dd><?php endif; ?>
+        <dt>In Sammlungen</dt><dd><?= (int)$accessory['uses'] ?> <?= (int)$accessory['uses'] === 1 ? 'Sammler' : 'Sammlern' ?></dd>
+    </dl>
+    <?php if (!$owner && !$photos && $accImg): ?><p class="hint">Eigene Fotos ersetzen das Standardbild – nur für deinen Eintrag. <a href="<?= e(url('item/edit', ['id' => $item['id']])) ?>#photos">Fotos hinzufügen</a></p><?php endif; ?>
 </section>
 <?php endif; ?>
 

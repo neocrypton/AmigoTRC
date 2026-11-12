@@ -9,6 +9,13 @@ auf dem Tablet und auf dem Smartphone.
 
 **Sammlung**
 - Spiele, Konsolen/Computer, Zubehör und Sonstiges erfassen
+- **Konsolen & Handhelds** über die Plattform aus TheGamesDB wählen: Name, Hersteller,
+  Technik-Daten, Beschreibung und Konsolen-Foto (sonst Plattform-Icon) werden übernommen;
+  eigene Bezeichnung für Varianten möglich (z. B. „SNES Mini“)
+- **Zubehör aus dem gemeinsamen Katalog:** Controller, Memory Cards usw. werden beim
+  Eintragen vorgeschlagen; Neues wird automatisch im Katalog angelegt und steht danach allen
+  zur Verfügung. Das erste hochgeladene Foto wird Standardbild (abwählbar), eigene Fotos
+  ersetzen es nur für den eigenen Eintrag. Pflege unter **Admin › Zubehör-Katalog**
 - Spielsuche mit Live-Vorschlägen aus TheGamesDB: Titel, Plattform, Cover,
   Entwickler, Publisher, Genre und Erscheinungsdatum werden übernommen
 - Region (PAL, NTSC-U, NTSC-J …), Umfang (versiegelt, CIB, lose …)

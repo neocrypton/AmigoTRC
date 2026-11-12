@@ -315,6 +315,80 @@ final class AdminController
     }
 
     /** Plattformen aus TheGamesDB auswählen und importieren. */
+    /** Admin › Zubehör-Katalog: Liste mit Suche, Löschen und Standardbild entfernen. */
+    public function accessories(): void
+    {
+        $db = App::db();
+        if (is_post()) {
+            $id = input_int('id', 1);
+            $acc = \Amigo\Service\AccessoryCatalog::find($id);
+            if ($acc) {
+                $action = input('action', 20);
+                if ($action === 'delete') {
+                    \Amigo\Service\AccessoryCatalog::delete((int)$acc['id']);
+                    flash('ok', '„' . $acc['name'] . '“ aus dem Katalog gelöscht. Sammlungs-Einträge bleiben erhalten.');
+                } elseif ($action === 'remove_image') {
+                    \Amigo\Service\AccessoryCatalog::removeImage((int)$acc['id']);
+                    flash('ok', 'Standardbild von „' . $acc['name'] . '“ entfernt. Das nächste hochgeladene Foto wird neues Standardbild.');
+                }
+            }
+            redirect('admin/accessories', array_filter(['q' => query('q', 100)]));
+        }
+        $q = query('q', 100);
+        $params = [];
+        $where = '';
+        if ($q !== '') {
+            $where = " WHERE a.name LIKE ? ESCAPE '!' OR a.manufacturer LIKE ? ESCAPE '!' OR p.name LIKE ? ESCAPE '!'";
+            $params = array_fill(0, 3, Database::like($q));
+        }
+        $rows = $db->all(
+            'SELECT a.*, p.name AS platform_name, u.username AS creator, iu.username AS image_by,
+                    (SELECT COUNT(*) FROM {items} i WHERE i.accessory_id = a.id) AS uses
+             FROM {accessories} a
+             LEFT JOIN {platforms} p ON p.id = a.platform_id
+             LEFT JOIN {users} u ON u.id = a.created_by
+             LEFT JOIN {users} iu ON iu.id = a.image_user_id' . $where . '
+             ORDER BY a.name LIMIT 500',
+            $params
+        );
+        View::render('admin/accessories', ['title' => 'Zubehör-Katalog', 'nav' => 'admin', 'rows' => $rows, 'q' => $q]);
+    }
+
+    /** Katalog-Eintrag bearbeiten (Name, Plattform, Hersteller). */
+    public function accessoryEdit(): void
+    {
+        $db = App::db();
+        $acc = \Amigo\Service\AccessoryCatalog::find(input_int('id', 1) ?? query_int('id', 1));
+        if (!$acc) {
+            redirect('admin/accessories');
+        }
+        $errors = [];
+        if (is_post()) {
+            $name = mb_substr(trim(preg_replace('/\s+/u', ' ', input('name', 150))), 0, 150);
+            $platformId = input_int('platform_id', 1);
+            if ($name === '') {
+                $errors[] = 'Bitte einen Namen angeben.';
+            }
+            if ($platformId !== null && !Catalog::platformExists($platformId)) {
+                $errors[] = 'Unbekannte Plattform.';
+            }
+            if (!$errors) {
+                $db->update('accessories', [
+                    'name'         => $name,
+                    'platform_id'  => $platformId,
+                    'manufacturer' => input('manufacturer', 150) ?: null,
+                    'updated_at'   => Database::now(),
+                ], ['id' => (int)$acc['id']]);
+                flash('ok', 'Katalog-Eintrag gespeichert.');
+                redirect('admin/accessories');
+            }
+            $acc = array_merge($acc, ['name' => $name, 'platform_id' => $platformId, 'manufacturer' => input('manufacturer', 150)]);
+        }
+        View::render('admin/accessory_form', [
+            'title' => 'Zubehör bearbeiten', 'nav' => 'admin', 'acc' => $acc, 'errors' => $errors, 'platforms' => Catalog::platforms(),
+        ]);
+    }
+
     /** Admin › Statistik: Badges, Einträge pro Tag, Nutzerzuwachs, Farbschemata. */
     public function stats(): void
     {

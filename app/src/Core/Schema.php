@@ -16,7 +16,7 @@ namespace Amigo\Core;
  */
 final class Schema
 {
-    public const VERSION = 11;
+    public const VERSION = 12;
 
     public static function migrate(Database $db): void
     {
@@ -24,7 +24,7 @@ final class Schema
         if ($current >= self::VERSION) {
             return;
         }
-        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5(), 6 => self::v6(), 7 => self::v7(), 8 => self::v8(), 9 => [], 10 => self::v10(), 11 => self::v11()];
+        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5(), 6 => self::v6(), 7 => self::v7(), 8 => self::v8(), 9 => [], 10 => self::v10(), 11 => self::v11(), 12 => self::v12()];
         foreach ($steps as $version => $statements) {
             if ($current < $version) {
                 foreach ($statements as $ddl) {
@@ -109,6 +109,36 @@ final class Schema
                 sort %INT% NOT NULL DEFAULT 0,
                 enabled SMALLINT NOT NULL DEFAULT 1
             )%OPT%",
+        ];
+    }
+
+    /**
+     * v12: Konsolen über Plattformen (Bilder von TheGamesDB) und gemeinsamer Zubehör-Katalog.
+     * items.accessory_id ohne Fremdschlüssel (SQLite kann ihn nicht nachträglich anlegen); beim
+     * Löschen eines Katalog-Eintrags setzt AccessoryCatalog::delete() die Verweise auf NULL.
+     */
+    private static function v12(): array
+    {
+        return [
+            'ALTER TABLE {platforms} ADD COLUMN console_img VARCHAR(255) NULL',
+            'ALTER TABLE {platforms} ADD COLUMN controller_img VARCHAR(255) NULL',
+            "CREATE TABLE {accessories} (
+                id %ID%,
+                name VARCHAR(150) NOT NULL,
+                platform_id %INT% NULL,
+                manufacturer VARCHAR(150) NULL,
+                image VARCHAR(40) NULL,
+                image_user_id %INT% NULL,
+                created_by %INT% NULL,
+                created_at %DT% NOT NULL,
+                updated_at %DT% NOT NULL,
+                FOREIGN KEY (platform_id) REFERENCES {platforms} (id) ON DELETE SET NULL,
+                FOREIGN KEY (image_user_id) REFERENCES {users} (id) ON DELETE SET NULL,
+                FOREIGN KEY (created_by) REFERENCES {users} (id) ON DELETE SET NULL
+            )%OPT%",
+            "CREATE INDEX [accessories_name] ON {accessories} (name)",
+            'ALTER TABLE {items} ADD COLUMN accessory_id %INT% NULL',
+            "CREATE INDEX [items_accessory] ON {items} (accessory_id)",
         ];
     }
 

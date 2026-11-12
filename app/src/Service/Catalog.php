@@ -110,6 +110,8 @@ final class Catalog
             'memory'       => $p['memory'],
             'overview'     => $p['overview'],
             'icon'         => $p['icon'],
+            'console_img'    => self::platformImagePath($p['console'] ?? null, 'consoleart'),
+            'controller_img' => self::platformImagePath($p['controller'] ?? null, 'controllerart'),
         ];
         $id = $db->value('SELECT id FROM {platforms} WHERE tgdb_id = ?', [$p['tgdb_id']]);
         if ($id) {
@@ -117,6 +119,50 @@ final class Catalog
             return (int)$id;
         }
         return $db->insert('platforms', $row + ['tgdb_id' => $p['tgdb_id'], 'created_at' => Database::now()]);
+    }
+
+    /**
+     * Pfad eines Plattform-Fotos relativ zu …/images/ (für den Cover-Cache). TheGamesDB liefert
+     * je nach API-Stand nur den Dateinamen („6.png“) oder einen Pfad („platform/consoleart/6.png“).
+     */
+    public static function platformImagePath(?string $value, string $type): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+        $value = ltrim($value, '/');
+        $path = 'original/' . (str_contains($value, '/') ? $value : 'platform/' . $type . '/' . $value);
+        return CoverCache::validPath($path) ? $path : null;
+    }
+
+    /**
+     * Ergänzt fehlende Konsolen-/Controller-Fotos bereits importierter Plattformen aus der
+     * (zwischengespeicherten) Plattform-Liste von TheGamesDB. Höchstens einmal am Tag.
+     */
+    public static function syncPlatformImages(): void
+    {
+        $db = App::db();
+        $tgdb = self::tgdb();
+        if (!$tgdb->enabled()) {
+            return;
+        }
+        $last = (int)(Settings::get($db, 'platform_img_sync') ?? 0);
+        $missing = (int)$db->value('SELECT COUNT(*) FROM {platforms} WHERE tgdb_id IS NOT NULL AND console_img IS NULL');
+        if (!$missing || time() - $last < 86400) {
+            return;
+        }
+        Settings::set($db, 'platform_img_sync', (string)time());
+        try {
+            foreach ($tgdb->platforms() as $p) {
+                $console = self::platformImagePath($p['console'] ?? null, 'consoleart');
+                if ($console) {
+                    $db->run('UPDATE {platforms} SET console_img = ?, controller_img = ? WHERE tgdb_id = ? AND console_img IS NULL',
+                        [$console, self::platformImagePath($p['controller'] ?? null, 'controllerart'), $p['tgdb_id']]);
+                }
+            }
+        } catch (\Throwable) {
+            // TheGamesDB nicht erreichbar: beim nächsten Mal erneut versuchen
+        }
     }
 
     public static function platformByTgdb(int $tgdbId): ?int

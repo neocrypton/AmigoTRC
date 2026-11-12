@@ -17,6 +17,7 @@
     <a href="<?= e(url('admin/platforms')) ?>">📥<span>Plattform-Import</span></a>
     <a href="<?= e(url('admin/site')) ?>">🌐<span>Website</span></a>
     <a href="<?= e(url('admin/stats')) ?>">📊<span>Statistik</span></a>
+    <a href="<?= e(url('admin/accessories')) ?>">🎮<span>Zubehör-Katalog</span></a>
     <?php endif; ?>
 </nav>
 

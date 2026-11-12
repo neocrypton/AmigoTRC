@@ -9,6 +9,7 @@ use Amigo\Core\Database;
 use Amigo\Core\Options;
 use Amigo\Core\View;
 use Amigo\Service\Catalog;
+use Amigo\Service\AccessoryCatalog;
 use Amigo\Service\ImageStore;
 
 final class CollectionController
@@ -65,7 +66,8 @@ final class CollectionController
             $where[] = 'i.kind = ?';
             $params[] = $filter['kind'];
         }
-        $from = ' FROM {items} i LEFT JOIN {platforms} p ON p.id = i.platform_id LEFT JOIN {games} g ON g.id = i.game_id WHERE ' . implode(' AND ', $where);
+        $from = ' FROM {items} i LEFT JOIN {platforms} p ON p.id = i.platform_id LEFT JOIN {games} g ON g.id = i.game_id'
+            . ' LEFT JOIN {accessories} a ON a.id = i.accessory_id WHERE ' . implode(' AND ', $where);
 
         $total = (int)$db->value('SELECT COUNT(*)' . $from, $params);
         $pages = max(1, (int)ceil($total / self::PER_PAGE));
@@ -73,7 +75,8 @@ final class CollectionController
 
         $items = $db->all(
             'SELECT i.id, i.title, i.kind, i.region, i.completeness, i.cond_overall, i.price_cents,
-                    p.name AS platform_name, g.boxart_thumb,
+                    p.name AS platform_name, p.console_img, p.icon AS platform_icon, g.boxart_thumb,
+                    a.id AS acc_id, a.image AS acc_image,
                     (SELECT ph.id FROM {photos} ph WHERE ph.item_id = i.id ORDER BY ph.sort, ph.id LIMIT 1) AS photo_id,
                     (SELECT COUNT(*) FROM {photos} ph WHERE ph.item_id = i.id) AS photo_count'
             . $from . ' ORDER BY ' . self::SORTS[$filter['sort']] . ' LIMIT ? OFFSET ?',
@@ -112,6 +115,10 @@ final class CollectionController
         $photos = $db->all('SELECT * FROM {photos} WHERE item_id = ? ORDER BY sort, id', [$item['id']]);
         $game = $item['game_id'] ? $db->one('SELECT * FROM {games} WHERE id = ?', [$item['game_id']]) : null;
         $platform = $item['platform_id'] ? $db->one('SELECT * FROM {platforms} WHERE id = ?', [$item['platform_id']]) : null;
+        $accessory = !empty($item['accessory_id']) ? AccessoryCatalog::find((int)$item['accessory_id']) : null;
+        if ($accessory) {
+            $accessory['uses'] = (int)$db->value('SELECT COUNT(DISTINCT user_id) FROM {items} WHERE accessory_id = ?', [$accessory['id']]);
+        }
         $plays = $item['game_id']
             && (!$foreign || (int)$owner['plays_public'] === 1)
             ? $db->all('SELECT * FROM {plays} WHERE user_id = ? AND game_id = ? ORDER BY finished_on DESC', [(int)$owner['id'], $item['game_id']])
@@ -125,6 +132,7 @@ final class CollectionController
             'photos'   => $photos,
             'game'     => $game,
             'platform' => $platform,
+            'accessory' => $accessory,
             'plays'    => $plays,
         ]);
     }
@@ -140,6 +148,10 @@ final class CollectionController
             [$data, $errors, $game] = $this->validate($item);
             if (!$errors) {
                 $now = Database::now();
+                // Zubehör ohne Katalog-Verknüpfung: im gemeinsamen Katalog anlegen (oder gleichnamigen Eintrag nutzen)
+                if ($data['kind'] === 'accessory' && !$data['accessory_id']) {
+                    $data['accessory_id'] = AccessoryCatalog::findOrCreate($data['title'], $data['platform_id'], input('accessory_manufacturer', 150) ?: null, (int)Auth::id());
+                }
                 if ($item) {
                     $db->update('items', $data + ['updated_at' => $now, 'scrape_status' => null], ['id' => $item['id'], 'user_id' => Auth::id()]);
                     $itemId = (int)$item['id'];
@@ -149,6 +161,13 @@ final class CollectionController
                 $warnings = $this->savePhotos($itemId);
                 foreach ($warnings as $w) {
                     flash('warn', $w);
+                }
+                // Erstes eigenes Foto wird Standardbild im Katalog, solange es dort keins gibt (abwählbar)
+                if ($data['kind'] === 'accessory' && $data['accessory_id'] && !input('no_share', 1)) {
+                    $first = $db->value('SELECT file FROM {photos} WHERE item_id = ? AND user_id = ? ORDER BY sort, id LIMIT 1', [$itemId, Auth::id()]);
+                    if ($first && AccessoryCatalog::adoptPhoto((int)$data['accessory_id'], (int)Auth::id(), (string)$first)) {
+                        flash('info', 'Dein Foto ist jetzt das Standardbild dieses Zubehörs im gemeinsamen Katalog.');
+                    }
                 }
                 flash('ok', $item ? 'Eintrag gespeichert.' : '1UP! Neuer Eintrag in der Sammlung.');
                 redirect('item', ['id' => $itemId]);
@@ -160,8 +179,10 @@ final class CollectionController
 
         $item ??= [
             'id' => null, 'kind' => input_enum('kind', Options::KINDS, $_GET) ?? 'game',
-            'platform_id' => query_int('platform', 1), 'title' => '', 'game_id' => null,
+            'platform_id' => query_int('platform', 1), 'title' => '', 'game_id' => null, 'accessory_id' => null,
         ];
+        Catalog::syncPlatformImages();
+        $accessory = !empty($item['accessory_id']) ? AccessoryCatalog::find((int)$item['accessory_id']) : null;
         if (!isset($item['_game']) && !empty($item['game_id'])) {
             $item['_game'] = $db->one('SELECT * FROM {games} WHERE id = ?', [$item['game_id']]);
         }
@@ -172,6 +193,7 @@ final class CollectionController
             'nav'        => 'add',
             'item'       => $item,
             'photos'     => $photos,
+            'accessory'  => $accessory,
             'errors'     => $errors,
             'platforms'  => Catalog::platforms(),
             'tgdb'       => Catalog::tgdb()->enabled(),
@@ -222,6 +244,28 @@ final class CollectionController
         exit;
     }
 
+    /** Standardbild eines Zubehör-Katalog-Eintrags (für alle angemeldeten Nutzer). */
+    public function accessoryImage(): void
+    {
+        $acc = AccessoryCatalog::find(query_int('id', 1));
+        $path = $acc ? AccessoryCatalog::imagePath($acc['image'], query('s', 1) === 't') : null;
+        if (!$path) {
+            http_response_code(404);
+            exit;
+        }
+        $etag = '"' . $acc['image'] . (query('s', 1) === 't' ? 't' : 'f') . '"';
+        header('Cache-Control: private, max-age=31536000, immutable');
+        header('ETag: ' . $etag);
+        if (($_SERVER['HTTP_IF_NONE_MATCH'] ?? '') === $etag) {
+            http_response_code(304);
+            exit;
+        }
+        header('Content-Type: image/jpeg');
+        header('Content-Length: ' . filesize($path));
+        readfile($path);
+        exit;
+    }
+
     private function findOwned(?int $id): array
     {
         $item = $id ? App::db()->one('SELECT * FROM {items} WHERE id = ? AND user_id = ?', [$id, Auth::id()]) : null;
@@ -237,15 +281,22 @@ final class CollectionController
     private function validate(?array $existing): array
     {
         $errors = [];
-        [$game, $gameWarning] = Catalog::resolveGameFromInput();
-        if ($gameWarning) {
-            flash('warn', $gameWarning);
+        $kind = input_enum('kind', Options::KINDS) ?? 'game';
+        // Spiele-Verknüpfung (TheGamesDB) nur für Spiele und Sonstiges
+        $game = null;
+        if ($kind === 'game' || $kind === 'other') {
+            [$game, $gameWarning] = Catalog::resolveGameFromInput();
+            if ($gameWarning) {
+                flash('warn', $gameWarning);
+            }
         }
+        $accessory = $kind === 'accessory' ? AccessoryCatalog::find(input_int('accessory_id', 1)) : null;
         $cond = static fn (string $k) => input_int($k, 0, 5);
 
         $data = [
-            'kind'            => input_enum('kind', Options::KINDS) ?? 'game',
+            'kind'            => $kind,
             'game_id'         => $game['id'] ?? null,
+            'accessory_id'    => $accessory ? (int)$accessory['id'] : null,
             'platform_id'     => input_int('platform_id', 1),
             'title'           => input('title', 255),
             'region'          => input_enum('region', Options::REGIONS),
@@ -265,8 +316,20 @@ final class CollectionController
             $data['title'] = $data['title'] !== '' ? $data['title'] : $game['title'];
             $data['platform_id'] ??= $game['platform_id'] ? (int)$game['platform_id'] : null;
         }
+        if ($accessory) {
+            $data['title'] = $data['title'] !== '' ? $data['title'] : $accessory['name'];
+            $data['platform_id'] ??= $accessory['platform_id'] ? (int)$accessory['platform_id'] : null;
+        }
+        // Konsole ohne eigenen Namen: Name der gewählten Plattform
+        if ($kind === 'console' && $data['title'] === '' && $data['platform_id'] && Catalog::platformExists($data['platform_id'])) {
+            $data['title'] = (string)App::db()->value('SELECT name FROM {platforms} WHERE id = ?', [$data['platform_id']]);
+        }
         if ($data['title'] === '') {
-            $errors[] = 'Bitte einen Titel angeben oder ein Spiel aus der Suche wählen.';
+            $errors[] = match ($kind) {
+                'console'   => 'Bitte eine Plattform wählen oder eine Bezeichnung eingeben.',
+                'accessory' => 'Bitte eine Bezeichnung eingeben oder ein Zubehör aus dem Katalog wählen.',
+                default     => 'Bitte einen Titel angeben oder ein Spiel aus der Suche wählen.',
+            };
         }
         if ($data['platform_id'] !== null && !Catalog::platformExists($data['platform_id'])) {
             $errors[] = 'Unbekannte Plattform.';

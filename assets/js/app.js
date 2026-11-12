@@ -40,7 +40,11 @@
   /* ---------- Fehlende Cover still ausblenden statt kaputtem Bild-Symbol ---------- */
   document.addEventListener('error', function (e) {
     var img = e.target;
-    if (img && img.tagName === 'IMG' && img.src.indexOf('r=cover') >= 0) img.classList.add('img-missing');
+    if (!img || img.tagName !== 'IMG' || img.src.indexOf('r=cover') < 0) return;
+    // Ersatzbild (z. B. Plattform-Icon, wenn es kein Konsolen-Foto gibt), sonst ausblenden
+    var fb = img.getAttribute('data-fallback');
+    if (fb && fb.indexOf('index.php?r=cover&') === 0) { img.removeAttribute('data-fallback'); img.src = fb; img.classList.add('img-fallback'); return; }
+    img.classList.add('img-missing');
   }, true);
 
   /* ---------- Sicherheitsabfragen ---------- */
@@ -65,7 +69,10 @@
 
   /* ---------- Spielsuche (TheGamesDB + lokal) ---------- */
   $$('[data-picker]').forEach(function (root) {
-    var api = root.getAttribute('data-api');
+    var apiGames = root.getAttribute('data-api');
+    var apiAccessory = root.getAttribute('data-api-accessory');   // nur Sammlung
+    var accField = $('[data-picker-accessory]', root);
+    var form = root.closest('form');
     var input = $('[data-picker-input]', root);
     var list = $('[data-picker-list]', root);
     var status = $('[data-picker-status]', root);
@@ -80,18 +87,29 @@
     var statusDefault = status ? status.textContent : '';
 
     function safeThumb(url) {
-      return typeof url === 'string' && url.indexOf('index.php?r=cover&') === 0 ? url : null;
+      return typeof url === 'string' && (url.indexOf('index.php?r=cover&') === 0 || url.indexOf('index.php?r=accessory/image&') === 0) ? url : null;
+    }
+    /* Art des Eintrags (nur Sammlung): Spiel/Sonstiges → TheGamesDB, Zubehör → Katalog, Konsole → keine Suche */
+    function kind() {
+      var k = form && apiAccessory ? form.querySelector('input[name="kind"]:checked') : null;
+      return k ? k.value : 'game';
+    }
+    function api() {
+      var k = kind();
+      return k === 'accessory' ? apiAccessory : (k === 'console' ? null : apiGames);
     }
     function close() { list.hidden = true; active = -1; input.setAttribute('aria-expanded', 'false'); }
     function unlink() {
       gameField.value = '';
       tgdbField.value = '';
+      if (accField) accField.value = '';
       linked.classList.add('is-empty');
     }
     function choose(r) {
       input.value = r.title;
       gameField.value = r.game_id || '';
-      tgdbField.value = r.game_id ? '' : (r.tgdb_id || '');
+      tgdbField.value = r.game_id || r.accessory_id ? '' : (r.tgdb_id || '');
+      if (accField) accField.value = r.accessory_id || '';
       if (r.platform_id && platform) platform.value = String(r.platform_id);
       linkedName.textContent = r.title + (r.platform ? ' (' + r.platform + ')' : '');
       var t = safeThumb(r.thumb);
@@ -119,7 +137,7 @@
       txt.appendChild(el('strong', null, r.title));
       txt.appendChild(el('small', null, [r.platform, r.year].filter(Boolean).join(' · ')));
       b.appendChild(txt);
-      b.appendChild(el('span', 'src', r.game_id ? 'Katalog' : 'TGDB'));
+      b.appendChild(el('span', 'src', r.accessory_id ? 'Katalog' + (r.uses ? ' · ' + r.uses + '×' : '') : (r.game_id ? 'Katalog' : 'TGDB')));
       b.addEventListener('mousedown', function (e) { e.preventDefault(); });
       b.addEventListener('click', function () { choose(r); });
       return b;
@@ -158,13 +176,13 @@
       input.setAttribute('aria-expanded', 'true');
     }
     function fetchPage(q, p) {
-      var url = api + '&q=' + encodeURIComponent(q) + (platform && platform.value ? '&platform=' + encodeURIComponent(platform.value) : '') + (p > 1 ? '&page=' + p : '');
+      var url = api() + '&q=' + encodeURIComponent(q) + (platform && platform.value ? '&platform=' + encodeURIComponent(platform.value) : '') + (p > 1 ? '&page=' + p : '');
       return fetch(url, { credentials: 'same-origin', signal: ctrl ? ctrl.signal : undefined, headers: { Accept: 'application/json' } })
         .then(function (r) { return r.ok ? r.json() : { results: [], error: 'Suche fehlgeschlagen.' }; });
     }
     function search() {
       var q = input.value.trim();
-      if (q.length < 2) { close(); if (status) status.textContent = statusDefault; return; }
+      if (q.length < 2 || !api()) { close(); if (status) status.textContent = statusDefault; return; }
       if (ctrl) ctrl.abort();
       ctrl = window.AbortController ? new AbortController() : null;
       lastQuery = q; page = 1; loadingMore = false;
@@ -209,6 +227,24 @@
     });
     input.addEventListener('blur', function () { setTimeout(close, 150); });
     $('[data-picker-clear]', root).addEventListener('click', function () { unlink(); input.focus(); });
+    // Platzhalter je nach Art
+    var phDefault = input.getAttribute('placeholder');
+    function placeholder() {
+      var k = kind();
+      input.setAttribute('placeholder', (k === 'console' && input.getAttribute('data-ph-console')) || (k === 'accessory' && input.getAttribute('data-ph-accessory')) || phDefault);
+    }
+    // Art gewechselt: Verknüpfung lösen und Vorschläge schließen (Spiel ≠ Zubehör ≠ Konsole)
+    if (form && apiAccessory) {
+      placeholder();
+      $$('input[name="kind"]', form).forEach(function (r) {
+        r.addEventListener('change', function () {
+          if (!linked.classList.contains('is-empty')) unlink();
+          close();
+          placeholder();
+          if (status) status.textContent = statusDefault;
+        });
+      });
+    }
   });
 
   /* ---------- Foto-Auswahl: Fotos sammeln, Vorschau + Beschreibung ----------

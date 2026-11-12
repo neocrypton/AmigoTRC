@@ -85,6 +85,11 @@ $params = ($owner ? ['name' => $owner['username']] : []) + array_filter(['q' => 
                         <img src="<?= e(url('photo', ['id' => $it['photo_id'], 's' => 't'])) ?>" alt="" loading="lazy" decoding="async">
                     <?php elseif ($thumb = tgdb_image($it['boxart_thumb'])): ?>
                         <img src="<?= e($thumb) ?>" alt="" loading="lazy" decoding="async">
+                    <?php elseif ($it['acc_image']): ?>
+                        <img src="<?= e(url('accessory/image', ['id' => $it['acc_id'], 'v' => substr($it['acc_image'], 0, 8), 's' => 't'])) ?>" alt="" loading="lazy" decoding="async">
+                    <?php elseif ($it['kind'] === 'console' && ($cimg = platform_photo($it['console_img']) ?? platform_icon($it['platform_icon']))): ?>
+                        <?php $cicon = platform_icon($it['platform_icon']); $isIcon = !platform_photo($it['console_img']); ?>
+                        <img<?= $isIcon ? ' class="is-icon"' : '' ?> src="<?= e($cimg) ?>"<?= !$isIcon && $cicon ? ' data-fallback="' . e($cicon) . '"' : '' ?> alt="" loading="lazy" decoding="async">
                     <?php else: ?>
                         <span class="cart-noimg" aria-hidden="true"><?= e(mb_strtoupper(mb_substr($it['title'], 0, 1))) ?></span>
                     <?php endif; ?>

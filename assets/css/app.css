@@ -372,6 +372,26 @@ textarea { resize: vertical; }
 input::placeholder, textarea::placeholder { color: var(--muted); opacity: .8; }
 .hint { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
 .hint-warn { color: var(--warn); }
+/* Sammlungs-Formular: Felder je nach Art (Spiel / Konsole / Zubehör) */
+.only-console, .only-accessory { display: none; }
+.form:has(input[name=kind][value=console]:checked) .only-console,
+.form:has(input[name=kind][value=accessory]:checked) .only-accessory { display: revert; }
+.form:has(input[name=kind][value=console]:checked) .not-console,
+.form:has(input[name=kind][value=accessory]:checked) .not-accessory,
+.form:has(input[name=kind][value=console]:checked) .picker-linked,
+.form:has(input[name=kind][value=console]:checked) [data-picker-status] { display: none; }
+.catalog-photo-note { margin-top: 10px; }
+.catalog-img { margin: 0; }
+.catalog-img figcaption { margin-top: 4px; }
+/* Admin › Zubehör-Katalog */
+.acc-admin { list-style: none; margin: 0; padding: 0; }
+.acc-admin > li { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px; margin-bottom: 12px; }
+.acc-admin img, .acc-admin .noimg { width: 64px; height: 64px; object-fit: cover; border: 2px solid var(--line); flex: 0 0 auto; }
+.acc-admin-body { display: flex; flex-direction: column; gap: 2px; flex: 1 1 220px; min-width: 0; }
+.acc-admin .inline { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+/* Ersatzbild (Plattform-Icon) in Kacheln: klein und scharf in der Mitte */
+.cart-label img.img-fallback, .cart-label img.is-icon, .cover.is-icon, .cover.img-fallback { object-fit: contain; image-rendering: pixelated; padding: 22%; }
+
 /* Durchgespielt-Datum: exakt (Datumsfeld) oder ungefähr (Monat + Jahr) */
 .radio-row { display: flex; flex-wrap: wrap; gap: 6px 32px; margin: 0 0 6px; }
 .radio-row .check { margin: 0 0 4px; }

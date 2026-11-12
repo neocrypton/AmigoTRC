@@ -32,7 +32,7 @@ $int = static fn (string $k) => isset($item[$k]) && $item[$k] !== null && $item[
             <?php endforeach; ?>
         </fieldset>
 
-        <?php $record = $item; require __DIR__ . '/../partials/game_picker.php'; ?>
+        <?php $record = $item; $withAccessory = true; require __DIR__ . '/../partials/game_picker.php'; ?>
 
         <div class="row2">
             <div class="field">
@@ -98,6 +98,14 @@ $int = static fn (string $k) => isset($item[$k]) && $item[$k] !== null && $item[
             <input id="f-photos" type="file" name="photos[]" accept="image/jpeg,image/png,image/webp,image/gif" multiple class="file-input" data-photo-input data-max-files="<?= max(1, (int)$maxUpload['files']) ?>">
             <ul class="photo-new" data-photo-preview></ul>
             <noscript><p class="hint">Bildbeschreibungen können nach dem Speichern ergänzt werden.</p></noscript>
+        </div>
+        <div class="only-accessory catalog-photo-note">
+            <?php if ($accessory && $accessory['image'] && !$photos): ?>
+            <p class="hint">🖼 Dein Eintrag zeigt das <strong>Standardbild aus dem gemeinsamen Katalog</strong>. Eigene Fotos ersetzen es – nur für deinen Eintrag.</p>
+            <?php elseif (!$accessory || !$accessory['image']): ?>
+            <p class="hint">🖼 Hat dieses Zubehör im gemeinsamen Katalog noch kein Bild, wird dein <strong>erstes Foto</strong> zum Standardbild – sichtbar für alle angemeldeten Nutzer, die das Teil eintragen.</p>
+            <label class="check"><input type="checkbox" name="no_share" value="1"> Meine Fotos nicht als Standardbild verwenden</label>
+            <?php endif; ?>
         </div>
     </section>
 

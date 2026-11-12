@@ -213,6 +213,12 @@ function tgdb_image(?string $url): ?string
     return $path === null ? null : url('cover', ['p' => $path]);
 }
 
+/** Konsolen-/Controller-Foto einer Plattform (Pfad aus platforms.console_img) über den Cover-Cache. */
+function platform_photo(?string $path): ?string
+{
+    return $path && \Amigo\Service\CoverCache::validPath($path) ? url('cover', ['p' => $path]) : null;
+}
+
 function platform_icon(?string $icon): ?string
 {
     if (!$icon || !preg_match('/^[a-zA-Z0-9._-]+$/', $icon)) {
