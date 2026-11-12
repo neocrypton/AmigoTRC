@@ -45,5 +45,7 @@ final class Options
         'crt' => 'CRT Neon',
         'dmg' => 'Game Boy',
         'c64' => 'C64',
+        'win98' => 'Win98',
+        'superm' => 'Super M',
     ];
 }

@@ -12,7 +12,7 @@
   };
 
   /* ---------- Theme ---------- */
-  var THEMES = ['crt', 'dmg', 'c64'];
+  var THEMES = ['crt', 'dmg', 'c64', 'win98', 'superm'];
   function setTheme(t) {
     if (THEMES.indexOf(t) < 0) return;
     document.documentElement.setAttribute('data-theme', t);

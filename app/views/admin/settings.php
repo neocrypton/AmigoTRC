@@ -4,6 +4,7 @@
         <a class="btn" href="<?= e(url('admin/users')) ?>">👥 Benutzer</a>
         <a class="btn" href="<?= e(url('admin/platforms')) ?>">📥 Plattformen</a>
         <a class="btn" href="<?= e(url('admin/site')) ?>">🌐 Website</a>
+        <a class="btn" href="<?= e(url('admin/stats')) ?>">📊 Statistik</a>
     </div>
 </div>
 

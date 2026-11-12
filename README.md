@@ -54,10 +54,13 @@ auf dem Tablet und auf dem Smartphone.
   Authenticator) mit QR-Code und 10 Einmal-Recovery-Codes
 - Admin: Benutzer anlegen/sperren/löschen, 2FA zurücksetzen, Registrierung
   öffnen/schließen, 2FA für alle verpflichtend machen, Systemcheck
+- **Admin › Statistik:** Nutzerzuwachs und neue Einträge (Sammlung/Durchgespielt) pro Tag
+  der letzten 30 Tage samt Durchschnitt, beliebteste Badges und Verteilung der Farbschemata
 
 **Design**
 - Retro-Look mit Pixel-Schrift, CRT-Scanlines, Modul-Kacheln, Pixel-Sternen
-- Drei Farbschemata: *CRT Neon*, *Game Boy* (DMG-Grün) und *C64*
+- Fünf Farbschemata: *CRT Neon*, *Game Boy* (DMG-Grün), *C64*, *Win98* (Systemgrau mit
+  3D-Rändern) und *Super M* (Himmelblau, Rot, Weiß)
 - Mobil: App-artige Navigationsleiste unten, große Touch-Ziele,
   „Zum Startbildschirm hinzufügen“ (Web-App-Manifest)
 

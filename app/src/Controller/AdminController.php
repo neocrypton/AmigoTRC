@@ -315,6 +315,94 @@ final class AdminController
     }
 
     /** Plattformen aus TheGamesDB auswählen und importieren. */
+    /** Admin › Statistik: Badges, Einträge pro Tag, Nutzerzuwachs, Farbschemata. */
+    public function stats(): void
+    {
+        $db = App::db();
+        $days = 30;
+        $tz = new \DateTimeZone(date_default_timezone_get());
+        $today = new \DateTimeImmutable('today', $tz);
+        $from = $today->modify('-' . ($days - 1) . ' days');
+        // Grenze in UTC (Zeitstempel in der DB sind UTC); einen Tag Puffer, gezählt wird nach Ortszeit
+        $fromUtc = $from->modify('-1 day')->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+
+        // Tage der letzten 30 Tage (Ortszeit) mit 0 vorbelegen
+        $empty = [];
+        for ($d = $from; $d <= $today; $d = $d->modify('+1 day')) {
+            $empty[$d->format('Y-m-d')] = 0;
+        }
+        $perDay = function (string $table) use ($db, $fromUtc, $tz, $empty): array {
+            $out = $empty;
+            foreach ($db->all("SELECT created_at FROM {{$table}} WHERE created_at >= ?", [$fromUtc]) as $r) {
+                $day = (new \DateTimeImmutable($r['created_at'], new \DateTimeZone('UTC')))->setTimezone($tz)->format('Y-m-d');
+                if (isset($out[$day])) {
+                    $out[$day]++;
+                }
+            }
+            return $out;
+        };
+        // Durchschnitt pro Tag seit dem ersten Eintrag (inkl. heute)
+        $average = function (string $table) use ($db, $today, $tz): array {
+            $row = $db->one("SELECT COUNT(*) AS n, MIN(created_at) AS first FROM {{$table}}");
+            $n = (int)$row['n'];
+            if (!$n || !$row['first']) {
+                return ['total' => 0, 'days' => 0, 'avg' => 0.0];
+            }
+            $first = (new \DateTimeImmutable($row['first'], new \DateTimeZone('UTC')))->setTimezone($tz)->setTime(0, 0);
+            $span = (int)$first->diff($today)->days + 1;
+            return ['total' => $n, 'days' => $span, 'avg' => $n / $span];
+        };
+
+        $items = $perDay('items');
+        $plays = $perDay('plays');
+        $users = $perDay('users');
+
+        // Badges: 'b:<id>' = Badge, 'u:<datei>' = eigenes Bild, leer = automatisch
+        $badges = array_fill_keys(array_keys(\Amigo\Core\Badges::ALL), 0);
+        $custom = 0;
+        $auto = 0;
+        foreach ($db->all('SELECT avatar, COUNT(*) AS n FROM {users} GROUP BY avatar') as $r) {
+            $a = (string)($r['avatar'] ?? '');
+            if (str_starts_with($a, 'b:') && isset($badges[substr($a, 2)])) {
+                $badges[substr($a, 2)] += (int)$r['n'];
+            } elseif (str_starts_with($a, 'u:')) {
+                $custom += (int)$r['n'];
+            } else {
+                $auto += (int)$r['n'];
+            }
+        }
+        arsort($badges);
+
+        // Farbschemata (zuletzt genutzt; NULL = seit dem Update noch nicht angemeldet)
+        $themes = array_fill_keys(array_keys(\Amigo\Core\Options::THEMES), 0);
+        $themeUnknown = 0;
+        foreach ($db->all('SELECT theme, COUNT(*) AS n FROM {users} GROUP BY theme') as $r) {
+            if ($r['theme'] !== null && isset($themes[$r['theme']])) {
+                $themes[$r['theme']] += (int)$r['n'];
+            } else {
+                $themeUnknown += (int)$r['n'];
+            }
+        }
+
+        View::render('admin/stats', [
+            'title'        => 'Statistik',
+            'nav'          => 'admin',
+            'days'         => $days,
+            'items'        => $items,
+            'plays'        => $plays,
+            'users'        => $users,
+            'avgItems'     => $average('items'),
+            'avgPlays'     => $average('plays'),
+            'avgUsers'     => $average('users'),
+            'badges'       => $badges,
+            'custom'       => $custom,
+            'auto'         => $auto,
+            'themes'       => $themes,
+            'themeUnknown' => $themeUnknown,
+            'userTotal'    => (int)$db->value('SELECT COUNT(*) FROM {users}'),
+        ]);
+    }
+
     public function platformImport(): void
     {
         $tgdb = Catalog::tgdb();

@@ -95,6 +95,7 @@ $routes = [
     'admin/users'          => [C\AdminController::class, 'users', 'admin'],
     'admin/user/action'    => [C\AdminController::class, 'userAction', 'admin'],
     'admin/settings'       => [C\AdminController::class, 'settings', 'admin'],
+    'admin/stats'          => [C\AdminController::class, 'stats', 'admin'],
     'admin/mail'           => [C\AdminController::class, 'mail', 'admin'],
     'admin/recaptcha'      => [C\AdminController::class, 'recaptcha', 'admin'],
     'admin/tgdb'           => [C\AdminController::class, 'tgdbKey', 'admin'],
@@ -153,6 +154,15 @@ if ($access === 'admin' && !Auth::isAdmin()) {
     http_response_code(403);
     View::render('errors/error', ['title' => '403', 'code' => 403, 'message' => 'Zutritt nur für Admins.']);
     exit;
+}
+
+// Farbschema des Nutzers merken (Cookie), nur für die Admin-Statistik; ein UPDATE nur bei Änderung.
+if ($user && $access !== 'public') {
+    $userTheme = $_COOKIE['amigo_theme'] ?? 'crt';
+    $userTheme = isset(\Amigo\Core\Options::THEMES[$userTheme]) ? $userTheme : 'crt';
+    if (($user['theme'] ?? null) !== $userTheme) {
+        App::db()->update('users', ['theme' => $userTheme], ['id' => (int)$user['id']]);
+    }
 }
 
 // 2FA-Pflicht: Konten ohne 2FA dürfen nur noch die Einrichtung aufrufen.

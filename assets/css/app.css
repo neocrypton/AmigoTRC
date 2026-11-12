@@ -1,7 +1,7 @@
 /* =========================================================================
    AMIGO! The Retro Collector – Stylesheet
    Ohne Framework, ein File, für langsame Verbindungen optimiert.
-   Themes: crt (Standard), dmg (Game Boy), c64
+   Themes: crt (Standard), dmg (Game Boy), c64, win98, superm
    ========================================================================= */
 
 @font-face {
@@ -76,6 +76,53 @@
   --scan: rgb(0 0 0 / .18);
   --stripe1: #883932; --stripe2: #b86962; --stripe3: #bfce72; --stripe4: #9ae29b; --stripe5: #67b6bd;
   color-scheme: dark;
+}
+
+/* Win98: Systemgrau, 3D-Ränder, blaue Titelleisten (Details unten bei „Theme-Extras“) */
+[data-theme="win98"] {
+  --bg: #c0c0c0;
+  --bg2: #c0c0c0;
+  --panel: #c0c0c0;
+  --panel2: #c0c0c0;
+  --line: #808080;
+  --text: #000000;
+  --muted: #404040;
+  --accent: #000080;
+  --accent-ink: #ffffff;
+  --neon: #0000c0;
+  --hot: #000080;
+  --ok: #006400;
+  --warn: #7a5a00;
+  --bad: #b00000;
+  --shadow: #808080;
+  --glow: none;
+  --scan: transparent;
+  --stripe1: #000080; --stripe2: #1084d0; --stripe3: #000080; --stripe4: #1084d0; --stripe5: #000080;
+  --w98-hi: #ffffff; --w98-lo: #808080; --w98-dark: #000000; --w98-face: #dfdfdf;
+  color-scheme: light;
+}
+
+/* Super M: Himmelblau, Rot, Weiß – mit Münz-Gelb und Röhren-Grün als Akzent */
+[data-theme="superm"] {
+  --bg: #5c94fc;
+  --bg2: #8ab4ff;
+  --panel: #ffffff;
+  --panel2: #fff3d6;
+  --line: #1c1c1c;
+  --text: #1c1c1c;
+  --muted: #26304f;
+  --accent: #e52521;
+  --accent-ink: #ffffff;
+  --neon: #00247d;
+  --hot: #fbd000;
+  --ok: #138a2e;
+  --warn: #b35c00;
+  --bad: #c00000;
+  --shadow: #1c1c1c;
+  --glow: none;
+  --scan: transparent;
+  --stripe1: #e52521; --stripe2: #fbd000; --stripe3: #43b047; --stripe4: #049cd8; --stripe5: #9c4a1a;
+  color-scheme: light;
 }
 
 /* ---------- Basis ---------- */
@@ -431,6 +478,22 @@ a.stat:hover { border-color: var(--accent); }
 meter::-webkit-meter-bar { background: var(--bg); border: 2px solid var(--line); border-radius: 0; }
 meter::-webkit-meter-optimum-value { background: repeating-linear-gradient(90deg, var(--accent) 0 8px, transparent 8px 10px); }
 meter::-moz-meter-bar { background: var(--accent); }
+.bars-badges li { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto; }
+.bars-badge { display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bars-badge svg, .bars-badge-ico { flex: 0 0 24px; width: 24px; text-align: center; image-rendering: pixelated; }
+
+/* Admin-Statistik: Säulen pro Tag (SVG) */
+.daychart-fig { margin: 0 0 22px; }
+.daychart-fig figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; margin-bottom: 8px; font-size: 14px; }
+.daychart { display: block; width: 100%; height: 110px; }
+.daychart-bar { fill: var(--accent); }
+.daychart-hit { fill: transparent; }
+.daychart g:hover .daychart-bar { fill: var(--neon); }
+.daychart g:hover .daychart-hit { fill: color-mix(in srgb, var(--line) 35%, transparent); }
+.daychart-base { stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.daychart-axis { display: flex; justify-content: space-between; font-size: 12px; margin-top: 4px; }
+.daychart-table summary { cursor: pointer; color: var(--neon); margin-bottom: 10px; }
+.daychart-table .tbl { font-size: 14px; }
 
 /* ---------- Listen ---------- */
 .minilist { list-style: none; margin: 0; padding: 0; }
@@ -742,6 +805,102 @@ details summary { cursor: pointer; color: var(--neon); margin: 8px 0; }
 .theme-swatch.theme-crt { background: #0e0b1e; color: #ffd23f; border-color: #ff3ea5; }
 .theme-swatch.theme-dmg { background: #9bbc0f; color: #0f380f; border-color: #306230; }
 .theme-swatch.theme-c64 { background: #40318d; color: #a5eeff; border-color: #a5eeff; }
+.theme-swatch.theme-win98 { background: #c0c0c0; color: #000; border-color: #fff #404040 #404040 #fff; }
+.theme-swatch.theme-superm { background: #e52521; color: #fff; border-color: #fbd000; }
+
+/* ---------- Theme-Extras: Win98 ---------- */
+[data-theme="win98"] body { background: var(--bg); font-family: Tahoma, "MS Sans Serif", Verdana, "Segoe UI", sans-serif; }
+[data-theme="win98"] body::after { display: none; }
+[data-theme="win98"] .panel-title, [data-theme="win98"] .btn, [data-theme="win98"] .tabbar span,
+[data-theme="win98"] .h1, [data-theme="win98"] .stat-num, [data-theme="win98"] .pager-info {
+  font-family: Tahoma, "MS Sans Serif", Verdana, sans-serif; font-weight: 700; letter-spacing: 0;
+}
+[data-theme="win98"] .h1 { font-size: clamp(18px, 4vw, 24px); text-shadow: none; }
+[data-theme="win98"] .stat-num { text-shadow: none; }
+[data-theme="win98"] .logo-type, [data-theme="win98"] .brand-name { text-shadow: 2px 2px 0 var(--w98-lo); }
+/* erhabene Flächen */
+[data-theme="win98"] .panel, [data-theme="win98"] .stat, [data-theme="win98"] .menu-grid a,
+[data-theme="win98"] .cart a, [data-theme="win98"] .btn, [data-theme="win98"] .iconbtn, [data-theme="win98"] .chip,
+[data-theme="win98"] .count {
+  background: var(--panel);
+  border: 2px solid; border-color: var(--w98-hi) var(--w98-dark) var(--w98-dark) var(--w98-hi);
+  box-shadow: inset -1px -1px 0 var(--w98-lo), inset 1px 1px 0 var(--w98-face);
+}
+[data-theme="win98"] .panel { padding: 16px; }
+[data-theme="win98"] .panel-title {
+  margin: -14px -14px 14px; padding: 5px 10px;
+  font-size: 13px; text-transform: none;
+  color: #fff; background: linear-gradient(90deg, #000080, #1084d0); border: 0;
+}
+[data-theme="win98"] .btn { color: #000; text-transform: none; font-size: 13px; }
+[data-theme="win98"] .btn-sm { font-size: 12px; }
+[data-theme="win98"] .btn:hover { color: #000; }
+[data-theme="win98"] .btn:active, [data-theme="win98"] .btn[aria-pressed="true"] {
+  transform: none; border-color: var(--w98-dark) var(--w98-hi) var(--w98-hi) var(--w98-dark);
+  box-shadow: inset 1px 1px 0 var(--w98-lo);
+}
+[data-theme="win98"] .btn-primary { outline: 1px solid #000; outline-offset: -1px; }
+[data-theme="win98"] .btn-danger { color: var(--bad); }
+[data-theme="win98"] .btn-ghost { background: var(--panel); }
+[data-theme="win98"] .cart a { clip-path: none; }
+[data-theme="win98"] .cart a:hover, [data-theme="win98"] .menu-grid a:hover, [data-theme="win98"] a.stat:hover { transform: none; outline: 1px dotted #000; outline-offset: -5px; }
+/* vertiefte Felder */
+[data-theme="win98"] input:not([type=checkbox]):not([type=radio]):not([type=file]), [data-theme="win98"] select,
+[data-theme="win98"] textarea, [data-theme="win98"] .cart-label, [data-theme="win98"] .noimg {
+  background-color: #fff; color: #000;
+  border: 2px solid; border-color: var(--w98-lo) var(--w98-hi) var(--w98-hi) var(--w98-lo);
+  box-shadow: inset 1px 1px 0 var(--w98-dark);
+}
+[data-theme="win98"] input:focus, [data-theme="win98"] select:focus, [data-theme="win98"] textarea:focus { box-shadow: inset 1px 1px 0 var(--w98-dark); outline: 1px dotted #000; }
+[data-theme="win98"] select { background-image: linear-gradient(45deg, transparent 50%, #000 50%), linear-gradient(135deg, #000 50%, transparent 50%); }
+/* Titelleiste oben wie ein Fenster */
+[data-theme="win98"] .topbar { background: linear-gradient(90deg, #000080, #1084d0); backdrop-filter: none; border-bottom: 2px solid var(--w98-dark); border-image: none; }
+[data-theme="win98"] .brand-name { color: #fff; text-shadow: none; }
+[data-theme="win98"] .brand-sub { color: #dfe8ff; }
+[data-theme="win98"] .mainnav a, [data-theme="win98"] .sitenav a { color: #fff; }
+[data-theme="win98"] .mainnav a:hover, [data-theme="win98"] .sitenav a:hover { color: #fff; border-color: #dfe8ff; }
+[data-theme="win98"] .mainnav a[aria-current], [data-theme="win98"] .sitenav a[aria-current] { color: #000; background: var(--panel); border-color: var(--w98-hi) var(--w98-dark) var(--w98-dark) var(--w98-hi); }
+[data-theme="win98"] .iconbtn { color: #000; }
+[data-theme="win98"] .tabbar { background: var(--panel); border-top: 2px solid var(--w98-hi); box-shadow: 0 -1px 0 var(--w98-lo); }
+[data-theme="win98"] .tabbar a { color: #000; }
+[data-theme="win98"] .tabbar a[aria-current] { color: var(--accent); }
+[data-theme="win98"] .tabbar span { font-size: 11px; }
+[data-theme="win98"] .tabbar .tab-add .ico { background: var(--panel); color: #000; border: 2px solid; border-color: var(--w98-hi) var(--w98-dark) var(--w98-dark) var(--w98-hi); box-shadow: none; }
+[data-theme="win98"] .picker-list { background: #fff; border: 2px solid #000; box-shadow: 2px 2px 0 var(--w98-lo); }
+[data-theme="win98"] .picker-list button:hover, [data-theme="win98"] .picker-list button[aria-selected="true"] { background: #000080; color: #fff; }
+[data-theme="win98"] .picker-list button:hover small, [data-theme="win98"] .picker-list button[aria-selected="true"] small { color: #dfe8ff; }
+
+/* ---------- Theme-Extras: Super M ---------- */
+[data-theme="superm"] body {
+  background:
+    linear-gradient(to top, #9c4a1a 0 18px, #43b047 18px 26px, transparent 26px) bottom / 100% 26px no-repeat fixed,
+    var(--bg);
+}
+[data-theme="superm"] .h1, [data-theme="superm"] .logo-type { color: #fff; text-shadow: 3px 3px 0 #1c1c1c; }
+[data-theme="superm"] .topbar { background: color-mix(in srgb, #e52521 94%, transparent); }
+[data-theme="superm"] .brand-name { color: #fff; text-shadow: 2px 2px 0 #1c1c1c; }
+[data-theme="superm"] .brand-sub { color: #ffe9a8; }
+[data-theme="superm"] .mainnav a, [data-theme="superm"] .sitenav a { color: #fff; }
+[data-theme="superm"] .mainnav a:hover, [data-theme="superm"] .sitenav a:hover { color: #fbd000; border-color: #fbd000; }
+[data-theme="superm"] .mainnav a[aria-current], [data-theme="superm"] .sitenav a[aria-current] { color: #1c1c1c; background: #fbd000; border-color: #1c1c1c; }
+[data-theme="superm"] .iconbtn { background: #fff; color: #1c1c1c; border-color: #1c1c1c; }
+[data-theme="superm"] .panel-title { background: var(--accent); color: #fff; border-bottom-color: var(--line); text-shadow: 2px 2px 0 #7a0e0c; }
+[data-theme="superm"] .stat-num { color: var(--accent); text-shadow: 2px 2px 0 #fbd000; }
+[data-theme="superm"] input:not([type=checkbox]):not([type=radio]):not([type=file]), [data-theme="superm"] select,
+[data-theme="superm"] textarea { background-color: #fff; box-shadow: inset 3px 3px 0 #d8d8d8; }
+[data-theme="superm"] .count, [data-theme="superm"] .chip, [data-theme="superm"] .tag { background: #fff; }
+[data-theme="superm"] .cart a { background: linear-gradient(#fff3d6, #fff); }
+[data-theme="superm"] .cart-label, [data-theme="superm"] .noimg { background: #e8f0ff; }
+[data-theme="superm"] .tabbar { background: #e52521; border-top-color: #1c1c1c; }
+[data-theme="superm"] .tabbar a { color: #ffe9e8; }
+[data-theme="superm"] .tabbar a[aria-current] { color: #fbd000; }
+[data-theme="superm"] .tabbar .tab-add .ico { background: #fbd000; color: #1c1c1c; box-shadow: 3px 3px 0 #1c1c1c; }
+[data-theme="superm"] .hero-sub, [data-theme="superm"] .herobox-sub { color: #00247d; text-shadow: none; }
+[data-theme="superm"] .req { color: var(--accent); }
+[data-theme="superm"] .panel .logo-type { color: var(--accent); text-shadow: 3px 3px 0 #fbd000, 5px 5px 0 #1c1c1c; }
+/* Zusatztext in farbigen Titelleisten lesbar halten */
+[data-theme="win98"] .panel-title small, [data-theme="superm"] .panel-title small { color: inherit; opacity: .85; text-shadow: none; }
+[data-theme="win98"] .panel-title .count, [data-theme="superm"] .panel-title .count { color: #000; text-shadow: none; }
 .qr { display: grid; place-items: center; background: #fff; padding: 12px; width: min(100%, 260px); aspect-ratio: 1; margin: 0 auto 12px; border: 3px solid var(--line); color: #000; }
 .qr svg { width: 100%; height: 100%; }
 .secret code { font-size: 17px; letter-spacing: .08em; word-break: break-all; color: var(--accent); }

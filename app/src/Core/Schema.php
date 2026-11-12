@@ -16,7 +16,7 @@ namespace Amigo\Core;
  */
 final class Schema
 {
-    public const VERSION = 10;
+    public const VERSION = 11;
 
     public static function migrate(Database $db): void
     {
@@ -24,7 +24,7 @@ final class Schema
         if ($current >= self::VERSION) {
             return;
         }
-        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5(), 6 => self::v6(), 7 => self::v7(), 8 => self::v8(), 9 => [], 10 => self::v10()];
+        $steps = [1 => self::v1(), 2 => self::v2(), 3 => self::v3(), 4 => self::v4(), 5 => self::v5(), 6 => self::v6(), 7 => self::v7(), 8 => self::v8(), 9 => [], 10 => self::v10(), 11 => self::v11()];
         foreach ($steps as $version => $statements) {
             if ($current < $version) {
                 foreach ($statements as $ddl) {
@@ -109,6 +109,14 @@ final class Schema
                 sort %INT% NOT NULL DEFAULT 0,
                 enabled SMALLINT NOT NULL DEFAULT 1
             )%OPT%",
+        ];
+    }
+
+    /** v11: zuletzt genutztes Farbschema je Nutzer (für die Admin-Statistik). */
+    private static function v11(): array
+    {
+        return [
+            'ALTER TABLE {users} ADD COLUMN theme VARCHAR(10) NULL',
         ];
     }
 

@@ -16,6 +16,7 @@
     <a href="<?= e(url('admin/users')) ?>">👥<span>Benutzer</span></a>
     <a href="<?= e(url('admin/platforms')) ?>">📥<span>Plattform-Import</span></a>
     <a href="<?= e(url('admin/site')) ?>">🌐<span>Website</span></a>
+    <a href="<?= e(url('admin/stats')) ?>">📊<span>Statistik</span></a>
     <?php endif; ?>
 </nav>
 

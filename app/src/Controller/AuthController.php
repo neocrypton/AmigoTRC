@@ -273,7 +273,7 @@ final class AuthController
             'mode'    => $mode,
             'useRecaptcha' => $useRecaptcha,
             'siteKey' => $useRecaptcha ? Recaptcha::siteKey() : '',
-            'theme'   => ($_COOKIE['amigo_theme'] ?? 'crt') === 'dmg' ? 'light' : 'dark',
+            'theme'   => in_array($_COOKIE['amigo_theme'] ?? 'crt', ['dmg', 'win98', 'superm'], true) ? 'light' : 'dark',
             'privacyUrl' => \Amigo\Service\Site::visible(\Amigo\Service\Site::page('privacy')) ? url('page', ['p' => 'privacy']) : null,
         ], 'layout_plain');
     }
