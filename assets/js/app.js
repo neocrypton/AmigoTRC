@@ -76,6 +76,7 @@
     var thumb = $('[data-picker-thumb]', root);
     var platform = $('[data-picker-platform]', root);
     var timer = null, ctrl = null, results = [], active = -1;
+    var lastQuery = '', page = 1, more = false, loadingMore = false;
     var statusDefault = status ? status.textContent : '';
 
     function safeThumb(url) {
@@ -99,50 +100,97 @@
       close();
     }
     function highlight(i) {
-      var buttons = $$('button', list);
+      var buttons = $$('button[role="option"]', list);
       buttons.forEach(function (b, k) { b.setAttribute('aria-selected', k === i ? 'true' : 'false'); });
       if (buttons[i]) buttons[i].scrollIntoView({ block: 'nearest' });
       active = i;
     }
-    function render(data) {
-      results = data.results || [];
-      list.textContent = '';
+    function option(r) {
+      var b = el('button');
+      b.type = 'button';
+      b.setAttribute('role', 'option');
+      var t = safeThumb(r.thumb);
+      if (t) {
+        var img = el('img'); img.src = t; img.alt = ''; img.loading = 'lazy'; b.appendChild(img);
+      } else {
+        b.appendChild(el('span', 'noimg', '?'));
+      }
+      var txt = el('span');
+      txt.appendChild(el('strong', null, r.title));
+      txt.appendChild(el('small', null, [r.platform, r.year].filter(Boolean).join(' · ')));
+      b.appendChild(txt);
+      b.appendChild(el('span', 'src', r.game_id ? 'Katalog' : 'TGDB'));
+      b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      b.addEventListener('click', function () { choose(r); });
+      return b;
+    }
+    /* Liste aufbauen; append = weitere Seite von TheGamesDB unten anhängen */
+    function render(data, append) {
+      var incoming = data.results || [];
+      more = !!data.more;
+      if (append) {
+        var known = {};
+        results.forEach(function (r) { if (r.tgdb_id) known[r.tgdb_id] = true; });
+        incoming = incoming.filter(function (r) { return !r.tgdb_id || !known[r.tgdb_id]; });
+        results = results.concat(incoming);
+      } else {
+        results = incoming;
+        list.textContent = '';
+        list.scrollTop = 0;
+        active = -1;
+      }
       if (status) status.textContent = data.error ? data.error : (results.length ? results.length + ' Treffer' : 'Keine Treffer – Titel einfach frei eingeben.');
       if (!results.length) { close(); return; }
-      results.forEach(function (r, i) {
-        var b = el('button');
-        b.type = 'button';
-        b.setAttribute('role', 'option');
-        var t = safeThumb(r.thumb);
-        if (t) {
-          var img = el('img'); img.src = t; img.alt = ''; img.loading = 'lazy'; b.appendChild(img);
-        } else {
-          b.appendChild(el('span', 'noimg', '?'));
-        }
-        var txt = el('span');
-        txt.appendChild(el('strong', null, r.title));
-        txt.appendChild(el('small', null, [r.platform, r.year].filter(Boolean).join(' · ')));
-        b.appendChild(txt);
-        b.appendChild(el('span', 'src', r.game_id ? 'Katalog' : 'TGDB'));
-        b.addEventListener('mousedown', function (e) { e.preventDefault(); });
-        b.addEventListener('click', function () { choose(r); });
-        list.appendChild(b);
-        if (i === 0) active = -1;
-      });
+      var head = $('.picker-head', list);
+      if (!head) { head = el('div', 'picker-head'); list.appendChild(head); }
+      head.textContent = results.length + ' Treffer';
+      var oldMore = $('.picker-more', list);
+      if (oldMore) list.removeChild(oldMore);
+      incoming.forEach(function (r) { list.appendChild(option(r)); });
+      if (more) {
+        var m = el('button', 'picker-more', '▼ Weitere Treffer von TheGamesDB laden');
+        m.type = 'button';
+        m.addEventListener('mousedown', function (e) { e.preventDefault(); });
+        m.addEventListener('click', loadMore);
+        list.appendChild(m);
+      }
       list.hidden = false;
       input.setAttribute('aria-expanded', 'true');
+    }
+    function fetchPage(q, p) {
+      var url = api + '&q=' + encodeURIComponent(q) + (platform && platform.value ? '&platform=' + encodeURIComponent(platform.value) : '') + (p > 1 ? '&page=' + p : '');
+      return fetch(url, { credentials: 'same-origin', signal: ctrl ? ctrl.signal : undefined, headers: { Accept: 'application/json' } })
+        .then(function (r) { return r.ok ? r.json() : { results: [], error: 'Suche fehlgeschlagen.' }; });
     }
     function search() {
       var q = input.value.trim();
       if (q.length < 2) { close(); if (status) status.textContent = statusDefault; return; }
       if (ctrl) ctrl.abort();
       ctrl = window.AbortController ? new AbortController() : null;
-      var url = api + '&q=' + encodeURIComponent(q) + (platform && platform.value ? '&platform=' + encodeURIComponent(platform.value) : '');
+      lastQuery = q; page = 1; loadingMore = false;
       if (status) status.textContent = 'Suche… LOADING';
-      fetch(url, { credentials: 'same-origin', signal: ctrl ? ctrl.signal : undefined, headers: { Accept: 'application/json' } })
-        .then(function (r) { return r.ok ? r.json() : { results: [], error: 'Suche fehlgeschlagen.' }; })
-        .then(render)
+      fetchPage(q, 1)
+        .then(function (d) { render(d, false); })
         .catch(function (err) { if (err && err.name !== 'AbortError' && status) status.textContent = 'Suche nicht möglich.'; });
+    }
+    function loadMore() {
+      if (loadingMore || !more) return;
+      loadingMore = true;
+      var btn = $('.picker-more', list);
+      if (btn) { btn.disabled = true; btn.textContent = 'Lade… LOADING'; }
+      var q = lastQuery, next = page + 1;
+      fetchPage(q, next)
+        .then(function (d) {
+          loadingMore = false;
+          if (q !== lastQuery) return;
+          if (d.error) { if (btn) { btn.disabled = false; btn.textContent = d.error; } return; }
+          page = next;
+          render(d, true);
+        })
+        .catch(function (err) {
+          loadingMore = false;
+          if (btn && err && err.name !== 'AbortError') { btn.disabled = false; btn.textContent = 'Laden fehlgeschlagen – nochmal versuchen'; }
+        });
     }
 
     input.setAttribute('aria-autocomplete', 'list');

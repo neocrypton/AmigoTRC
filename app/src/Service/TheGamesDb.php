@@ -63,6 +63,15 @@ final class TheGamesDb
     /** @return array<int, array> normalisierte Treffer */
     public function searchGames(string $name, ?int $platformId = null, int $page = 1): array
     {
+        return $this->searchPage($name, $platformId, $page)['games'];
+    }
+
+    /**
+     * Eine Ergebnisseite der Namenssuche (TheGamesDB liefert ca. 20 Spiele pro Seite).
+     * @return array{games: array<int, array>, more: bool} more = es gibt eine weitere Seite
+     */
+    public function searchPage(string $name, ?int $platformId = null, int $page = 1): array
+    {
         $query = [
             'name'    => $name,
             'fields'  => 'players,publishers,genres,overview',
@@ -75,7 +84,10 @@ final class TheGamesDb
         $res = $this->request('Games/ByGameName', $query, 86400);
         $games = $res['data']['games'] ?? [];
         $boxart = $res['include']['boxart'] ?? [];
-        return array_map(fn (array $g) => $this->normalizeGame($g, $boxart), array_values($games));
+        return [
+            'games' => array_map(fn (array $g) => $this->normalizeGame($g, $boxart), array_values($games)),
+            'more'  => !empty($res['pages']['next']),
+        ];
     }
 
     public function game(int $id): ?array

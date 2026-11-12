@@ -19,12 +19,13 @@ final class ApiController
 
         $q = query('q', 100);
         $platformId = query_int('platform', 1);
+        $page = query_int('page', 1, 20) ?? 1; // Seite 2+ = „Weitere Treffer laden“ (nur TheGamesDB)
         if (mb_strlen($q) < 2) {
             $this->json(['results' => []]);
         }
 
         $db = App::db();
-        $local = $db->all(
+        $local = $page > 1 ? [] : $db->all(
             "SELECT g.id, g.tgdb_id, g.title, g.release_date, g.boxart_thumb, p.name AS platform, g.platform_id
              FROM {games} g LEFT JOIN {platforms} p ON p.id = g.platform_id
              WHERE g.title LIKE ? ESCAPE '!'" . ($platformId ? ' AND g.platform_id = ?' : '') . '
@@ -50,6 +51,7 @@ final class ApiController
 
         $tgdb = Catalog::tgdb();
         $error = null;
+        $more = false;
         if ($tgdb->enabled()) {
             if (RateLimiter::tooMany('api:' . Auth::id(), 40, 60)) {
                 $this->json(['results' => $results, 'error' => 'Zu viele Suchanfragen – kurz warten.']);
@@ -58,7 +60,9 @@ final class ApiController
             $platformTgdb = $platformId ? $db->value('SELECT tgdb_id FROM {platforms} WHERE id = ?', [$platformId]) : null;
             try {
                 $platformNames = array_column($db->all('SELECT tgdb_id, name, id FROM {platforms} WHERE tgdb_id IS NOT NULL'), null, 'tgdb_id');
-                foreach ($tgdb->searchGames($q, $platformTgdb ? (int)$platformTgdb : null) as $g) {
+                $found = $tgdb->searchPage($q, $platformTgdb ? (int)$platformTgdb : null, $page);
+                $more = $found['more'];
+                foreach ($found['games'] as $g) {
                     if (isset($seen[$g['tgdb_id']])) {
                         continue;
                     }
@@ -72,16 +76,13 @@ final class ApiController
                         'year'        => $g['release_date'] ? substr($g['release_date'], 0, 4) : null,
                         'thumb'       => tgdb_image($g['boxart_thumb']),
                     ];
-                    if (count($results) >= 30) {
-                        break;
-                    }
                 }
             } catch (\Throwable $e) {
                 $error = 'TheGamesDB nicht erreichbar.';
             }
         }
 
-        $this->json(['results' => $results, 'error' => $error]);
+        $this->json(['results' => $results, 'error' => $error, 'page' => $page, 'more' => $more]);
     }
 
     private function json(array $data): never
