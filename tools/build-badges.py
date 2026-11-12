@@ -957,6 +957,616 @@ NAAAAAAAAAAN
 NAKAAKKAAKAN
 NAAAAAAAAAAN
 NNNNNNNNNNNN"""),
+    # --- Nr. 91–140 ---
+    ('zombie', 'Zombie', '#1a1c2c', '#7fb069', """
+...AAAAAA...
+..AAAAAAAA..
+.AAAAAAAAAA.
+.AWWAAAAWWA.
+.AWKAAAAKWA.
+.AAAAAAAAAA.
+.AAAKAAKAAA.
+..AKAKKAKA..
+..AAAAAAAA..
+...DDDDDD...
+.AADDDDDDAA.
+AA.DDDDDD.AA"""),
+    ('vampire', 'Vampir', '#3b1f4b', '#e8e8f0', """
+...KKKKKK...
+..KKKKKKKK..
+..KAAKKAAK..
+..AAAAAAAA..
+..ARAAAARA..
+..AAAAAAAA..
+..AAKKKKAA..
+...AWKKWA...
+RR..AAAA..RR
+RRRKKKKKKRRR
+.RRKKKKKKRR.
+..RKKKKKKR.."""),
+    ('ninja', 'Ninja', '#41a6f6', '#1b1b2f', """
+...AAAAAA...
+..AAAAAAAAR.
+.AAAAAAAAARR
+.AMMMMMMMMA.
+.AMKMMMMKMA.
+.AAAAAAAAAA.
+..AAAAAAAA..
+...AAAAAA...
+.AAAARRAAAA.
+AA.AAAAAA.AA
+...AA..AA...
+...AA..AA..."""),
+    ('pirate', 'Pirat', '#0099db', '#1b1b2f', """
+....AAAA....
+..AAAWWAAA..
+.AAAAAAAAAA.
+AAAAAAAAAAAA
+...MMMMMM...
+..MKKMMMMM..
+..MKKMMKMM..
+..MMMMMMMM..
+..MMMKKMMM..
+...MMMMMM...
+..RWRWRWRW..
+..WRWRWRWR.."""),
+    ('astronaut', 'Astronaut', '#1a1c2c', '#f4f4f4', """
+...AAAAAA...
+..AAAAAAAA..
+.AACCCCCCAA.
+.ACCBCCCCCA.
+.ACBCCCCCCA.
+.AACCCCCCAA.
+..AAAAAAAA..
+.SAAARRAAAS.
+.SAAAAAAAAS.
+.SAAAAAAAAS.
+..AAA..AAA..
+..SSS..SSS.."""),
+    ('dragon', 'Drache', '#29366f', '#38b764', """
+.......AA...
+......AAAA..
+.Y...AAWKA..
+YY...AAAAAA.
+.YY.AAAAARR.
+..YAAAA.....
+..AAAAAA....
+.AAAEEAAA...
+AAAEEEEAA.A.
+AAAEEEEAAAA.
+.AAAAAAAAA..
+..A.A..A.A.."""),
+    ('unicorn', 'Einhorn', '#5d275d', '#f4f4f4', """
+.......Y....
+......Y.....
+.....AAQQ...
+....AAAAQQ..
+...AAKAAQQ..
+..AAAAAAQ...
+.AAAAAAA....
+.AAAAAAAAAA.
+.....AAAAAA.
+....AAAAAAAQ
+....A.A.A.AQ
+....A.A.A.A."""),
+    ('monkey', 'Affe', '#38b764', '#8b5a3c', """
+....AAAA....
+..AAAAAAAA..
+.AAMMAAMMAA.
+MAMMMMMMMMAM
+MAMKMMMMKMAM
+.AMMMMMMMMA.
+..MMMKKMMM..
+..MMMMMMMM..
+...MKKKKM...
+....MMMM....
+..AAAAAAAA..
+.AA.AAAA.AA."""),
+    ('dog', 'Hund', '#41a6f6', '#c28569', """
+.NN......NN.
+NNNAAAAAANNN
+NNAAAAAAAANN
+NNAKAAAAKANN
+.NAAAAAAAAN.
+..AAAWWAAA..
+..AAWKKWAA..
+..AAAWWAAA..
+...AAQQAA...
+....AQQA....
+.....QQ....."""),
+    ('lion', 'Löwe', '#feae34', '#f77622', """
+...AAAAAA...
+..AAAAAAAA..
+.AAMMMMMMAA.
+AAMMMMMMMMAA
+AAMKMMMMKMAA
+AAMMMMMMMMAA
+AAMMMNNMMMAA
+AAMMMKKMMMAA
+.AAMKMMKMAA.
+..AAMMMMAA..
+...AAAAAA...
+....AAAA...."""),
+    ('sheep', 'Schaf', '#63c74d', '#f4f4f4', """
+...AA.AA.AA.
+..AAAAAAAAAA
+.AAAAAAAAAAA
+DDDAAAAAAAAA
+DKDDAAAAAAAA
+DDDDAAAAAAAA
+.DD.AAAAAAA.
+....AAAAAAA.
+....D.D..D.D
+....D.D..D.D"""),
+    ('cow', 'Kuh', '#63c74d', '#f4f4f4', """
+.S........S.
+.SS......SS.
+..AAAAAAAA..
+.KAAKAAAAAK.
+.AKAAAAAKKA.
+.AAKAAAAKAA.
+..QQQQQQQQ..
+..QKQQQQKQ..
+..QQQQQQQQ..
+...QQQQQQ..."""),
+    ('jellyfish', 'Qualle', '#1a1c2c', '#ff77a8', """
+....AAAA....
+..AAAAAAAA..
+.AAWAAAAAAA.
+.AWAAAAAAAA.
+AAAAAAAAAAAA
+AKKAAAAAAKKA
+AAAAAAAAAAAA
+.A.A.A.A.A..
+.A..A.A..A..
+..A.A..A.A..
+..A..A.A..A.
+.A...A..A..."""),
+    ('shark', 'Hai', '#0099db', '#9badb7', """
+.....A......
+....AA......
+...AAA......
+..AAAAAAAA..A
+.AAAAAAAAAAAA
+AKAAAAAAAAAA.
+AAAAAAAAAAAA.
+.WWWWWWWAA..A
+..WKWKWW....."""),
+    ('ladybug', 'Marienkäfer', '#63c74d', '#e43b44', """
+....KKKK....
+...K.KK.K...
+..K.KKKK.K..
+....KWWK....
+..AAAKKAAA..
+.AAKAKKAKAA.
+AAKKAKKAKKAA
+AAAAAKKAAAAA
+AAKAAKKAAKAA
+AAAAAKKAAAAA
+.AAKAKKAKAA.
+..AAAKKAAA.."""),
+    ('mummy', 'Mumie', '#3b1f4b', '#e8dcb5', """
+...AAAAAA...
+..ASSAAAAA..
+..AAAASSAA..
+..AKAAAAKA..
+..ASSAASSA..
+..AAAAAAAA..
+...SSAAAA...
+.AAAASSAAAA.
+AA.AAAASSAAA
+A..ASSAAA..A
+...AAAASSA..
+...AA..AA..."""),
+    ('cyclops', 'Zyklop', '#5d275d', '#b55088', """
+....AAAA....
+..AAAAAAAA..
+.AAWWWWWWAA.
+.AWWWBBWWWA.
+.AWWBKKBWWA.
+.AWWWBBWWWA.
+.AAWWWWWWAA.
+.AAAAAAAAAA.
+.AAWAAAAWAA.
+..AAAAAAAA..
+.AA......AA.
+AA........AA"""),
+    ('bow', 'Bogen', '#29366f', '#8b5a3c', """
+....AA......
+.....AA.....
+......A..S..
+......AA.S..
+.......A.S..
+.......ASSSR
+RSSSSSSASSSS
+.......ASSSR
+.......A.S..
+......AA.S..
+......A..S..
+.....AA.....
+....AA......"""),
+    ('hammer', 'Hammer', '#41a6f6', '#9badb7', """
+.AAAAAAAAA..
+AAWWAAAAAAA.
+AAAAAAAAAAA.
+.AAAAAAAAA..
+.....NN.....
+.....NN.....
+.....NN.....
+.....NN.....
+.....NN.....
+.....NN.....
+.....KK.....
+.....KK....."""),
+    ('wand', 'Zauberstab', '#1a1c2c', '#feae34', """
+.........A..
+........AAA.
+.......AAAAA
+........AWA.
+...W....A.A.
+.......M....
+......M.....
+.....M......
+....M.....W.
+...M........
+..W.........
+.W.........."""),
+    ('scroll', 'Schriftrolle', '#5d275d', '#e8dcb5', """
+.NNNNNNNNNN.
+NAAAAAAAAAAN
+.NNNNNNNNNN.
+..AAAAAAAA..
+..AKKKKKAA..
+..AAAAAAAA..
+..AKKKAKKA..
+..AAAAAAAA..
+..AKKKKAAA..
+.NNNNNNNNNN.
+NAAAAAAAAAAN
+.NNNNNNNNNN."""),
+    ('treasuremap', 'Schatzkarte', '#29366f', '#e8dcb5', """
+AAAAAAAAAAAA
+AAAAAAAAAAAA
+AABAAAAAAAAA
+ABBBAAAAAAAA
+AAKAAAAAARAR
+AAAKAAAAAARA
+AAAAKKAAARAR
+AAAAAAKKAAAA
+AAGGAAAAAAAA
+AGGGGAAAAAAA
+AAGGAAAAAAAA
+AAAAAAAAAAAA"""),
+    ('ring', 'Ring', '#3b1f4b', '#feae34', """
+.....CC.....
+....CWCC....
+....CCCC....
+.....CC.....
+....AAAA....
+..AAA..AAA..
+.AA......AA.
+.A........A.
+.A........A.
+.AA......AA.
+..AAA..AAA..
+....AAAA...."""),
+    ('oneup', 'Extraleben', '#1a1c2c', '#63c74d', """
+.A..A..A.AAA.
+AA..A..A.A..A
+.A..A..A.A..A
+.A..A..A.AAA.
+.A..A..A.A...
+.A..A..A.A...
+AAA..AA..A...
+.............
+.QQ.QQ..QQ.QQ
+QQQQQQ.QQQQQQ
+.QQQQ...QQQQ.
+..QQ.....QQ.."""),
+    ('pcmouse', 'Computermaus', '#41a6f6', '#e8e8f0', """
+......K.....
+......K.....
+.....K......
+...AAKAAA...
+..AAAKAAAA..
+..AAAKAAAA..
+..AAARAAAA..
+..AAAKAAAA..
+..AAAAAAAA..
+..AAAAAAAA..
+..AAAAAAAA..
+...AAAAAA..."""),
+    ('keyboard', 'Tastatur', '#5d275d', '#9badb7', """
+AAAAAAAAAAAA
+AWAWAWAWAWAA
+AAAAAAAAAAAA
+AAWAWAWAWAWA
+AAAAAAAAAAAA
+AWAWAWAWAWAA
+AAAAAAAAAAAA
+AAAWWWWWWAAA
+AAAAAAAAAAAA"""),
+    ('lightgun', 'Lichtpistole', '#feae34', '#e43b44', """
+AAAAAAAAAAA.
+AAAAAAAAAAAK
+AAAAAAAAAAA.
+.....AAAA...
+.....A.KAA..
+.....AKKAA..
+......AAAA..
+......AAAA..
+.......AAA..
+.......AAA.."""),
+    ('vhs', 'Videokassette', '#41a6f6', '#1b1b2f', """
+AAAAAAAAAAAA
+AWWWWWWWWWWA
+AWRRRRRRRRWA
+AWWWWWWWWWWA
+AAAAAAAAAAAA
+AASSAAAASSAA
+ASKKSAASKKSA
+AASSAAAASSAA
+AAAAAAAAAAAA"""),
+    ('boombox', 'Ghettoblaster', '#b55088', '#9badb7', """
+..KKKKKKKK..
+..K......K..
+AAAAAAAAAAAA
+AARYARYAAWWA
+AAAAAAAAAAAA
+AKKKAAAAKKKA
+KDDDKAAKDDDK
+KDKDKCCKDKDK
+KDDDKAAKDDDK
+AKKKAAAAKKKA
+AAAAAAAAAAAA"""),
+    ('camera', 'Kamera', '#0099db', '#1b1b2f', """
+...SSS......
+.AAAAAAAAWA.
+AAAAAAAAAAAA
+AAAASSSSAAAA
+AAASKKKKSAAA
+AAASKCCKSAAA
+AAASKCCKSAAA
+AAASKKKKSAAA
+AAAASSSSAAAA
+AAAAAAAAAAAA"""),
+    ('phone', 'Telefon', '#feae34', '#e43b44', """
+.AAAAAAAAAA.
+AAAAAAAAAAAA
+AAA......AAA
+AA........AA
+...AAAAAA...
+..AAWWWWAA..
+.AAWKWKWWAA.
+.AAWWWWWWAA.
+.AAWKWKWWAA.
+.AAAWWWWAAA.
+.AAAAAAAAAA."""),
+    ('battery', 'Batterie', '#1a1c2c', '#63c74d', """
+....SSSS....
+..SSSSSSSS..
+..SAAAAAAS..
+..SAAAAYAS..
+..SAAAYYAS..
+..SAAYYAAS..
+..SAYYYYAS..
+..SAAAYYAS..
+..SAAYYAAS..
+..SAAYAAAS..
+..SAAAAAAS..
+..SSSSSSSS.."""),
+    ('wheel', 'Lenkrad', '#38b764', '#1b1b2f', """
+....AAAA....
+..AAAAAAAA..
+.AA......AA.
+.A........A.
+AA..SSSS..AA
+AAAASSSSAAAA
+AA...SS...AA
+.A...SS...A.
+.AA..SS..AA.
+..AAAAAAAA..
+....AAAA...."""),
+    ('apple', 'Apfel', '#38b764', '#e43b44', """
+......N.....
+.....NGG....
+....N.GG....
+..AAA.AAA...
+.AAWAAAAAA..
+AAWAAAAAAAA.
+AAAAAAAAAAA.
+AAAAAAAAAAA.
+AAAAAAAAAAA.
+.AAAAAAAAA..
+..AAA.AAA..."""),
+    ('banana', 'Banane', '#5d275d', '#feae34', """
+..........N.
+.........NA.
+.........AA.
+........AAA.
+.......AAAM.
+......AAAAM.
+....AAAAAM..
+.AAAAAAAMM..
+AAAAAAAMM...
+.MMMMMMM....
+..NMMM......"""),
+    ('strawberry', 'Erdbeere', '#41a6f6', '#e43b44', """
+...G.GG.G...
+....GGGG....
+..AAAGGAAA..
+.AAMAAAAMAA.
+.AAAAAMAAAA.
+.AMAAAAAAMA.
+..AAAMAAAA..
+..AMAAAAMA..
+...AAAMAA...
+....AAAA....
+.....AA....."""),
+    ('cake', 'Kuchen', '#3b1f4b', '#ff77a8', """
+.....Y......
+.....R......
+.....W......
+.AAAAAAAAAA.
+AWAWAAWAAWAA
+AAAAAAAAAAAA
+MMMMMMMMMMMM
+NNNNNNNNNNNN
+MMMMMMMMMMMM
+NNNNNNNNNNNN
+MMMMMMMMMMMM"""),
+    ('cookie', 'Keks', '#41a6f6', '#c28569', """
+....AAAA....
+..AAAAAAAA..
+.AAKAAAAAAA.
+.AAAAAANAAA.
+AAAAKAAAAAAA
+AANAAAAAAKAA
+AAAAAAKAAAAA
+AAAKAAAAANAA
+.AAAAANAAAA.
+.AKAAAAAAKA.
+..AAAAAAAA..
+....AAAA...."""),
+    ('fries', 'Pommes', '#41a6f6', '#feae34', """
+...A.A.A.A..
+..AA.AAA.A..
+..AAAAAAAA..
+..AAAAAAAAA.
+.RRRRRRRRRR.
+.RRRRRRRRRR.
+.RRWWWWWWRR.
+.RRRRRRRRRR.
+..RRRRRRRR..
+..RRRRRRRR..
+..RRRRRRRR.."""),
+    ('cloud', 'Wolke', '#41a6f6', '#f4f4f4', """
+....AAAA....
+...AAAAAA...
+.AAAAAAAAA..
+AAAAAAAAAAAA
+AAAAAAAAAAAA
+SAAAAAAAAAAS
+.SSSSSSSSSS.
+..B..B..B...
+.B..B..B....
+..B..B..B..."""),
+    ('rainbow', 'Regenbogen', '#41a6f6', '#e43b44', """
+....AAAAAA....
+..AAOOOOOOAA..
+.AOOYYYYYYOOA.
+AOYYGGGGGGYYOA
+AOYGGBBBBGGYOA
+AOYGBPPPPBGYOA
+AOYGBP..PBGYOA
+WWYGBP..PBGWWW
+WWWWWP..PWWWW."""),
+    ('snowflake', 'Schneeflocke', '#29366f', '#c0f0ff', """
+......A......
+....A.A.A....
+.....AAA.....
+.A....A....A.
+..A...A...A..
+...AAAAAAA...
+AAAAAAWAAAAAA
+...AAAAAAA...
+..A...A...A..
+.A....A....A.
+.....AAA.....
+....A.A.A....
+......A......"""),
+    ('volcano', 'Vulkan', '#1a1c2c', '#8b5a3c', """
+...R..O..R...
+....ROYOR....
+.....OYO.....
+....RAAAR....
+....AAAAA....
+...AARAAAA...
+..AAAARAAAA..
+..AAAAARAAA..
+.AAAAAAAAAAA.
+AAAAAAAAAAAAA"""),
+    ('castle', 'Burg', '#41a6f6', '#9badb7', """
+.....R.......
+.....RR......
+.....A.......
+A.A.AAA.A.A..
+AAA.AAA.AAA..
+AAAAAAAAAAA..
+AKAAAKAAAKA..
+AAAAAAAAAAA..
+AAAAKKKAAAA..
+AAAKKKKKAAA..
+AAAKKKKKAAA.."""),
+    ('goalflag', 'Zielflagge', '#38b764', '#1b1b2f', """
+WAWAWAWA....
+AWAWAWAW....
+WAWAWAWA....
+AWAWAWAW....
+WAWAWAWA....
+N...........
+N...........
+N...........
+N...........
+N...........
+N...........
+NN.........."""),
+    ('brokenheart', 'Gebrochenes Herz', '#1a1c2c', '#e43b44', """
+.AA...A.AA.
+AAAA..A.AAA
+AWAAA..AAAA
+AAAAA.AAAAA
+.AAA.AAAAA.
+..AA..AAA..
+...A.AAA...
+....AA....."""),
+    ('satellite', 'Satellit', '#1a1c2c', '#9badb7', """
+......S.....
+......S.....
+.....AAA....
+BBBB.AWA.BBBB
+BCBCSAAASBCBC
+BBBB.AAA.BBBB
+BCBC.AAA.BCBC
+BBBB.....BBBB
+.....S.S.....
+....S...S...."""),
+    ('comet', 'Komet', '#1a1c2c', '#feae34', """
+..........AA.
+.........AAAA
+.......OAAWAA
+......OOAAAA.
+.....OO.AA...
+....RO.......
+...RR........
+..R..........
+.R...........
+R............"""),
+    ('crystalball', 'Kristallkugel', '#3b1f4b', '#2ce8f5', """
+....AAAA....
+..AAAAAAAA..
+.AWWAAAAAAA.
+.AWAAQAAAAA.
+AAAAQQQAAAAA
+AAAAAQAAAAAA
+AAAAAAAAAAAA
+.AAAAAAAAAA.
+..AAAAAAAA..
+...NNNNNN...
+..NYNNNNYN..
+.NNNNNNNNNN."""),
+    ('witchhat', 'Hexenhut', '#38b764', '#5d275d', """
+........AA..
+.......AAA..
+......AAA...
+.....AAAA...
+....AAAAA...
+....AAAAAA..
+...AAAAAAA..
+...YYYYYYY..
+...AAAAAAA..
+.AAAAAAAAAAA
+AAAAAAAAAAAAA"""),
 ]
 
 
@@ -985,7 +1595,7 @@ def symbol(bid, name, bg, main, art):
 
 
 if __name__ == '__main__':
-    assert len(BADGES) == 90 and len({b[0] for b in BADGES}) == 90
+    assert len(BADGES) == 140 and len({b[0] for b in BADGES}) == 140
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     svg = ('<svg xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">\n'
            + '\n'.join(symbol(*b) for b in BADGES) + '\n</svg>\n')

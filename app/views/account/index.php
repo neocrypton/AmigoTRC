@@ -29,7 +29,7 @@
     <form method="post" action="<?= e(url('account/avatar')) ?>">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="badge">
-        <fieldset class="badge-grid" data-reveal="15" data-reveal-step="10">
+        <fieldset class="badge-grid" data-reveal="15" data-reveal-step="25">
             <legend class="label">Pixel-Badge wählen</legend>
             <?php foreach (\Amigo\Core\Badges::ALL as $key => $label): ?>
             <label class="badge-pick" title="<?= e($label) ?>">
