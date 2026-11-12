@@ -550,6 +550,8 @@ meter::-moz-meter-bar { background: var(--accent); }
 /* Game Boy: Schrift-Schatten kürzer und im dunkleren Hintergrund-Grün statt im kräftigen Dunkelgrün */
 [data-theme="dmg"] .h1, [data-theme="dmg"] .logo-type, [data-theme="dmg"] .brand-name,
 [data-theme="dmg"] .stat-num, [data-theme="dmg"] .prose h2, [data-theme="dmg"] .gameover-code { text-shadow: 2px 2px 0 var(--bg2); }
+/* C64: Statistik-Zahlen mit dem ganz dunklen Blau als Schatten (wie der Innenschatten der Eingabefelder) */
+[data-theme="c64"] .stat-num { text-shadow: 2px 2px 0 var(--shadow); }
 
 /* Sterne */
 .stars { display: inline-flex; gap: 2px; white-space: nowrap; }
