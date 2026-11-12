@@ -547,6 +547,9 @@ meter::-moz-meter-bar { background: var(--accent); }
 .cond-1, .cond-0 { color: var(--bad); }
 .cond-na { color: var(--muted); border-style: dashed; }
 [data-theme="dmg"] .cond-1, [data-theme="dmg"] .cond-0 { text-decoration: line-through; }
+/* Game Boy: Schrift-Schatten kürzer und im dunkleren Hintergrund-Grün statt im kräftigen Dunkelgrün */
+[data-theme="dmg"] .h1, [data-theme="dmg"] .logo-type, [data-theme="dmg"] .brand-name,
+[data-theme="dmg"] .stat-num, [data-theme="dmg"] .prose h2, [data-theme="dmg"] .gameover-code { text-shadow: 2px 2px 0 var(--bg2); }
 
 /* Sterne */
 .stars { display: inline-flex; gap: 2px; white-space: nowrap; }
