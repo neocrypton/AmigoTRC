@@ -898,6 +898,8 @@ details summary { cursor: pointer; color: var(--neon); margin: 8px 0; }
 [data-theme="superm"] .hero-sub, [data-theme="superm"] .herobox-sub { color: #00247d; text-shadow: none; }
 [data-theme="superm"] .req { color: var(--accent); }
 [data-theme="superm"] .panel .logo-type { color: var(--accent); text-shadow: 3px 3px 0 #fbd000, 5px 5px 0 #1c1c1c; }
+/* Überschriften in weißen Kästen (z. B. News, Website-Seiten): rot statt weiß */
+[data-theme="superm"] .panel .h1 { color: var(--accent); text-shadow: 2px 2px 0 #fbd000; }
 /* Zusatztext in farbigen Titelleisten lesbar halten */
 [data-theme="win98"] .panel-title small, [data-theme="superm"] .panel-title small { color: inherit; opacity: .85; text-shadow: none; }
 [data-theme="win98"] .panel-title .count, [data-theme="superm"] .panel-title .count { color: #000; text-shadow: none; }
